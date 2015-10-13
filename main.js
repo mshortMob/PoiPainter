@@ -18,6 +18,7 @@ var mode = function(domName){
     this.alp=parseFloat(sl5.defaultValue);
     this.mix=parseFloat(sl6.defaultValue);
 	this.imgRate=parseFloat(sl7.defaultValue);
+	this.res=parseFloat(sl8.defaultValue);
 	this.imgMode=imageMode;
     this.onSelected = function () {
         sl.value=this.vel;
@@ -27,6 +28,7 @@ var mode = function(domName){
         sl5.value=this.alp;
         sl6.value=this.mix;
 		sl7.value=this.imgRate;
+		sl8.value=this.res;
 		imageMode=this.imgMode;
 		document.getElementById(domName).style.backgroundColor='green';
     }
@@ -38,6 +40,7 @@ var mode = function(domName){
         this.alp=parseFloat(sl5.value);
         this.mix=parseFloat(sl6.value);
 		this.imgRate=parseFloat(sl7.value);
+		this.res=parseFloat(sl8.value);
 		this.imgMode=imageMode;
 		document.getElementById(domName).style.backgroundColor='LightGray';
     }
@@ -90,15 +93,19 @@ document.addEventListener('keydown', function(event) {
 	console.log(event.keyCode)
     if(event.keyCode == 49) {
        	modeSelector(mode1);
+		currentMode="poiPaintButton";
     }
     if(event.keyCode == 50) {
        	modeSelector(mode2);
+		currentMode="poiPaintButton2";
     }
     if(event.keyCode == 51) {
        	modeSelector(mode3);
+		currentMode="poiPaintButton3";
     }
     if(event.keyCode == 52) {
        	modeSelector(mode4);
+		currentMode="poiPaintButton4";
     }
 });
 
@@ -221,6 +228,18 @@ document.getElementById("masterModeButton").addEventListener("click", function()
 	}
 });
 
+function setSize(width){
+document.getElementById("tempCanvas").setAttribute("width",sl8.value);
+document.getElementById("tempCanvas").setAttribute("height", sl8.value*.75);
+document.getElementById("tempCanvas2").setAttribute("width",sl8.value);
+document.getElementById("tempCanvas2").setAttribute("height", sl8.value*.75);
+document.getElementById("video").setAttribute("width",sl8.value);
+document.getElementById("video").setAttribute("height", sl8.value*.75);
+document.getElementById("tracerCanvas").setAttribute("width",sl8.value);
+document.getElementById("tracerCanvas").setAttribute("height", sl8.value*.75);
+
+}
+
 
 isReadMode=0;
 isWriteMode=0;
@@ -235,6 +254,7 @@ function createWriteString(){
         writeString=writeString+","+mode1.mix;
 		writeString=writeString+","+mode1.imgRate;
 		writeString=writeString+","+mode1.imgMode;
+		writeString=writeString+","+mode1.res;
 		
 		writeString=writeString+","+mode2.vel;
         writeString=writeString+","+mode2.bri
@@ -244,6 +264,7 @@ function createWriteString(){
         writeString=writeString+","+mode2.mix;
 		writeString=writeString+","+mode2.imgRate;
 		writeString=writeString+","+mode2.imgMode;
+		writeString=writeString+","+mode2.res;
 		
 		writeString=writeString+","+mode3.vel;
         writeString=writeString+","+mode3.bri
@@ -253,6 +274,7 @@ function createWriteString(){
         writeString=writeString+","+mode3.mix;
 		writeString=writeString+","+mode3.imgRate;
 		writeString=writeString+","+mode3.imgMode;
+		writeString=writeString+","+mode3.res;
 	
 		writeString=writeString+","+mode4.vel;
         writeString=writeString+","+mode4.bri
@@ -262,6 +284,7 @@ function createWriteString(){
         writeString=writeString+","+mode4.mix;
 		writeString=writeString+","+mode4.imgRate;
 		writeString=writeString+","+mode4.imgMode;
+		writeString=writeString+","+mode4.res;
 
 }
 
@@ -270,7 +293,7 @@ writeInterval=2000;
 function startWriteInterval(){
 	isWriteMode=1;
 	currentValue="poiPaintButton"
-	writeInterval=setInterval(function(){writeToServer(writeString);},500);
+	writeInterval=setInterval(function(){writeToServer(writeString);},1000);
 	document.getElementById("masterModeButton").style.backgroundColor="lightblue";
 }
 
@@ -296,6 +319,7 @@ function writeToServer(someString) {
       };
       request.send();
 }
+
 
 function readFromServer() {
     var request = new XMLHttpRequest();
@@ -323,33 +347,37 @@ function readFromServer() {
         mode1.mix=responseArray[9];
 		mode1.imgRate=responseArray[10];
 		mode1.imgMode=responseArray[11];
+		mode1.res=responseArray[12];
 		  
-		mode2.vel=responseArray[12];
-        mode2.bri=responseArray[13];
-        mode2.clr=responseArray[14];
-        mode2.del=responseArray[15];
-        mode2.alp=responseArray[16];
-        mode2.mix=responseArray[17];
-		mode2.imgRate=responseArray[18];
-		mode2.imgMode=responseArray[19];
+		mode2.vel=responseArray[13];
+        mode2.bri=responseArray[14];
+        mode2.clr=responseArray[15];
+        mode2.del=responseArray[16];
+        mode2.alp=responseArray[17];
+        mode2.mix=responseArray[18];
+		mode2.imgRate=responseArray[19];
+		mode2.imgMode=responseArray[20];
+		mode2.res=responseArray[21];
 		  
-		mode3.vel=responseArray[20];
-        mode3.bri=responseArray[21];
-        mode3.clr=responseArray[22];
-        mode3.del=responseArray[23];
-        mode3.alp=responseArray[24];
-        mode3.mix=responseArray[25];
-		mode3.imgRate=responseArray[26];
-		mode3.imgMode=responseArray[27];
+		mode3.vel=responseArray[22];
+        mode3.bri=responseArray[23];
+        mode3.clr=responseArray[24];
+        mode3.del=responseArray[25];
+        mode3.alp=responseArray[26];
+        mode3.mix=responseArray[27];
+		mode3.imgRate=responseArray[28];
+		mode3.imgMode=responseArray[29];
+		mode3.res=responseArray[30];
 		  
-		mode4.vel=responseArray[28];
-        mode4.bri=responseArray[29];
-        mode4.clr=responseArray[30];
-        mode4.del=responseArray[31];
-        mode4.alp=responseArray[32];
-        mode4.mix=responseArray[33];
-		mode4.imgRate=responseArray[34];
-		mode4.imgMode=responseArray[35];
+		mode4.vel=responseArray[31];
+        mode4.bri=responseArray[32];
+        mode4.clr=responseArray[33];
+        mode4.del=responseArray[34];
+        mode4.alp=responseArray[35];
+        mode4.mix=responseArray[36];
+		mode4.imgRate=responseArray[37];
+		mode4.imgMode=responseArray[38];
+		mode4.res=responseArray[39];
 		  
 		  
 		  
@@ -397,6 +425,7 @@ function deselectTracker(currentMode){
 	previousMode=currentMode;
 }
 
+previousResolution=sl8.value;
 function updateControls(){
 	clearInterval(colorInterval);
 	colorInterval=setInterval(function(){ clr.change();}, parseFloat(sl3.max)+parseFloat(sl3.min)-parseFloat(sl3.value));
@@ -409,6 +438,11 @@ function updateControls(){
     previousMode.alp=parseFloat(sl5.value);
     previousMode.mix=parseFloat(sl6.value);
 	previousMode.imgRate=parseFloat(sl7.value);
+	previousMode.res=parseFloat(sl8.value);
+	if (parseFloat(sl8.value)!=previousResolution) {
+		previousResolution=parseFloat(sl8.value);
+		setSize();
+	}
 	previousMode.imgMode=imageMode;
 }
 
@@ -454,6 +488,12 @@ function initSliders(){
 	sl7.min=10;
 	sl7.step=5;
 	sl7.defaultValue=900;
+	
+	sl8=document.getElementById("sl8");
+	sl8.max=400;
+	sl8.min=10;
+	sl8.step=2;
+	sl8.defaultValue=200;
 	
 }
 
@@ -542,3 +582,5 @@ function initializeVideo() {
 }
 
 initGlobalVars();
+document.getElementById("slaveModeButton").click();
+setTimeout(function(){document.getElementById("slaveModeButton").click();},100);
