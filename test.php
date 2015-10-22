@@ -7,7 +7,8 @@
 //passthru($soxPath.' '.escapeshellarg($inputPath).' -t ogg -e signed-integer - tempo '.$stretchAmount.' rate 44.1k channels 1');
 
 $formInput=$_GET['key'];
-$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+$fn=$_GET['fn'];
+$myfile = fopen($fn, "w") or die("Unable to open file!");
 $txt = $formInput;
 fwrite($myfile, $txt);
 fclose($myfile);

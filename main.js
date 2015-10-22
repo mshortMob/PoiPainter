@@ -304,12 +304,25 @@ function stopWriteInterval(){
 }
 
 
+setInterval(function(){writeStatusToServer();},10000);
+function writeStatusToServer(){
+	 var request = new XMLHttpRequest();
+	 var urlquery = 'test.php?key='+Date()+"&fn=status.txt";            
+      console.log('Calling PHP Loading with query '+urlquery);
+      request.open("GET",urlquery,true);
+      request.timeout = 10000; 
+      request.responseType = 'arraybuffer';
+      request.onload = function () {
+          request.response;
+      };
+      request.send();
+
+}
 
 function writeToServer(someString) {
 	createWriteString();
     var request = new XMLHttpRequest();
-    request = new XMLHttpRequest();
-    var urlquery = 'test.php?key='+someString;            
+    var urlquery = 'test.php?key='+someString+"&fn=newfile.txt";            
       console.log('Calling PHP Loading with query '+urlquery);
       request.open("GET",urlquery,true);
       request.timeout = 10000; 
@@ -323,7 +336,6 @@ function writeToServer(someString) {
 
 function readFromServer() {
     var request = new XMLHttpRequest();
-    request = new XMLHttpRequest();
     var urlquery = 'test2.php?key='+'newfile.txt';            
       console.log('Calling PHP Loading with query '+urlquery);
       request.open("GET",urlquery,true);
