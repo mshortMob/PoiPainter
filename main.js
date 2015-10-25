@@ -229,6 +229,7 @@ document.getElementById("masterModeButton").addEventListener("click", function()
 });
 
 function setSize(width){
+clearCanvases();
 document.getElementById("tempCanvas").setAttribute("width",sl8.value);
 document.getElementById("tempCanvas").setAttribute("height", sl8.value*.75);
 document.getElementById("tempCanvas2").setAttribute("width",sl8.value);
@@ -237,6 +238,9 @@ document.getElementById("video").setAttribute("width",sl8.value);
 document.getElementById("video").setAttribute("height", sl8.value*.75);
 document.getElementById("tracerCanvas").setAttribute("width",sl8.value);
 document.getElementById("tracerCanvas").setAttribute("height", sl8.value*.75);
+changeImage();
+clearCanvases();
+
 
 }
 
@@ -342,58 +346,58 @@ function readFromServer() {
       request.timeout = 10000; 
       //request.responseType = 'arraybuffer';
       request.onload = function () {
-          console.log(request.response);
-		  responseArray=request.response.split(",");
-		  document.getElementById(responseArray[0]).click();
-		  imageMode=responseArray[1];
-		  imageModeFeedback();
-		  Dir1=responseArray[2];
-		  Dir2=responseArray[3];
-		  dirUpdateAndFeedback();
-		  
-		mode1.vel=responseArray[4];
-        mode1.bri=responseArray[5];
-        mode1.clr=responseArray[6];
-        mode1.del=responseArray[7];
-        mode1.alp=responseArray[8];
-        mode1.mix=responseArray[9];
-		mode1.imgRate=responseArray[10];
-		mode1.imgMode=responseArray[11];
-		mode1.res=responseArray[12];
-		  
-		mode2.vel=responseArray[13];
-        mode2.bri=responseArray[14];
-        mode2.clr=responseArray[15];
-        mode2.del=responseArray[16];
-        mode2.alp=responseArray[17];
-        mode2.mix=responseArray[18];
-		mode2.imgRate=responseArray[19];
-		mode2.imgMode=responseArray[20];
-		mode2.res=responseArray[21];
-		  
-		mode3.vel=responseArray[22];
-        mode3.bri=responseArray[23];
-        mode3.clr=responseArray[24];
-        mode3.del=responseArray[25];
-        mode3.alp=responseArray[26];
-        mode3.mix=responseArray[27];
-		mode3.imgRate=responseArray[28];
-		mode3.imgMode=responseArray[29];
-		mode3.res=responseArray[30];
-		  
-		mode4.vel=responseArray[31];
-        mode4.bri=responseArray[32];
-        mode4.clr=responseArray[33];
-        mode4.del=responseArray[34];
-        mode4.alp=responseArray[35];
-        mode4.mix=responseArray[36];
-		mode4.imgRate=responseArray[37];
-		mode4.imgMode=responseArray[38];
-		mode4.res=responseArray[39];
-		  
-		  
-		  
-		  return responseArray;
+		console.log(request.response);
+		if (request.response != "Unable to open file!") {
+			responseArray=request.response.split(",");
+			document.getElementById(responseArray[0]).click();
+			imageMode=responseArray[1];
+			imageModeFeedback();
+			Dir1=responseArray[2];
+			Dir2=responseArray[3];
+			dirUpdateAndFeedback();
+			  
+			mode1.vel=responseArray[4];
+			mode1.bri=responseArray[5];
+			mode1.clr=responseArray[6];
+			mode1.del=responseArray[7];
+			mode1.alp=responseArray[8];
+			mode1.mix=responseArray[9];
+			mode1.imgRate=responseArray[10];
+			mode1.imgMode=responseArray[11];
+			mode1.res=responseArray[12];
+			  
+			mode2.vel=responseArray[13];
+			mode2.bri=responseArray[14];
+			mode2.clr=responseArray[15];
+			mode2.del=responseArray[16];
+			mode2.alp=responseArray[17];
+			mode2.mix=responseArray[18];
+			mode2.imgRate=responseArray[19];
+			mode2.imgMode=responseArray[20];
+			mode2.res=responseArray[21];
+			  
+			mode3.vel=responseArray[22];
+			mode3.bri=responseArray[23];
+			mode3.clr=responseArray[24];
+			mode3.del=responseArray[25];
+			mode3.alp=responseArray[26];
+			mode3.mix=responseArray[27];
+			mode3.imgRate=responseArray[28];
+			mode3.imgMode=responseArray[29];
+			mode3.res=responseArray[30];
+			  
+			mode4.vel=responseArray[31];
+			mode4.bri=responseArray[32];
+			mode4.clr=responseArray[33];
+			mode4.del=responseArray[34];
+			mode4.alp=responseArray[35];
+			mode4.mix=responseArray[36];
+			mode4.imgRate=responseArray[37];
+			mode4.imgMode=responseArray[38];
+			mode4.res=responseArray[39];
+			   
+			return responseArray;
+		}
       };
       request.send();
 }
@@ -460,14 +464,14 @@ function updateControls(){
 
 function initSliders(){
 	sl=document.getElementById("sl");
-	sl.max=764;
-	sl.min=1;
+	sl.max=765;
+	sl.min=0;
 	sl.step=3;
 	sl.defaultValue=600;
 	
 	sl2=document.getElementById("sl2");
-	sl2.max=764;
-	sl2.min=1;
+	sl2.max=765;
+	sl2.min=0;
 	sl2.step=3;
 	sl2.defaultValue=700;
 	
@@ -518,6 +522,24 @@ function changeImage(){
 	tempCanvas2.getContext('2d').drawImage(document.getElementById("img"+imageNumberAdd), 0, 0, document.getElementById('video').width, document.getElementById('video').height);
 	imgDataContext = tempCanvas2.getContext("2d");
 	img=imgDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+}
+
+function clearCanvases() {
+	tempCanvas.getContext('2d').drawImage(video, 0, 0, document.getElementById('video').width, document.getElementById('video').height);
+	vidDataContext = tempCanvas.getContext("2d");
+	oldvid=vid;
+	vid=vidDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+	tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+	var velVal=parseFloat(sl.min)+parseFloat(sl.max)-parseFloat(sl.value);
+	var briVal=parseFloat(sl2.min)+parseFloat(sl2.max)-parseFloat(sl2.value);
+	var delVal=parseFloat(sl4.min)+parseFloat(sl4.max)-parseFloat(sl4.value);
+	var mixVal=parseFloat(sl6.min)+parseFloat(sl6.max)-parseFloat(sl6.value);
+	var imgMix=parseFloat(sl7.min)+parseFloat(sl7.max)-parseFloat(sl7.value);
+	for (x=0; x < ((document.getElementById('video').width * document.getElementById('video').height) * 4); x=x+4) {
+			tracerCanvasData.data[x+3]=0;
+	}
+	document.getElementById('tempCanvas').style.opacity=parseFloat(sl5.value);
+	tracerCanvasDataContext.putImageData(tracerCanvasData,0,0);
 }
 
 function computeTraces() {
