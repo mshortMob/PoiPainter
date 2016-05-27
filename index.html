@@ -17,9 +17,10 @@
 					<button id="kalModeButton" class="modeButton">Kaleidoscope Mode</button>
 					<button id="dir1Button" onclick="switchDir1();" class="modeButton">Direction 1</button>
 					<button id="dir2Button" onclick="switchDir2();" class="modeButton">Direction 2</button>
-					<button class="modeButton" id="fullScreenButton" onclick="setTimeout(function(){makeTransformable('#tracerCanvas');},2000)">Fullscreen</button>
+					<button class="modeButton" id="fullScreenButton" >Fullscreen</button>
 					<button class="modeButton" id="slaveModeButton">Slave Mode</button>
 					<button class="modeButton" id="masterModeButton">Master Mode</button>
+					<button class="modeButton" id="showHandles" onclick="if(transformOnce){makeTransformable('.warpCanv');transformOnce=false;}">Show Handles</button>
 
 					<div id="spacerDiv"></div>
 					<div class="slLabel">Velocity Sensitivity:</div>
@@ -42,16 +43,11 @@
 			</div>
 			<canvas id="tempCanvas" width="160" height="120" style="opacity: 0;"></canvas>
 			<canvas id="tempCanvas2" width='160' height='120' ></canvas>
-			<canvas id="tracerCanvas" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas2" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas3" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas4" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas5" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas6" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas7" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas8" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas9" width="160" height="120"></canvas>
-			<canvas id="tracerCanvas10" width="160" height="120"></canvas>
+			<canvas class="warpCanv" id="tracerCanvas" width="160" height="120"></canvas>
+			<canvas class="warpCanv" id="tracerCanvas2" width="160" height="120"></canvas>
+			<canvas class="warpCanv" id="tracerCanvas3" width="160" height="120"></canvas>
+			<canvas class="warpCanv" id="tracerCanvas4" width="160" height="120"></canvas>
+			<canvas class="warpCanv" id="tracerCanvas5" width="160" height="120"></canvas>
 			<video id="video" autoplay="" style='display: none;' width='160' height='120'></video>
 			<!--<image id='barImage' src='bar.jpg'></image>-->
 			<!--<image id='barImage2' src='bar.jpg'></image>-->

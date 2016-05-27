@@ -116,6 +116,7 @@ document.addEventListener('keydown', function(event) {
 
 
 function initGlobalVars(){
+	transformOnce=true;
 	currentMode="poiPaintButton";
 	imageMode=-1;
 	kalMode=0;
@@ -245,6 +246,27 @@ document.getElementById("hideCtls").addEventListener("click", function() {
 document.getElementById("fullScreenButton").addEventListener("click", function() {
 	
 	fullscreen();
+});
+
+showHandles=false;
+document.getElementById("showHandles").addEventListener("click", function() {
+	setTimeout(function(){
+	if (showHandles) {
+		handles=document.getElementsByClassName("ui-draggable")
+		for(var x=0; x<handles.length;x++){
+			 handles[x].style.display='none';
+		}
+		showHandles=false;
+		document.getElementById("showHandles").style.backgroundColor='grey';
+	}else{
+		handles=document.getElementsByClassName("ui-draggable")
+		for(var x=0; x<handles.length;x++){
+			 handles[x].style.display='block';
+		}
+		showHandles=true;
+		document.getElementById("showHandles").style.backgroundColor='green';
+	}
+	;},400);
 });
 
 document.getElementById("slaveModeButton").addEventListener("click", function() {

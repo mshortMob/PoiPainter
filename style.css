@@ -1,4 +1,5 @@
 .ui-draggable{
+    display:none;
     background-color:grey;
     margin-top:-15px;
     margin-left:-15px;
@@ -178,7 +179,7 @@ padding-top:5px;
 position:absolute;	
 right:0px;
 top:0px;
-height:480px;
+height:520px;
 border-left: 2px solid lightgrey;
 border-bottom: 2px solid lightgrey;
 padding-left:15px;
