@@ -20,6 +20,7 @@ var mode = function(domName){
 	this.imgRate=parseFloat(sl7.defaultValue);
 	this.res=parseFloat(sl8.defaultValue);
 	this.imgMode=imageMode;
+	this.kalMode=kalMode;
     this.onSelected = function () {
         sl.value=this.vel;
         sl2.value=this.bri;
@@ -30,6 +31,7 @@ var mode = function(domName){
 		sl7.value=this.imgRate;
 		sl8.value=this.res;
 		imageMode=this.imgMode;
+		kalMode=this.kalMode;
 		document.getElementById(domName).style.backgroundColor='green';
     }
     this.onDeselected = function () {
@@ -42,10 +44,10 @@ var mode = function(domName){
 		this.imgRate=parseFloat(sl7.value);
 		this.res=parseFloat(sl8.value);
 		this.imgMode=imageMode;
+		this.kalMode=kalMode;
 		document.getElementById(domName).style.backgroundColor='LightGray';
     }
 }
-
 
 function dirUpdateAndFeedback(){
 	if (Dir1==-1) {
@@ -115,6 +117,7 @@ document.addEventListener('keydown', function(event) {
 function initGlobalVars(){
 	currentMode="poiPaintButton";
 	imageMode=-1;
+	kalMode=0;
 	vid=[];
 	rotState=0;
 	colorInterval=0;
@@ -146,6 +149,7 @@ function modeSelector(mode){
 	mode.onSelected();
 	updateControls();
 	imageModeFeedback();
+		kalModeFeedback();
 }
 
 
@@ -181,6 +185,24 @@ function imageModeFeedback(){
 	if (imageMode==-1) {
 		document.getElementById("imgModeButton").style.backgroundColor="#C0C0C0";
 	}
+}
+
+document.getElementById("kalModeButton").addEventListener("click", function() {
+	kalMode=(kalMode+1) % 2;
+	kalModeFeedback();
+});
+
+function kalModeFeedback(){
+	if (kalMode==1) {
+		document.getElementById("kalModeButton").style.backgroundColor="lightblue";
+	}
+	if (kalMode==0) {
+		document.getElementById("kalModeButton").style.backgroundColor="#C0C0C0";
+	}
+		mode1.kalMode=kalMode;
+		mode2.kalMode=kalMode;
+		mode3.kalMode=kalMode;
+		mode4.kalMode=kalMode;
 }
 
 document.getElementById("hideCtls").addEventListener("click", function() {
@@ -285,6 +307,11 @@ function createWriteString(){
 		writeString=writeString+","+mode4.imgRate;
 		writeString=writeString+","+mode4.imgMode;
 		writeString=writeString+","+mode4.res;
+		
+		writeString=writeString+","+mode1.kalMode;
+		writeString=writeString+","+mode2.kalMode;
+		writeString=writeString+","+mode3.kalMode;
+		writeString=writeString+","+mode4.kalMode;
 
 }
 
@@ -390,7 +417,11 @@ function readFromServer() {
 		mode4.imgRate=responseArray[37];
 		mode4.imgMode=responseArray[38];
 		mode4.res=responseArray[39];
-		  
+		
+		mode1.kalMode=responseArray[40];
+		mode2.kalMode=responseArray[41];
+		mode3.kalMode=responseArray[42];
+		mode4.kalMode=responseArray[43];
 		  
 		  
 		  return responseArray;
@@ -456,6 +487,7 @@ function updateControls(){
 		setSize();
 	}
 	previousMode.imgMode=imageMode;
+	previousMode.kalMode=kalMode;
 }
 
 function initSliders(){

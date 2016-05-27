@@ -20,6 +20,7 @@ var mode = function(domName){
 	this.imgRate=parseFloat(sl7.defaultValue);
 	this.res=parseFloat(sl8.defaultValue);
 	this.imgMode=imageMode;
+	this.kalMode=kalMode;
     this.onSelected = function () {
         sl.value=this.vel;
         sl2.value=this.bri;
@@ -30,6 +31,7 @@ var mode = function(domName){
 		sl7.value=this.imgRate;
 		sl8.value=this.res;
 		imageMode=this.imgMode;
+		kalMode=this.kalMode;
 		document.getElementById(domName).style.backgroundColor='green';
     }
     this.onDeselected = function () {
@@ -42,6 +44,7 @@ var mode = function(domName){
 		this.imgRate=parseFloat(sl7.value);
 		this.res=parseFloat(sl8.value);
 		this.imgMode=imageMode;
+		this.kalMode=kalMode;
 		document.getElementById(domName).style.backgroundColor='LightGray';
     }
 }
@@ -115,12 +118,21 @@ document.addEventListener('keydown', function(event) {
 function initGlobalVars(){
 	currentMode="poiPaintButton";
 	imageMode=-1;
+	kalMode=0;
 	vid=[];
 	rotState=0;
 	colorInterval=0;
 	imageChangeInterval=0;
 	tracerCanvasDataContext=tracerCanvas.getContext("2d");
 	tracerCanvasDataContext.clearRect(0,0,document.getElementById('tracerCanvas').width,document.getElementById('tracerCanvas').height);
+	tracerCanvasDataContext2=tracerCanvas2.getContext("2d");
+	tracerCanvasDataContext2.clearRect(0,0,document.getElementById('tracerCanvas2').width,document.getElementById('tracerCanvas2').height);
+	tracerCanvasDataContext3=tracerCanvas3.getContext("2d");
+	tracerCanvasDataContext3.clearRect(0,0,document.getElementById('tracerCanvas3').width,document.getElementById('tracerCanvas3').height);
+	tracerCanvasDataContext4=tracerCanvas4.getContext("2d");
+	tracerCanvasDataContext4.clearRect(0,0,document.getElementById('tracerCanvas5').width,document.getElementById('tracerCanvas5').height);
+	tracerCanvasDataContext5=tracerCanvas5.getContext("2d");
+	tracerCanvasDataContext5.clearRect(0,0,document.getElementById('tracerCanvas5').width,document.getElementById('tracerCanvas5').height);
 	clr= new colorObject();
 	initializeVideo();
 	initSliders();
@@ -137,6 +149,11 @@ function initGlobalVars(){
 	document.getElementById('justControls').style.width='0px';
 	document.getElementById('justControls').style.visibility='hidden';
 	document.getElementById('justControls').style.transition='width .05s';
+	document.getElementById("tracerCanvas").style.opacity=1;		
+	document.getElementById("tracerCanvas2").style.opacity=0;
+	document.getElementById("tracerCanvas3").style.opacity=0;
+	document.getElementById("tracerCanvas4").style.opacity=0;
+	document.getElementById("tracerCanvas5").style.opacity=0;
 	imageNumber=1;
 	setTimeout(function(){changeImage();},5000);
 }
@@ -146,6 +163,7 @@ function modeSelector(mode){
 	mode.onSelected();
 	updateControls();
 	imageModeFeedback();
+	kalModeFeedback();
 }
 
 
@@ -173,6 +191,30 @@ document.getElementById("imgModeButton").addEventListener("click", function() {
 	imageMode=imageMode*-1;
 	imageModeFeedback();
 });
+
+document.getElementById("kalModeButton").addEventListener("click", function() {
+	kalMode=(kalMode+1) % 2;
+	kalModeFeedback();
+});
+
+function kalModeFeedback(){
+	if (kalMode==1) {
+		document.getElementById("kalModeButton").style.backgroundColor="lightblue";
+		document.getElementById("tracerCanvas").style.opacity=0;		
+		document.getElementById("tracerCanvas2").style.opacity=1;
+		document.getElementById("tracerCanvas3").style.opacity=1;
+		document.getElementById("tracerCanvas4").style.opacity=1;
+		document.getElementById("tracerCanvas5").style.opacity=1;
+	}
+	if (kalMode==0) {
+		document.getElementById("kalModeButton").style.backgroundColor="#C0C0C0";
+		document.getElementById("tracerCanvas").style.opacity=1;		
+		document.getElementById("tracerCanvas2").style.opacity=0;
+		document.getElementById("tracerCanvas3").style.opacity=0;
+		document.getElementById("tracerCanvas4").style.opacity=0;
+		document.getElementById("tracerCanvas5").style.opacity=0;
+	}
+}
 
 function imageModeFeedback(){
 	if (imageMode==1) {
@@ -289,6 +331,11 @@ function createWriteString(){
 		writeString=writeString+","+mode4.imgRate;
 		writeString=writeString+","+mode4.imgMode;
 		writeString=writeString+","+mode4.res;
+		
+		writeString=writeString+","+mode1.kalMode;
+		writeString=writeString+","+mode2.kalMode;
+		writeString=writeString+","+mode3.kalMode;
+		writeString=writeString+","+mode4.kalMode;
 
 }
 
@@ -395,6 +442,11 @@ function readFromServer() {
 			mode4.imgRate=responseArray[37];
 			mode4.imgMode=responseArray[38];
 			mode4.res=responseArray[39];
+			
+			mode1.kalMode=responseArray[40];
+			mode2.kalMode=responseArray[41];
+			mode3.kalMode=responseArray[42];
+			mode4.kalMode=responseArray[43];
 			   
 			return responseArray;
 		}
@@ -460,6 +512,7 @@ function updateControls(){
 		setSize();
 	}
 	previousMode.imgMode=imageMode;
+	previousMode.kalMode=kalMode;
 }
 
 function initSliders(){
@@ -543,36 +596,106 @@ function clearCanvases() {
 }
 
 function computeTraces() {
-	tempCanvas.getContext('2d').drawImage(video, 0, 0, document.getElementById('video').width, document.getElementById('video').height);
-	vidDataContext = tempCanvas.getContext("2d");
-	oldvid=vid;
-	vid=vidDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
-	tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
-	var velVal=parseFloat(sl.min)+parseFloat(sl.max)-parseFloat(sl.value);
-	var briVal=parseFloat(sl2.min)+parseFloat(sl2.max)-parseFloat(sl2.value);
-	var delVal=parseFloat(sl4.min)+parseFloat(sl4.max)-parseFloat(sl4.value);
-	var mixVal=parseFloat(sl6.min)+parseFloat(sl6.max)-parseFloat(sl6.value);
-	var imgMix=parseFloat(sl7.min)+parseFloat(sl7.max)-parseFloat(sl7.value);
-	for (x=0; x < ((document.getElementById('video').width * document.getElementById('video').height) * 4); x=x+4) {
-		if (tracerCanvasData.data[x+3] > 0) {
-			tracerCanvasData.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
-		}
-		if (Math.abs((vid.data[x]+vid.data[x+1]+vid.data[x+2])-(oldvid.data[x]+oldvid.data[x+1]+oldvid.data[x+2])) > (velVal) && (vid.data[x]+vid.data[x+1]+vid.data[x+2] > briVal)) {
-			if (imageMode == -1) {
-				tracerCanvasData.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
-				tracerCanvasData.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
-				tracerCanvasData.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+	if (kalMode==1) {
+		tempCanvas.getContext('2d').drawImage(video, 0, 0, document.getElementById('video').width, document.getElementById('video').height);
+		vidDataContext = tempCanvas.getContext("2d");
+		oldvid=vid;
+		vid=vidDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		tracerCanvasData2=tracerCanvasDataContext2.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		tracerCanvasData3=tracerCanvasDataContext3.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		tracerCanvasData4=tracerCanvasDataContext4.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		tracerCanvasData5=tracerCanvasDataContext5.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		var velVal=parseFloat(sl.min)+parseFloat(sl.max)-parseFloat(sl.value);
+		var briVal=parseFloat(sl2.min)+parseFloat(sl2.max)-parseFloat(sl2.value);
+		var delVal=parseFloat(sl4.min)+parseFloat(sl4.max)-parseFloat(sl4.value);
+		var mixVal=parseFloat(sl6.min)+parseFloat(sl6.max)-parseFloat(sl6.value);
+		var imgMix=parseFloat(sl7.min)+parseFloat(sl7.max)-parseFloat(sl7.value);
+		for (x=0; x < ((document.getElementById('video').width * document.getElementById('video').height) * 4); x=x+4) {
+			if (tracerCanvasData.data[x+3] > 0) {
+				tracerCanvasData.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
+				//tracerCanvasData2.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
+				//tracerCanvasData3.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
+				//tracerCanvasData4.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
 			}
-			if (imageMode == 1) {
-				tracerCanvasData.data[x]=img.data[x]*((mixVal))+clr.requestR()*(1-(mixVal));
-				tracerCanvasData.data[x+1]=img.data[x+1]*((mixVal))+clr.requestG()*(1-(mixVal));
-				tracerCanvasData.data[x+2]=img.data[x+2]*((mixVal))+clr.requestB()*(1-(mixVal));
+			if (Math.abs((vid.data[x]+vid.data[x+1]+vid.data[x+2])-(oldvid.data[x]+oldvid.data[x+1]+oldvid.data[x+2])) > (velVal) && (vid.data[x]+vid.data[x+1]+vid.data[x+2] > briVal)) {
+				if (imageMode == -1) {
+					tracerCanvasData.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
+					tracerCanvasData.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
+					tracerCanvasData.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+					//tracerCanvasData2.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
+					//tracerCanvasData2.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
+					//tracerCanvasData2.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+					//tracerCanvasData3.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
+					//tracerCanvasData3.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
+					//tracerCanvasData3.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+					//tracerCanvasData4.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
+					//tracerCanvasData4.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
+					//tracerCanvasData4.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+				}
+				if (imageMode == 1) {
+					tracerCanvasData.data[x]=img.data[x]*((mixVal))+clr.requestR()*(1-(mixVal));
+					tracerCanvasData.data[x+1]=img.data[x+1]*((mixVal))+clr.requestG()*(1-(mixVal));
+					tracerCanvasData.data[x+2]=img.data[x+2]*((mixVal))+clr.requestB()*(1-(mixVal));
+					//tracerCanvasData2.data[x]=img.data[x]*((mixVal))+clr.requestR()*(1-(mixVal));
+					//tracerCanvasData2.data[x+1]=img.data[x+1]*((mixVal))+clr.requestG()*(1-(mixVal));
+					//tracerCanvasData2.data[x+2]=img.data[x+2]*((mixVal))+clr.requestB()*(1-(mixVal));
+					//tracerCanvasData3.data[x]=img.data[x]*((mixVal))+clr.requestR()*(1-(mixVal));
+					//tracerCanvasData3.data[x+1]=img.data[x+1]*((mixVal))+clr.requestG()*(1-(mixVal));
+					//tracerCanvasData3.data[x+2]=img.data[x+2]*((mixVal))+clr.requestB()*(1-(mixVal));
+					//tracerCanvasData4.data[x]=img.data[x]*((mixVal))+clr.requestR()*(1-(mixVal));
+					//tracerCanvasData4.data[x+1]=img.data[x+1]*((mixVal))+clr.requestG()*(1-(mixVal));
+					//tracerCanvasData4.data[x+2]=img.data[x+2]*((mixVal))+clr.requestB()*(1-(mixVal));				
+				}
+				tracerCanvasData.data[x+3]=255;
+				//tracerCanvasData2.data[x+3]=255;
+				//tracerCanvasData3.data[x+3]=255;
+				//tracerCanvasData4.data[x+3]=255;
 			}
-			tracerCanvasData.data[x+3]=255;
 		}
+		document.getElementById('tempCanvas').style.opacity=parseFloat(sl5.value);
+		tracerCanvasData2=tracerCanvasData
+		tracerCanvasData3=tracerCanvasData
+		tracerCanvasData4=tracerCanvasData
+		tracerCanvasData5=tracerCanvasData
+		tracerCanvasDataContext.putImageData(tracerCanvasData,0,0);
+		tracerCanvasDataContext2.putImageData(tracerCanvasData2,0,0);
+		tracerCanvasDataContext3.putImageData(tracerCanvasData3,0,0);
+		tracerCanvasDataContext4.putImageData(tracerCanvasData4,0,0);
+		tracerCanvasDataContext5.putImageData(tracerCanvasData5,0,0);
 	}
-	document.getElementById('tempCanvas').style.opacity=parseFloat(sl5.value);
-	tracerCanvasDataContext.putImageData(tracerCanvasData,0,0);
+	if (kalMode==0) {
+		tempCanvas.getContext('2d').drawImage(video, 0, 0, document.getElementById('video').width, document.getElementById('video').height);
+		vidDataContext = tempCanvas.getContext("2d");
+		oldvid=vid;
+		vid=vidDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+		var velVal=parseFloat(sl.min)+parseFloat(sl.max)-parseFloat(sl.value);
+		var briVal=parseFloat(sl2.min)+parseFloat(sl2.max)-parseFloat(sl2.value);
+		var delVal=parseFloat(sl4.min)+parseFloat(sl4.max)-parseFloat(sl4.value);
+		var mixVal=parseFloat(sl6.min)+parseFloat(sl6.max)-parseFloat(sl6.value);
+		var imgMix=parseFloat(sl7.min)+parseFloat(sl7.max)-parseFloat(sl7.value);
+		for (x=0; x < ((document.getElementById('video').width * document.getElementById('video').height) * 4); x=x+4) {
+			if (tracerCanvasData.data[x+3] > 0) {
+				tracerCanvasData.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
+			}
+			if (Math.abs((vid.data[x]+vid.data[x+1]+vid.data[x+2])-(oldvid.data[x]+oldvid.data[x+1]+oldvid.data[x+2])) > (velVal) && (vid.data[x]+vid.data[x+1]+vid.data[x+2] > briVal)) {
+				if (imageMode == -1) {
+					tracerCanvasData.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
+					tracerCanvasData.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
+					tracerCanvasData.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+				}
+				if (imageMode == 1) {
+					tracerCanvasData.data[x]=img.data[x]*((mixVal))+clr.requestR()*(1-(mixVal));
+					tracerCanvasData.data[x+1]=img.data[x+1]*((mixVal))+clr.requestG()*(1-(mixVal));
+					tracerCanvasData.data[x+2]=img.data[x+2]*((mixVal))+clr.requestB()*(1-(mixVal));
+				}
+				tracerCanvasData.data[x+3]=255;
+			}
+		}
+		document.getElementById('tempCanvas').style.opacity=parseFloat(sl5.value);
+		tracerCanvasDataContext.putImageData(tracerCanvasData,0,0);
+	}
 }
 
 //function computeTraces() {
