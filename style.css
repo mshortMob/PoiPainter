@@ -37,7 +37,7 @@ body{background-color:black;}
 left:30%;
 opacity: 1;
 top: 40%;
-transform: scale(1, 1);
+transform: scale(-1, 1);
 position:absolute;
 height: 20%;
 width: 40%;

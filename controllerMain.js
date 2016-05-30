@@ -504,10 +504,10 @@ function initSliders(){
 	sl2.defaultValue=700;
 	
 	sl3=document.getElementById("sl3");
-	sl3.max=10000;
-	sl3.min=50;
-	sl3.step=25;
-	sl3.defaultValue=8000;
+	sl3.max=30;
+	sl3.min=0;
+	sl3.step=1;
+	sl3.defaultValue=5;
 	
 	sl4=document.getElementById("sl4");
 	sl4.max=100;
