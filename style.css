@@ -1,9 +1,9 @@
 .ui-draggable{
     background-color:grey;
-    margin-top:-15px;
-    margin-left:-15px;
-    width:30px;
-    height:30px;
+    margin-top:-5px;
+    margin-left:-5px;
+    width:10px;
+    height:10px;
     z-index:10000000;
 }
 

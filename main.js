@@ -1,3 +1,23 @@
+var displayObject = function(domName){
+    this.image=parseFloat(sl.defaultValue);
+    this.id=parseFloat(sl2.defaultValue);
+    this.mask=parseFloat(sl3.defaultValue);
+    this.groupNumber=parseFloat(sl4.defaultValue);
+    this.onSelected = function () {
+		document.getElementById(domName).style.backgroundColor='green';
+    }
+    this.onDeselected = function () {
+		document.getElementById(domName).style.backgroundColor='LightGray';
+    }
+}
+
+function showCoords(event) {
+    var x = event.clientX;
+    var y = event.clientY;
+    var coords = "X coords: " + x + ", Y coords: " + y;
+    console.log(coords);
+}
+
 objCount=0;
 var currentObject
 function addObject(elemId,imageSrc){
@@ -7,19 +27,32 @@ function addObject(elemId,imageSrc){
      node.setAttribute("Id",elemId)
 	 node.setAttribute("class","displayCanvas")
 	 node.setAttribute("onclick",'selectObject(this);')
+     //node.setAttribute("onmousedown",'showCoords(event);')
      document.body.appendChild(node);
      makeTransformable("#"+ elemId)
 	 addMask(elemId);
+     if(!handlesVisible){
+          //showHandles()
+     }
 	 objCount=objCount+1;
 }
 
+
 function selectObject(elem){
-	var allCanvases = document.getElementsByClassName("displayCanvas")
-	for(var x=0; x<allCanvases.length; x++){
-		 allCanvases[x].style.border='0px solid black'
-	}
-	elem.style.border="3px solid red"
-    console.log(elem.style.backgroundImage);
+     if (currentObject == elem) {
+          elem.style.border="0px solid black"
+          currentObject=[]
+     }else{
+          currentObject=elem;
+          var allCanvases = document.getElementsByClassName("displayCanvas")
+          for(var x=0; x<allCanvases.length; x++){
+               allCanvases[x].style.border='0px solid black'
+          }
+          elem.style.border="3px solid red"
+          //console.log(elem.style.backgroundImage);
+          document.getElementById("imageSelector").value=currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length-2)
+          //console.log(currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length));
+     }
 }
 
 function addMask(elem) {
