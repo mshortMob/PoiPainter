@@ -55,4 +55,5 @@ button , select , #presetFreqSlider{
 .displayCanvas{
         float:left;
         position: absolute;
+        transition: opacity .1s;
 }

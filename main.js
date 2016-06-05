@@ -7,6 +7,11 @@ function initGlobalVars(){
 	presetFreqSlider.min=500;
 	presetFreqSlider.step=1;
 	presetFreqSlider.defaultValue=1000;
+    presetFadeSlider=document.getElementById("presetFadeSlider");
+	presetFadeSlider.max=10;
+	presetFadeSlider.min=0;
+	presetFadeSlider.step=.01;
+	presetFadeSlider.defaultValue=.3;
 }
 
 var displayObject = function(id, classNumber, image, mask, zindex, preset, opacity,isCurrent){
@@ -20,7 +25,11 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     this.isCurrent=isCurrent;
     this.updateOpacity = function(opacity){
        document.getElementById(this.id).style.opacity=opacity;
+       this.opacity=opacity
        //console.log(document.getElementById(this.id));
+    }
+    this.getOpacity = function(opacity){
+          return this.opacity;
     }
     this.updatePreset = function(){
           this.preset=document.getElementById('presetSelector').value;
@@ -145,6 +154,13 @@ function setAlphaForPreset(preset,opacity){
              displayObjectsArray[x].updateOpacity(parseFloat(opacity))
         }
     }
+}
+
+function changePresetFadeTime(){
+     var classList = document.getElementsByClassName('displayCanvas')
+     for(var x=0;x<classList.length;x++){
+          classList[x].style.transition="opacity "+parseInt(document.getElementById("presetFadeSlider").value)+"s"
+     }
 }
 
 function addObject(){
