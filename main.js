@@ -2,6 +2,11 @@ initGlobalVars()
 function initGlobalVars(){
      displayObjectsArray = [];
      currentObject = "";
+    presetFreqSlider=document.getElementById("presetFreqSlider");
+	presetFreqSlider.max=10000;
+	presetFreqSlider.min=500;
+	presetFreqSlider.step=1;
+	presetFreqSlider.defaultValue=1000;
 }
 
 var displayObject = function(id, classNumber, image, mask, zindex, preset, opacity,isCurrent){
@@ -13,6 +18,10 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     this.opacity=opacity;
     this.preset=document.getElementById('presetSelector').value;
     this.isCurrent=isCurrent;
+    this.updateOpacity = function(opacity){
+       document.getElementById(this.id).style.opacity=opacity;
+       //console.log(document.getElementById(this.id));
+    }
     this.updatePreset = function(){
           this.preset=document.getElementById('presetSelector').value;
     }
@@ -111,6 +120,31 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
         selectObject(this.id);
     }
     this.init();
+}
+
+presetsIntervalHandle=0;
+cyclePresets();
+function cyclePresets(){
+     clearInterval(presetsIntervalHandle)
+     var currentPreset=1;
+     presetsIntervalHandle=setInterval(function(){
+          currentPreset=((currentPreset)%4)+1;
+          for(var x=1;x<=4;x++){
+               if (x == currentPreset) {
+                    setAlphaForPreset(currentPreset,1)
+               }else{
+                    setAlphaForPreset(x,0)
+               }
+          }
+     },parseInt(document.getElementById("presetFreqSlider").value));
+}
+
+function setAlphaForPreset(preset,opacity){
+    for(var x=0; x<displayObjectsArray.length;x++){
+        if(displayObjectsArray[x].preset == preset){
+             displayObjectsArray[x].updateOpacity(parseFloat(opacity))
+        }
+    }
 }
 
 function addObject(){

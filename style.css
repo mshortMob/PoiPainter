@@ -29,6 +29,11 @@ body{
  position:absolute;
 }
 
+.label{
+        margin-top:4px;
+        font-size: 14px;
+}
+
 #showControlsButton{
         display:none;
         width:100px;
@@ -39,7 +44,7 @@ body{
         position:absolute;
 }
 
-button , select{
+button , select , #presetFreqSlider{
     width:100%;
     height:30px;
     margin-top:2px;
