@@ -14,8 +14,11 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     this.preset=preset;
     this.isCurrent=isCurrent;
     this.updateMask = function(){
+          var canvas = document.getElementById(this.id);
+          var context = canvas.getContext('2d');
+          context.clearRect(0, 0, canvas.width, canvas.height);
           this.mask=document.getElementById('maskSelector').value
-          if (this.mask != 'None') {
+          if (this.mask != 'None' && this.mask != 'Gradient1') {
                var canvas = document.getElementById(this.id);
                var context = canvas.getContext('2d');
                base_image = new Image();
@@ -23,11 +26,22 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
                base_image.onload = function(){
                     context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height);
                }
-          }else{
+          }
+          if (this.mask == 'None') {
                var canvas = document.getElementById(this.id);
                var context = canvas.getContext('2d');
                context.clearRect(0, 0, canvas.width, canvas.height);
           }
+          if (this.mask == 'Gradient1') {
+               var canvas = document.getElementById(this.id);
+               var context = canvas.getContext('2d');
+               var grd = context.createLinearGradient(50, 50, canvas.width, canvas.height);
+               grd.addColorStop(0, "black");
+               grd.addColorStop(1, "transparent");
+               context.fillStyle = grd;
+               context.fillRect(0, 0, canvas.width, canvas.height);          
+          }          
+          
 
     }
     this.updateImage = function(){
@@ -80,6 +94,15 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
                base_image.onload = function(){
                context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height)             
           }
+          if (this.mask != 'Gradient1') {
+               var canvas = document.getElementById(this.id);
+               var context = canvas.getContext('2d');
+               var grd = context.createLinearGradient(50, 50, canvas.width, canvas.height);
+               grd.addColorStop(0, "black");
+               grd.addColorStop(1, "transparent");
+               context.fillStyle = grd;
+               context.fillRect(0, 0, canvas.width, canvas.height);          
+          }          
         }
         selectObject(this.id);
     }
@@ -126,7 +149,6 @@ function showControls(){
      document.getElementById('controls').style.display='inline'
      document.getElementById('showControlsButton').style.display='none';
 }
-
 
 function requestFullScreen() {
     // Supports most browsers and their versions.
