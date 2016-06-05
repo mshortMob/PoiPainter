@@ -1,70 +1,120 @@
-var displayObject = function(domName){
-    this.image=parseFloat(sl.defaultValue);
-    this.id=parseFloat(sl2.defaultValue);
-    this.mask=parseFloat(sl3.defaultValue);
-    this.groupNumber=parseFloat(sl4.defaultValue);
-    this.onSelected = function () {
-		document.getElementById(domName).style.backgroundColor='green';
-    }
-    this.onDeselected = function () {
-		document.getElementById(domName).style.backgroundColor='LightGray';
-    }
+initGlobalVars()
+function initGlobalVars(){
+     displayObjectsArray = [];
+     currentObject = "";
 }
 
-function showCoords(event) {
-    var x = event.clientX;
-    var y = event.clientY;
-    var coords = "X coords: " + x + ", Y coords: " + y;
-    console.log(coords);
-}
-
-objCount=0;
-var currentObject
-function addObject(elemId,imageSrc){
-     var node = document.createElement("CANVAS");
-     node.style.backgroundImage="url("+imageSrc+")";
-     node.style.backgroundSize="cover";
-     node.setAttribute("Id",elemId)
-	 node.setAttribute("class","displayCanvas")
-	 node.setAttribute("onclick",'selectObject(this);')
-     //node.setAttribute("onmousedown",'showCoords(event);')
-     document.body.appendChild(node);
-     makeTransformable("#"+ elemId)
-	 addMask(elemId);
-     if(!handlesVisible){
-          //showHandles()
-     }
-	 objCount=objCount+1;
-}
-
-
-function selectObject(elem){
-     if (currentObject == elem) {
-          elem.style.border="0px solid black"
-          currentObject=[]
-     }else{
-          currentObject=elem;
-          var allCanvases = document.getElementsByClassName("displayCanvas")
-          for(var x=0; x<allCanvases.length; x++){
-               allCanvases[x].style.border='0px solid black'
+var displayObject = function(id, classNumber, image, mask, zindex, preset, opacity,isCurrent){
+    this.id=id;
+    this.classNumber =classNumber;
+    this.image=document.getElementById('imageSelector').value;;
+    this.mask=document.getElementById('maskSelector').value;
+    this.zindex=zindex;
+    this.opacity=opacity;
+    this.preset=preset;
+    this.isCurrent=isCurrent;
+    this.updateMask = function(){
+          this.mask=document.getElementById('maskSelector').value
+          if (this.mask != 'None') {
+               var canvas = document.getElementById(this.id);
+               var context = canvas.getContext('2d');
+               base_image = new Image();
+               base_image.src = this.mask;
+               base_image.onload = function(){
+                    context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height);
+               }
+          }else{
+               var canvas = document.getElementById(this.id);
+               var context = canvas.getContext('2d');
+               context.clearRect(0, 0, canvas.width, canvas.height);
           }
-          elem.style.border="3px solid red"
-          //console.log(elem.style.backgroundImage);
-          document.getElementById("imageSelector").value=currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length-2)
-          //console.log(currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length));
+
+    }
+    this.updateImage = function(){
+          this.image=document.getElementById('imageSelector').value
+          document.getElementById(this.id).style.backgroundImage="url("+this.image+")";
+          console.log(this.image)
+    }
+    this.setCurrent = function (){
+          currentObject=this.id
+          var handlesSet = document.getElementsByClassName(this.classNumber)
+          for(var x=0; x<handlesSet.length; x++){
+               handlesSet[x].style.display='inline'
+          }
+          this.isCurrent=true;
+          document.getElementById("imageSelector").value=document.getElementById(currentObject).style.backgroundImage.substring(5,document.getElementById(currentObject).style.backgroundImage.length-2)
+          document.getElementById("maskSelector").value=this.mask;
+    }
+    this.setNotCurrent = function (){
+          var handlesSet = document.getElementsByClassName(this.classNumber)
+          for(var x=0; x<handlesSet.length; x++){
+               handlesSet[x].style.display='none'
+          }
+          this.isCurrent=false;
+    }
+    this.init = function () {
+          //hide All Handles
+          for(var x=0; x<displayObjectsArray.length;x++){
+               var handlesSet = document.getElementsByClassName('handlesSet'+x)
+               for(var x=0; x<handlesSet.length; x++){
+                    handlesSet[x].style.display='none'
+               }
+          }
+          //addObject(this.id, this.image)
+          var node = document.createElement("CANVAS");
+          node.style.backgroundImage="url("+this.image+")";
+          node.style.backgroundSize="cover";
+          node.style.backgroundRepeat="no-repeat";
+          node.setAttribute("Id",this.id)
+          node.setAttribute("class","displayCanvas")
+          node.setAttribute("onclick",'selectObject(this.id)')
+          //node.setAttribute("onmousedown",'showCoords(event);')
+          document.body.appendChild(node);
+          makeTransformable("#"+ this.id)
+          //mask section
+          if (this.mask != 'None') {
+               var canvas = document.getElementById(this.id);
+               var context = canvas.getContext('2d');
+               base_image = new Image();
+               base_image.src = this.mask;
+               base_image.onload = function(){
+               context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height)             
+          }
+        }
+        selectObject(this.id);
+    }
+    this.init();
+}
+
+function addObject(){
+     displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "anim1.gif", 'mask1.png', 1, 1, 1, true))
+}
+
+function selectObject(id){
+     for(var x=0;x<displayObjectsArray.length;x++){
+          if (x==id) {
+              if (displayObjectsArray[x].isCurrent==true) {
+                    displayObjectsArray[id].setNotCurrent(); 
+              }else{
+                    displayObjectsArray[id].setCurrent(); 
+              } 
+          }else{
+              displayObjectsArray[x].setNotCurrent();    
+          }  
+     }
+     currentObject=id;
+}
+
+function changeCurrentImage(){
+     if (displayObjectsArray[currentObject].isCurrent) {
+           displayObjectsArray[currentObject].updateImage();
      }
 }
 
-function addMask(elem) {
-  if (document.getElementById('maskSelector').value != 'None') {
-	var canvas = document.getElementById(elem);
-	var context = canvas.getContext('2d');
-	base_image = new Image();
-	base_image.src = document.getElementById('maskSelector').value;
-	base_image.onload = function(){
-	  context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height)             
-	}
-  }
+function changeCurrentMask(){
+     if (displayObjectsArray[currentObject].isCurrent) {
+           displayObjectsArray[currentObject].updateMask();
+     }
 }
 
 function requestFullScreen() {
@@ -82,25 +132,84 @@ function requestFullScreen() {
     }
 }
 
-handlesVisible=true;
-document.getElementById("showHandlesButton").style.backgroundColor="green";
-function showHandles(){
-	allHandles=document.getElementsByClassName("ui-draggable")
-	if (handlesVisible) {
-		for(var x=0; x<allHandles.length; x++){
-			 allHandles[x].style.display='none'
-		}
-		handlesVisible=false;
-		document.getElementById("showHandlesButton").style.backgroundColor="lightgrey";
-	}else{
-		for(var x=0; x<allHandles.length; x++){
-			 allHandles[x].style.display='inline'
-		}
-		handlesVisible=true;
-		document.getElementById("showHandlesButton").style.backgroundColor="green"
-	}
+//function showCoords(event) {
+//    var x = event.clientX;
+//    var y = event.clientY;
+//    var coords = "X coords: " + x + ", Y coords: " + y;
+//    console.log(coords);
+//}
 
-}
+//objCount=0;
+//var currentObject
+//function addObject(elemId,imageSrc){
+//     var node = document.createElement("CANVAS");
+//     node.style.backgroundImage="url("+imageSrc+")";
+//     node.style.backgroundSize="cover";
+//     node.style.backgroundRepeat="no-repeat";
+//     node.setAttribute("Id",elemId)
+//	 node.setAttribute("class","displayCanvas")
+//	 node.setAttribute("onclick",'selectObject(this);')
+//     //node.setAttribute("onmousedown",'showCoords(event);')
+//     document.body.appendChild(node);
+//     makeTransformable("#"+ elemId)
+//	 addMask(elemId);
+//     if(!handlesVisible){
+//          //showHandles()
+//     }
+//	 objCount=objCount+1;
+//}
+//
+//
+//function selectObject(elem){
+//     if (currentObject == elem) {
+//          elem.style.border="0px solid black"
+//          currentObject=[]
+//     }else{
+//          currentObject=elem;
+//          var allCanvases = document.getElementsByClassName("displayCanvas")
+//          for(var x=0; x<allCanvases.length; x++){
+//               allCanvases[x].style.border='0px solid black'
+//          }
+//          elem.style.border="3px solid red"
+//          //console.log(elem.style.backgroundImage);
+//          document.getElementById("imageSelector").value=currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length-2)
+//          //console.log(currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length));
+//     }
+//}
+//
+//function addMask(elem) {
+//  if (document.getElementById('maskSelector').value != 'None') {
+//	var canvas = document.getElementById(elem);
+//	var context = canvas.getContext('2d');
+//	base_image = new Image();
+//	base_image.src = document.getElementById('maskSelector').value;
+//	base_image.onload = function(){
+//	  context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height)             
+//	}
+//  }
+//}
+//
+
+//
+//handlesVisible=true;
+//document.getElementById("showHandlesButton").style.backgroundColor="green";
+//function showHandles(){
+//	allHandles=document.getElementsByClassName("ui-draggable")
+//	if (handlesVisible) {
+//		for(var x=0; x<allHandles.length; x++){
+//			 allHandles[x].style.display='none'
+//		}
+//		handlesVisible=false;
+//		document.getElementById("showHandlesButton").style.backgroundColor="lightgrey";
+//	}else{
+//		for(var x=0; x<allHandles.length; x++){
+//			 allHandles[x].style.display='inline'
+//		}
+//		handlesVisible=true;
+//		document.getElementById("showHandlesButton").style.backgroundColor="green"
+//	}
+//
+//}
 
 //-------------------------------
 
@@ -186,7 +295,8 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
     });
     return typeof callback === "function" ? callback(element, H) : void 0;
   };
-
+  
+  classCount=0;
   makeTransformable = function(selector, callback) {
     return $(selector).each(function(i, element) {
       var controlPoints, originalPos, p, position;
@@ -195,11 +305,12 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
         var _i, _len, _ref, _results;
         _ref = ['left top', 'left bottom', 'right top', 'right bottom'];
         _results = [];
+        
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           position = _ref[_i];
-          _results.push($('<div>').css({
-            border: '3px solid black',
-            borderRadius: '3px',
+          _results.push($('<div class=handlesSet'+classCount+'>').css({
+            border: '3px solid darkgrey',
+            borderRadius: '8px',
             cursor: 'move',
             position: 'absolute',
             zIndex: 100000
@@ -209,6 +320,7 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
             collision: 'none'
           }));
         }
+        classCount=classCount+1;
         return _results;
       })();
       originalPos = (function() {
