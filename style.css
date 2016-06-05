@@ -23,7 +23,7 @@ body{
  right:0px;
  top:0px;
  width:130px;
- height:145px;
+ height:100%;
  border:3px solid grey;
  background-color:lightgrey; 
  position:absolute;
@@ -44,4 +44,10 @@ button , select{
     height:30px;
     margin-top:2px;
     margin-bottom:2px;
+}
+
+
+.displayCanvas{
+        float:left;
+        position: absolute;
 }

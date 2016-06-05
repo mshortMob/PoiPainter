@@ -11,8 +11,11 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     this.mask=document.getElementById('maskSelector').value;
     this.zindex=zindex;
     this.opacity=opacity;
-    this.preset=preset;
+    this.preset=document.getElementById('presetSelector').value;
     this.isCurrent=isCurrent;
+    this.updatePreset = function(){
+          this.preset=document.getElementById('presetSelector').value;
+    }
     this.updateMask = function(){
           var canvas = document.getElementById(this.id);
           var context = canvas.getContext('2d');
@@ -58,6 +61,7 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
           this.isCurrent=true;
           document.getElementById("imageSelector").value=document.getElementById(currentObject).style.backgroundImage.substring(5,document.getElementById(currentObject).style.backgroundImage.length-2)
           document.getElementById("maskSelector").value=this.mask;
+          document.getElementById('presetSelector').value=this.preset;
     }
     this.setNotCurrent = function (){
           var handlesSet = document.getElementsByClassName(this.classNumber)
@@ -113,6 +117,11 @@ function addObject(){
      displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "anim1.gif", 'mask1.png', 1, 1, 1, true))
 }
 
+function removeCurrentObject(){
+     document.getElementById(currentObject).style.display='none';
+     selectObject(currentObject)
+}
+
 function selectObject(id){
      for(var x=0;x<displayObjectsArray.length;x++){
           if (x==id) {
@@ -137,6 +146,12 @@ function changeCurrentImage(){
 function changeCurrentMask(){
      if (displayObjectsArray[currentObject].isCurrent) {
            displayObjectsArray[currentObject].updateMask();
+     }
+}
+
+function changeCurrentPreset(){
+     if (displayObjectsArray[currentObject].isCurrent) {
+           displayObjectsArray[currentObject].updatePreset();
      }
 }
 
