@@ -7,7 +7,9 @@
 	<script src="sketch.js"></script>
 </head>
 <body id="body">
+		<button id="showControlsButton" onclick="showControls()">Show Controls</button>
 		<span id="controls">
+				<button onclick="hideControls()">Hide Controls</button>
 				<button onclick="addObject()">Add Obj</button>
 				<button onclick="requestFullScreen();">Full Screen</button>
 				<select id="imageSelector" onchange="changeCurrentImage()">
@@ -20,7 +22,8 @@
 						<option value='anim7.gif'>anim7.gif</option>
 						<option value='anim8.gif'>anim8.gif</option>
 						<option value='anim9.gif'>anim9.gif</option>
-						<option value='anim10.gif'>anim10.gif</option>						
+						<option value='anim10.gif'>anim10.gif</option>
+						<option value='Off.png'>Off</option>	
 				</select>
 				<select id="maskSelector" onchange="changeCurrentMask()">
 						<option value='None'>None</option>

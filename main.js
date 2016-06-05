@@ -117,6 +117,17 @@ function changeCurrentMask(){
      }
 }
 
+function hideControls(){
+     document.getElementById('controls').style.display='none'
+     document.getElementById('showControlsButton').style.display='inline';
+}
+
+function showControls(){
+     document.getElementById('controls').style.display='inline'
+     document.getElementById('showControlsButton').style.display='none';
+}
+
+
 function requestFullScreen() {
     // Supports most browsers and their versions.
     var element = document.body; // Make the body go full screen.
@@ -132,98 +143,13 @@ function requestFullScreen() {
     }
 }
 
-//function showCoords(event) {
-//    var x = event.clientX;
-//    var y = event.clientY;
-//    var coords = "X coords: " + x + ", Y coords: " + y;
-//    console.log(coords);
-//}
-
-//objCount=0;
-//var currentObject
-//function addObject(elemId,imageSrc){
-//     var node = document.createElement("CANVAS");
-//     node.style.backgroundImage="url("+imageSrc+")";
-//     node.style.backgroundSize="cover";
-//     node.style.backgroundRepeat="no-repeat";
-//     node.setAttribute("Id",elemId)
-//	 node.setAttribute("class","displayCanvas")
-//	 node.setAttribute("onclick",'selectObject(this);')
-//     //node.setAttribute("onmousedown",'showCoords(event);')
-//     document.body.appendChild(node);
-//     makeTransformable("#"+ elemId)
-//	 addMask(elemId);
-//     if(!handlesVisible){
-//          //showHandles()
-//     }
-//	 objCount=objCount+1;
-//}
-//
-//
-//function selectObject(elem){
-//     if (currentObject == elem) {
-//          elem.style.border="0px solid black"
-//          currentObject=[]
-//     }else{
-//          currentObject=elem;
-//          var allCanvases = document.getElementsByClassName("displayCanvas")
-//          for(var x=0; x<allCanvases.length; x++){
-//               allCanvases[x].style.border='0px solid black'
-//          }
-//          elem.style.border="3px solid red"
-//          //console.log(elem.style.backgroundImage);
-//          document.getElementById("imageSelector").value=currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length-2)
-//          //console.log(currentObject.style.backgroundImage.substring(5,currentObject.style.backgroundImage.length));
-//     }
-//}
-//
-//function addMask(elem) {
-//  if (document.getElementById('maskSelector').value != 'None') {
-//	var canvas = document.getElementById(elem);
-//	var context = canvas.getContext('2d');
-//	base_image = new Image();
-//	base_image.src = document.getElementById('maskSelector').value;
-//	base_image.onload = function(){
-//	  context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height)             
-//	}
-//  }
-//}
-//
-
-//
-//handlesVisible=true;
-//document.getElementById("showHandlesButton").style.backgroundColor="green";
-//function showHandles(){
-//	allHandles=document.getElementsByClassName("ui-draggable")
-//	if (handlesVisible) {
-//		for(var x=0; x<allHandles.length; x++){
-//			 allHandles[x].style.display='none'
-//		}
-//		handlesVisible=false;
-//		document.getElementById("showHandlesButton").style.backgroundColor="lightgrey";
-//	}else{
-//		for(var x=0; x<allHandles.length; x++){
-//			 allHandles[x].style.display='inline'
-//		}
-//		handlesVisible=true;
-//		document.getElementById("showHandlesButton").style.backgroundColor="green"
-//	}
-//
-//}
-
 //-------------------------------
-
 var selector = '#tracerCanvas' // Replace this with the selector for the element you want to make transformable
-
-
 jQuery.getScript('//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js', function() {
 jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js', function() {
-  
 (function() {
   var $, applyTransform, getTransform, makeTransformable;
-
   $ = jQuery;
-
   getTransform = function(from, to) {
     var A, H, b, h, i, k_i, lhs, rhs, _i, _j, _k, _ref;
     console.assert((from.length === (_ref = to.length) && _ref === 4));
@@ -247,7 +173,6 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
     }
     return H;
   };
-
   applyTransform = function(element, originalPos, targetPos, callback) {
     var H, from, i, j, p, to;
     from = (function() {
@@ -295,7 +220,6 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
     });
     return typeof callback === "function" ? callback(element, H) : void 0;
   };
-  
   classCount=0;
   makeTransformable = function(selector, callback) {
     return $(selector).each(function(i, element) {
@@ -305,7 +229,6 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
         var _i, _len, _ref, _results;
         _ref = ['left top', 'left bottom', 'right top', 'right bottom'];
         _results = [];
-        
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           position = _ref[_i];
           _results.push($('<div class=handlesSet'+classCount+'>').css({
@@ -369,12 +292,7 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
       return element;
     });
   };
-
   window.makeTransformable = makeTransformable
-
 }).call(this);
-
-//makeTransformable("#tracerCanvas");
-
 });
 });
