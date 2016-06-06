@@ -57,3 +57,15 @@ button , select , #presetFreqSlider{
         position: absolute;
         transition: opacity .1s;
 }
+
+video{
+        opacity: 0;
+    width:100%;
+    height:100%;
+    top:0px;
+    left:0px;
+    z-index:-1;
+    transform:scale(-2,1);
+    position:fixed;
+    float:left;
+}

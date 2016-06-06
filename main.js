@@ -12,6 +12,12 @@ function initGlobalVars(){
 	presetFadeSlider.min=0;
 	presetFadeSlider.step=.01;
 	presetFadeSlider.defaultValue=.3;
+    dryWetSlider=document.getElementById("dryWetSlider");
+	dryWetSlider.max=1;
+	dryWetSlider.min=0;
+	dryWetSlider.step=.01;
+	dryWetSlider.defaultValue=0;
+    
 }
 
 var displayObject = function(id, classNumber, image, mask, zindex, preset, opacity,isCurrent){
@@ -131,8 +137,21 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     this.init();
 }
 
+function togglePresets(){
+    if(document.getElementById("togglePresetsButton").style.backgroundColor == 'green'){
+          clearInterval(presetsIntervalHandle)
+          document.getElementById("togglePresetsButton").style.backgroundColor = 'grey'
+          setAlphaForPreset(1,1)
+          setAlphaForPreset(2,1)
+          setAlphaForPreset(3,1)
+          setAlphaForPreset(4,1)
+    }else{
+          document.getElementById("togglePresetsButton").style.backgroundColor = 'green'
+          cyclePresets();
+    }
+}
+
 presetsIntervalHandle=0;
-cyclePresets();
 function cyclePresets(){
      clearInterval(presetsIntervalHandle)
      var currentPreset=1;
@@ -228,6 +247,29 @@ function requestFullScreen() {
             wscript.SendKeys("{F11}");
         }
     }
+}
+
+function dryWetSliderUpdate(){
+     document.getElementById('video').style.opacity=document.getElementById('dryWetSlider').value;
+}
+
+initializeVideo();
+function initializeVideo() {
+	window.addEventListener("DOMContentLoaded", function() {
+	// Grab elements, create settings, etc.
+	video = document.getElementById("video"),
+	videoObj = { "video": true },
+	errBack = function(error) {
+		console.log("Video capture error: ", error.code); 
+	};
+	// Put video listeners into place
+	if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+		navigator.webkitGetUserMedia(videoObj, function(stream){
+			video.src = window.URL.createObjectURL(stream);
+			video.play();
+		}, errBack);
+	}
+	}, false);
 }
 
 //-------------------------------
