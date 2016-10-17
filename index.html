@@ -33,6 +33,40 @@
 		<script src="NURBSSurface.js"></script>
 		<script src="NURBSUtils.js"></script>
 		<script src="TrackballControls.js"></script>
+		<script id="fragment_shh" type="x-shader/x-fragment">
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+
+			uniform sampler2D tOne;
+			uniform sampler2D tSec;
+			uniform float time;
+
+			varying vec2 vUv;
+			
+			void main(void)
+			{
+				vec3 c;
+				vec4 Ca = texture2D(tOne, vUv);
+				vec4 Cb = texture2D(tSec, vUv);
+				c = (Ca.rgb * .1 + Cb.rgb * Cb.a * (1.0 - Ca.a))*time;
+			    gl_FragColor= vec4(c, 1.0);
+			}
+			
+		</script>
+		
+		<script id="vertex_shh" type="x-shader/x-vertex">
+		
+			varying vec2 vUv;
+			
+			void main()
+			{
+				vUv = uv;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_Position = projectionMatrix * mvPosition;
+			}
+			
+		</script>
 		<script>
 			var colorObject = function() {
 				this.currentColHex="ff00ff";
@@ -78,33 +112,26 @@
 			
 			initGlobalVars();
 			function initGlobalVars(){
+				vertShader = document.getElementById('vertex_shh').innerHTML;
+				fragShader = document.getElementById('fragment_shh').innerHTML;
 				currentObjIndex=0;
-				ppModeAnimVal=0;
 				tracerCanvasDataContext=tracerCanvas.getContext("2d");
 				firstTraceComputation=true;
 				initializeVideo();
 				clr= new colorObject();
 				vid=[];
-				colorInterval=0;
 				setTimeout(function(){
 					setPoiPainterResolution(128)
 					tracerCanvasDataContext.fillRect(0,0,document.getElementById('tracerCanvas').width,document.getElementById('tracerCanvas').height);
 				},1000);
 				addControls();			
-				timeCycle=0;
-				currentScene=0;
 				videoTextures=[];
-				material=[];
-				vertices=[];
 				initVideos();
-				points=[];
 				container=null;
-				stats=null;
 				camera=null;
 				controls=null;
 				scene=null;
 				renderer=null;
-				renderer2=null;
 				objects = [];
 				plane = new THREE.Plane();
 				raycaster = new THREE.Raycaster();
@@ -132,7 +159,7 @@
 					}
 					statesArray.scenes.push(sceneJSON)
 				}
-				for(var x=0;x<12;x++){
+				for(var x=0;x<4;x++){
 					addPlane();
 				}
 			}
@@ -148,13 +175,15 @@
 			}
 
 			function computeTraces() {
-				tempCanvas.getContext('2d').drawImage(video, 0, 0, document.getElementById('video').width, document.getElementById('video').height);
+				var width=document.getElementById('video').width;
+				var height=document.getElementById('video').height;
+				tempCanvas.getContext('2d').drawImage(video, 0, 0,width ,height );
 				vidDataContext = tempCanvas.getContext("2d");
 				if (firstTraceComputation!=true) {
 					oldvid=vid;
 				}
-				vid=vidDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
-				tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,document.getElementById('video').width,document.getElementById('video').height);
+				vid=vidDataContext.getImageData(0,0,width,height);
+				tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,width,height);
 				if (firstTraceComputation==true) {
 					oldvid=vid;
 					firstTraceComputation=false;
@@ -163,15 +192,9 @@
 				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
 				var delVal=100-parseFloat(painterController.FadeTime)*100;
 				var mixVal=1-parseFloat(painterController.ColorMix)
-				for (x=0; x < ((document.getElementById('video').width * document.getElementById('video').height) * 4); x=x+4) {
-					if (tracerCanvasData.data[x] > 0) {
-						tracerCanvasData.data[x]=tracerCanvasData.data[x]-(delVal);
-					}
-					if (tracerCanvasData.data[x+1] > 0) {
-						tracerCanvasData.data[x+1]=tracerCanvasData.data[x+1]-(delVal);
-					}
-					if (tracerCanvasData.data[x+2] > 0) {
-						tracerCanvasData.data[x+2]=tracerCanvasData.data[x+2]-(delVal);
+				for (x=0; x < ((width * height) * 4); x=x+4) {
+					if (tracerCanvasData.data[x+3] > 0) {
+						tracerCanvasData.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
 					}
 					if (Math.abs((vid.data[x]+vid.data[x+1]+vid.data[x+2])-(oldvid.data[x]+oldvid.data[x+1]+oldvid.data[x+2])) > (velVal) && (vid.data[x]+vid.data[x+1]+vid.data[x+2] > briVal)) {
 						tracerCanvasData.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
@@ -210,7 +233,7 @@
 				controls.enabled=false;
 				scene = new THREE.Scene();
 				scene.add( new THREE.AmbientLight( 0xffffff ) );
-				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
+				renderer = new THREE.WebGLRenderer( {  clearAlpha: 1, antialias: true , alpha:true} );
 				renderer.setClearColor( 0x000000 , 1);
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -229,30 +252,40 @@
 			  video1.width    = 320;
 			  video1.height   = 240;
 			  video1.autoplay = true;
-			  videoTexture1 = new THREE.Texture( video1 )
-			  material.push( new THREE.MeshLambertMaterial({map : videoTexture1 , morphTargets: true, side: THREE.DoubleSide, transparent:true}))
+			  videoTexture1 = new THREE.Texture( video1 );
+			  videoTexture1.minFilter=THREE.LinearFilter;
 			  videoTextures.push(videoTexture1)
 			  video2      = document.getElementById('video1');
 			  video2.width    = 320;
 			  video2.height   = 240;
 			  video2.autoplay = true;
 			  videoTexture2 = new THREE.Texture( video2 )
-			  material.push( new THREE.MeshLambertMaterial({map : videoTexture2 , morphTargets: true, side: THREE.DoubleSide, transparent:true}))
-			   videoTextures.push(videoTexture2)
+			  videoTexture2.minFilter=THREE.LinearFilter;			  
+			  videoTextures.push(videoTexture2)
 			  video3      = document.getElementById('video2');
 			  video3.width    = 320;
 			  video3.height   = 240;
 			  video3.autoplay = true;
 			  videoTexture3 = new THREE.Texture( video3 )
-			  material.push( new THREE.MeshLambertMaterial({map : videoTexture3 , morphTargets: true, side: THREE.DoubleSide, transparent:true}))
-			   videoTextures.push(videoTexture3)
+			  videoTexture3.minFilter=THREE.LinearFilter;			  
+			  videoTextures.push(videoTexture3)
 			  video4      = document.getElementById('video3');
 			  video4.width    = 320;
 			  video4.height   = 240;
 			  video4.autoplay = true;
 			  videoTexture4 = new THREE.Texture( video4 )
-			  material.push( new THREE.MeshLambertMaterial({map : videoTexture4 , morphTargets: true, side: THREE.DoubleSide, transparent:true}))
+			  videoTexture4.minFilter=THREE.LinearFilter;			  
 			  videoTextures.push(videoTexture4)
+			  maskTextures=[]
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask0.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask1.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask2.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask3.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask4.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask5.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask6.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask7.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask8.png"))
 			}
 			
 			function addControls(){
@@ -269,7 +302,8 @@
 					 MasterInterval:0,
 					 Slave:false,
 					 SlaveInterval:0,
-					 Visible:false
+					 Visible:false,
+					 PresetName:"statesStorage"
 				}
 				mappingController  = {
 					 Visible:false,
@@ -284,13 +318,15 @@
 					 CornerX4:200,
 					 CornerY4:-200,
 					 ZValue:0,
-					 Image:0
+					 Image:0,
+					 ImageBank:0,
+					 Mask:0
 				};
 				var count=0;
-				for(var y=0; y<5;y++){
-					for(var x=0; x<5;x++){
-						mappingController["VerticeX"+count]=-200+100*x;
-						mappingController["VerticeY"+count]=-200+100*y;
+				for(var y=0; y<globalController.GridSize+1;y++){
+					for(var x=0; x<globalController.GridSize+1;x++){
+						mappingController["VerticeX"+count]=-200+400/globalController.GridSize*x;
+						mappingController["VerticeY"+count]=-200+400/globalController.GridSize*y;
 						count=count+1;
 					}
 				}
@@ -333,7 +369,9 @@
 				controlsFolder.add( mappingController, "CornerX4", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
 				controlsFolder.add( mappingController, "CornerY4", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Mask", 0, 8, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});				
 				controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "ImageBank", 0, 3, 1 ).onChange(function(){changeImageBank();updateControlsValues();syncObjectsToJson()});
 				painterFolder=gui.addFolder( "PainterControls" )
 				painterFolder.open();
 				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();syncObjectsToJson()});
@@ -342,19 +380,19 @@
 				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "PPResolution", 10, 400, 1 ).onChange(function(){painterController.PPResolution=parseFloat(painterController.PPResolution);setPoiPainterResolution(painterController.PPResolution);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "ColorChangeRate", 1, 600, 1 ).onChange(function(){painterController.ColorChangeRate=parseFloat(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
-				//painterFolder.add( painterController, "ImageBank", 0, 3, 1 ).onChange(function(){painterController.ColorChangeRate=parseInt(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open()
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen() ;gui.close(); document.getElementsByClassName("close-button")[0].innerHTML="";for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}};}},'PresentationMode');
 				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
 				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
 				utilsFolder.add( globalController, "LoopScenes", true ).onChange(function(){});
 				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){});
 				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){});	
-				utilsFolder.add( globalController, "DryWet", 0, 1, .01 ).onChange(function(){renderer.setClearColor( 0x000000 , globalController.DryWet)});			
+				utilsFolder.add( globalController, "DryWet", 0, 1, .01 ).onChange(function(){renderer.setClearColor( 0x000000 , globalController.DryWet)});
+				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 			}
 			
-
 			function updateCornersFromDatGui(){
 				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[0]].x=mappingController.CornerX1
 				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[0]].y=mappingController.CornerY1
@@ -421,7 +459,7 @@
 						 objNum=objNum+1;
 					}
 				}
-				objects[currentObjIndex].showChildren()
+				//objects[currentObjIndex].showChildren()
 				//changeImageBank();
 			}
 			
@@ -466,8 +504,27 @@
 			  getSurfacePoint = function(u, v) {
 				  return nurbsSurface.getPoint(u, v);
 			  };
-			  var geometry = new THREE.ParametricGeometry( getSurfacePoint, globalController.GridSize, globalController.GridSize );			  
-			  var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));
+			  var geometry = new THREE.ParametricGeometry( getSurfacePoint, globalController.GridSize, globalController.GridSize );			    
+				var object = new THREE.Mesh( geometry,new THREE.MeshBasicMaterial({}));
+			
+				object.uniforms = {
+				  time: { value: .1 },
+				  tOne: { type: "t", value: THREE.ImageUtils.loadTexture( "mask0.png" ) },
+				  tSec: { type: "t", value: videoTextures[1] }
+				};
+				var material_shh = new THREE.ShaderMaterial({
+				  uniforms: object.uniforms,
+				  side: THREE.DoubleSide,
+				  transparent:true,
+				  morphTargets: true,
+				  vertexShader: vertShader,
+				  fragmentShader: fragShader
+			
+				});
+			  object.material=material_shh;
+			  //var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));
+			  //object.doubleSided = true;
+			  //object.m=material_shh;
 			  object.position.set( 0, 0, 0 );
 			  object.scale.multiplyScalar( 1 );
 			  object.name="displayObject"
@@ -513,7 +570,8 @@
 				object.drawV()				
 				object.position.z= savedJSON.ZValue
 				object.matNum= parseInt(savedJSON.Image);
-				object.material.map=videoTextures[object.matNum]
+				object.material.uniforms.tSec.value=videoTextures[object.matNum]
+				object.material.uniforms.tOne.value=maskTextures[parseInt(savedJSON.Mask)]
 				//object.updateCorners();
 			  }
 			  object.changeImage=function(){
@@ -581,12 +639,12 @@
 					 if (x == object.cornerNum[2]) {
 						  object.controlsX=object.geometry.vertices[x].x;
 						  object.controlsY=object.geometry.vertices[x].y;
-						  object.addChild(object.controlsX, object.controlsY-10, "translate", object, 0x73438e, 10, 10,x)
+						  object.addChild(object.controlsX, object.controlsY-8, "translate", object, 0x73438e, 8, 8,x)
 					  }
 					  if (x == object.cornerNum[0] || x == object.cornerNum[1] || x == object.cornerNum[2] || x == object.cornerNum[3]) {
-						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "corner-"+"vertice"+x, object, 0x0000ff, 10 ,10,x)					
+						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "corner-"+"vertice"+x, object, 0x0000ff, 8 ,8 ,x)					
 					  }else{
-							object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 10, 10,x)
+							object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 8, 8, x)
 					  }
 				}
 			  }
@@ -696,8 +754,8 @@
 				if ( SELECTED ) {
 					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
 						if (SELECTED.name == "translate") {
-								SELECTED.position.x=intersection.x;
-								SELECTED.position.y=intersection.y;
+								SELECTED.position.x=intersection.x-SELECTED.parent.position.x;
+								SELECTED.position.y=intersection.y-SELECTED.parent.position.y;
 								mappingController.OriginX=intersection.x-SELECTED.parent.controlsX;
 								mappingController.OriginY=intersection.y-SELECTED.parent.controlsY;
 						}
@@ -723,7 +781,7 @@
 								mappingController.CornerY2=SELECTED.position.y;
 							}
 						}
-						if (SELECTED.name.indexOf('vertice') != -1 || SELECTED.name.indexOf('corner') != -1) {
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
 							SELECTED.position.copy(intersection.sub( offset ));
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
@@ -738,16 +796,16 @@
 				var intersects = raycaster.intersectObjects( objects);
 				if ( intersects.length > 0 ) {
 					if ( INTERSECTED != intersects[ 0 ].object ) {
-						if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+						//if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
 						INTERSECTED = intersects[ 0 ].object;
-						INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+						//INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
 						plane.setFromNormalAndCoplanarPoint(
 							camera.getWorldDirection( plane.normal ),
 							INTERSECTED.position );
 					}
 					container.style.cursor = 'pointer';
 				} else {
-					if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+					//if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
 					INTERSECTED = null;
 					container.style.cursor = 'auto';
 				}
@@ -801,12 +859,19 @@
 				for(var x=0;x<objects.length;x++){
 					 if(objects[x].name=="displayObject"){
 						if (objects[x].targetOpacity) {
-							if (objects[x].material.opacity<1) {
-								objects[x].material.opacity=objects[x].material.opacity+globalController.FadeTime
+						    if (!objects[x].visible) {
+								objects[x].visible=true;
+							}
+							if (objects[x].material.uniforms.time.value<1) {
+								objects[x].material.uniforms.time.value=objects[x].material.uniforms.time.value+globalController.FadeTime
 							}
 						}else{
-							if (objects[x].material.opacity>=0) {
-								objects[x].material.opacity=objects[x].material.opacity-globalController.FadeTime
+							if (objects[x].material.uniforms.time.value>=0) {
+								objects[x].material.uniforms.time.value=objects[x].material.uniforms.time.value-globalController.FadeTime
+							}else{
+								if (objects[x].visible) {
+									objects[x].visible=false;
+								}
 							}
 						}
 					 }
@@ -875,14 +940,14 @@
 			function saveState(){
 				var requestBody=JSON.stringify(statesArray)
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "write.php?fn=statesStorage", true);
+				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName, true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn=statesStorage", true);
+				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					 statesArray=JSON.parse(xmlhttp.response)
@@ -894,7 +959,7 @@
 
 			function recallStateNoMap(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn=statesStorage", true);
+				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					 statesArray=JSON.parse(xmlhttp.response)
@@ -904,9 +969,9 @@
 			}
 			
 			function changeImageBank(){
-				document.getElementById("video2").src="anim"+(4*parseInt(painterController.ImageBank)+1)+".mp4"
-				document.getElementById("video3").src="anim"+(4*parseInt(painterController.ImageBank)+2)+".mp4"
-				document.getElementById("video4").src="anim"+(4*parseInt(painterController.ImageBank)+3)+".mp4"
+				document.getElementById("video1").src="anim"+(4*parseInt(mappingController.ImageBank)+1)+".mp4"
+				document.getElementById("video2").src="anim"+(4*parseInt(mappingController.ImageBank)+2)+".mp4"
+				document.getElementById("video3").src="anim"+(4*parseInt(mappingController.ImageBank)+3)+".mp4"
 			  }
 			
 			//setTimeout(function(){recallState()},5000);
