@@ -653,18 +653,7 @@
 					objects.splice(index, 1);
 				  }    
 				});
-			}			
-			function findObjectsNumber(object) {
-				var count=0;
-				for(var x=0; x<objects.length;x++){
-					if (object.uuid == objects[x].uuid ) {
-						var value=count;
-					}
-				count=count+1;
-				}
-				return value;
-			}
-			
+			}					
 			function onWindowResize() {
 				var aspect = window.innerWidth / window.innerHeight;
 				camera.left   = - frustumSize * aspect / 2;
@@ -757,7 +746,7 @@
 				//event.preventDefault();
 				if ( SELECTED != undefined) {
 					if (SELECTED.name.indexOf('corner') != -1 ) {
-							objects[findObjectsNumber(SELECTED.parent) ].updateCorners();
+							SELECTED.parent.updateCorners();
 							objects[currentObjIndex].showChildren();
 							updateControlsValues();
 							updateControlsView();
@@ -876,27 +865,7 @@
 					 updateControlsView()
 					 syncObjectsToJson()
 				}
-			}
-			
-
-			function recallStateNoMap(){
-				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
-				xmlhttp.send();
-				xmlhttp.onload = function(e){
-					 statesArray=JSON.parse(xmlhttp.response)
-					 updateControlsView();
-					 syncObjectsToJsonNoMap();
-				}
-			}
-			
-			function changeImageBank(){
-				document.getElementById("video2").src="anim"+(4*parseInt(painterController.ImageBank)+1)+".mp4"
-				document.getElementById("video3").src="anim"+(4*parseInt(painterController.ImageBank)+2)+".mp4"
-				document.getElementById("video4").src="anim"+(4*parseInt(painterController.ImageBank)+3)+".mp4"
-			  }
-			
-			//setTimeout(function(){recallState()},5000);
+			}			
 		</script>
 	</body>
 </html>
