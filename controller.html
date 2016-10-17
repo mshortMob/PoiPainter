@@ -1,0 +1,585 @@
+<html>
+	<head>
+		<title>FlowMapper</title>
+		<style>
+			body{
+			    margin:0px;    
+			}	
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="three.js"></script>
+		<script src='dat.gui.min.js'></script>
+		<script src="Detector.js"></script>
+		<script src="NURBSCurve.js"></script>
+		<script src="NURBSSurface.js"></script>
+		<script src="NURBSUtils.js"></script>
+		<script src="TrackballControls.js"></script>
+		<script>		
+			initGlobalVars();
+			function initGlobalVars(){
+				currentObjIndex=0;
+				vid=[];
+				colorInterval=0;
+				addControls();			
+				timeCycle=0;
+				currentScene=0;
+				videoTextures=[];
+				material=[];
+				vertices=[];
+				points=[];
+				container=null;
+				stats=null;
+				camera=null;
+				controls=null;
+				scene=null;
+				renderer=null;
+				renderer2=null;
+				objects = [];
+				plane = new THREE.Plane();
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				offset = new THREE.Vector3();
+				intersection = new THREE.Vector3();
+				INTERSECTED=null;
+				SELECTED=null;
+				initScene();
+				animate();
+				statesArray={};
+				statesArray.objects=[];
+				statesArray.scenes=[];
+				for(var x=0;x<12;x++){
+					var objectJSON ={}
+					for (var key in mappingController) {
+						objectJSON[key]=mappingController[key]
+					}
+					statesArray.objects.push(objectJSON)
+				}
+				for(var x=0;x<4;x++){
+					var sceneJSON ={}
+					for (var key in painterController) {
+						sceneJSON[key]=painterController[key]
+					}
+					statesArray.scenes.push(sceneJSON)
+				}
+				for(var x=0;x<12;x++){
+					addPlane();
+				}
+			}
+			
+			function initScene() {
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				frustumSize = 1000;
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10000 );
+				camera.position.z = -1000;
+				controls = new THREE.TrackballControls( camera , container);
+				controls.enabled=false;
+				scene = new THREE.Scene();
+				scene.add( new THREE.AmbientLight( 0xffffff ) );
+				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
+				renderer.setClearColor( 0x000000 , 1);
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = false;
+				container.appendChild( renderer.domElement );
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+			
+			function addControls(){
+				globalController  = {
+					 selectedFixture:0,
+					 selectedScene:0,
+					 GridSize:4,
+					 LoopSpeed:0,
+					 LoopPosition:0,
+					 FadeTime:.01,
+					 Master:false,
+					 MasterInterval:0,
+					 Slave:false,
+					 SlaveInterval:0,
+					 Visible:false,
+					 PresetName:"statesStorage"
+				}
+				mappingController  = {
+					 Visible:false,
+					 OriginX:0,
+					 OriginY:0,
+					 CornerX1:-200,
+					 CornerY1:-200,
+					 CornerX2:-200,
+					 CornerY2:200,
+					 CornerX3:200,
+					 CornerY3:200,
+					 CornerX4:200,
+					 CornerY4:-200,
+					 ZValue:0,
+					 Image:0
+				};
+				var count=0;
+				for(var y=0; y<5;y++){
+					for(var x=0; x<5;x++){
+						mappingController["VerticeX"+count]=-200+100*x;
+						mappingController["VerticeY"+count]=-200+100*y;
+						count=count+1;
+					}
+				}
+				painterController  = {
+					 VelocitySensitivity:.94,
+					 BrightnessSensitivity:1.0,
+					 FadeTime:.95,
+					 ColorMix:.9,
+					 PPResolution:120,
+					 ColorChangeRate:100,
+					 Visible1:false,
+					 Visible2:false,
+					 Visible3:false,
+					 Visible4:false,
+					 Visible5:false,
+					 Visible6:false,
+					 Visible7:false,
+					 Visible8:false,
+					 Visible9:false,
+					 Visible10:false,
+					 Visible11:false,
+					 Visible12:false
+				};
+				gui = new dat.GUI();
+				globalFolder=gui.addFolder( "Global" )
+				globalFolder.open();
+				globalFolder.add(globalController, "selectedFixture", 0, 11, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
+				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJsonNoMap();});
+				globalFolder.add( globalController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
+				controlsFolder=gui.addFolder( "MappingControls" )
+				controlsFolder.open();
+				controlsFolder.add( mappingController, "OriginX", -1200, 1200, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "OriginY", -600, 600, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "CornerX1", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY1", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerX2", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY2", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerX3", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY3", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerX4", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY4", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});	
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				painterFolder=gui.addFolder( "PainterControls" )
+				painterFolder.open();
+				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "PPResolution", 10, 400, 1 ).onChange(function(){painterController.PPResolution=parseFloat(painterController.PPResolution);setPoiPainterResolution(painterController.PPResolution);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorChangeRate", 1, 600, 1 ).onChange(function(){painterController.ColorChangeRate=parseFloat(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
+				//painterFolder.add( painterController, "ImageBank", 0, 3, 1 ).onChange(function(){painterController.ColorChangeRate=parseInt(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
+				utilsFolder=gui.addFolder( "Utils" )
+				utilsFolder.open()
+				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
+				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
+				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){});
+				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){});			
+				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+			}
+			
+
+			function updateCornersFromDatGui(){
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[0]].x=mappingController.CornerX1
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[0]].y=mappingController.CornerY1
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[1]].x=mappingController.CornerX4
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[1]].y=mappingController.CornerY4
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[3]].x=mappingController.CornerX3
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[3]].y=mappingController.CornerY3
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[2]].x=mappingController.CornerX2
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[2]].y=mappingController.CornerY2
+				objects[currentObjIndex].updateCorners();							
+				objects[currentObjIndex].showChildren();
+				updateControlsValues();
+				syncObjectsToJson();
+			}	
+						
+			function updateControlsView(){  
+				//for (var i in gui.__folders.MappingControls.__controllers) {
+				//  if (gui.__folders.MappingControls.__controllers[i].property!="Visible") {
+					//mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray.objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
+					//gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				//  }else{
+				//	mappingController["Visible"]=statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)];
+				//	gui.__folders.MappingControls.__controllers[0].updateDisplay();
+				//  }
+				//}
+				for(var x in mappingController){
+					if (x != "Visible") {
+						mappingController[x]=statesArray.objects[parseInt(globalController.selectedFixture)][x];
+					}
+				}
+				
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				    gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				}
+				
+				for (var i in gui.__folders.PainterControls.__controllers) {
+				  painterController[gui.__folders.PainterControls.__controllers[i].property]=statesArray.scenes[parseInt(globalController.selectedScene)][gui.__folders.PainterControls.__controllers[i].property];
+				  gui.__folders.PainterControls.__controllers[i].updateDisplay();
+				}
+				globalController["Visible"]=statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)];
+				gui.__folders.Global.__controllers[2].updateDisplay();
+			}
+			
+			function updateControlsValues(){  
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				  statesArray.objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				}
+				for(var x in mappingController){
+					if (x != "Visible") {
+						statesArray.objects[parseInt(globalController.selectedFixture)][x]=mappingController[x];
+					}
+				}
+				for (var i in gui.__folders.PainterControls.__controllers) {
+				  statesArray.scenes[parseInt(globalController.selectedScene)][gui.__folders.PainterControls.__controllers[i].property]=painterController[gui.__folders.PainterControls.__controllers[i].property];
+				}
+				statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)]=globalController["Visible"];
+			}
+			
+			function syncObjectsToJson(){
+
+			}
+			
+			function syncObjectsToJsonNoMap(){
+
+			}
+			
+			function addPlane(){
+			 nsControlPoints = [
+				  [
+					  new THREE.Vector4 ( -200, -200, 0, 1 ),
+					  new THREE.Vector4 ( -200, -100, 0, 1 ),
+					  new THREE.Vector4 ( -200, 100, 0, 1 ),
+					  new THREE.Vector4 ( -200, 200, 0, 1 )
+				  ],
+				  [
+					  new THREE.Vector4 ( 0, -200, 0, 1 ),
+					  new THREE.Vector4 ( 0, -100, 0, 1 ),
+					  new THREE.Vector4 ( 0, 100, 0, 1 ),
+					  new THREE.Vector4 ( 0, 200, 0, 1 )
+				  ],
+				  [
+					  new THREE.Vector4 ( 200, -200, 0, 1 ),
+					  new THREE.Vector4 ( 200, -100, 0, 1 ),
+					  new THREE.Vector4 ( 200, 100, 0, 1 ),
+					  new THREE.Vector4 ( 200, 200, 0, 1 )
+				  ]
+			  ];
+			  var degree1 = 2;
+			  var degree2 = 3;
+			  var knots1 = [0, 0, 0, 1, 1, 1];
+			  var knots2 = [0, 0, 0, 0, 1, 1, 1, 1];
+			  var nurbsSurface = new THREE.NURBSSurface(degree1, degree2, knots1, knots2, nsControlPoints);
+			  getSurfacePoint = function(u, v) {
+				  return nurbsSurface.getPoint(u, v);
+			  };
+			  var geometry = new THREE.ParametricGeometry( getSurfacePoint, globalController.GridSize, globalController.GridSize );			  
+			  var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));
+			  object.position.set( 0, 0, 0 );
+			  object.scale.multiplyScalar( 1 );
+			  object.name="displayObject"
+			  object.matNum=1;
+			  object.controlsX=0;
+			  object.controlsY=0;
+			  object.targetOpacity=false;
+			  object.material.opacity=0;
+			  object.setSceneOnly=function(savedJSON,visBool){
+				if (visBool) {
+				  	object.targetOpacity=true;
+				}else{
+					object.targetOpacity=false;
+				}
+				object.removeVertices()
+				object.drawV()
+			  }
+			  object.updateCornersFromDat=function(){
+			
+			  }
+			  object.setState=function(savedJSON,visBool){
+				if (visBool) {
+				  	object.targetOpacity=true;
+				}else{
+					object.targetOpacity=false;
+				}
+				object.position.x= savedJSON.OriginX
+				object.position.y= savedJSON.OriginY
+				//object.geometry.vertices[object.cornerNum[0]].x= savedJSON.CornerX1
+				//object.geometry.vertices[object.cornerNum[0]].y= savedJSON.CornerY1
+				//object.geometry.vertices[object.cornerNum[1]].x= savedJSON.CornerX4
+				//object.geometry.vertices[object.cornerNum[1]].y= savedJSON.CornerY4
+				//object.geometry.vertices[object.cornerNum[3]].x= savedJSON.CornerX3
+				//object.geometry.vertices[object.cornerNum[3]].y= savedJSON.CornerY3
+				//object.geometry.vertices[object.cornerNum[2]].x= savedJSON.CornerX2
+				//object.geometry.vertices[object.cornerNum[2]].y= savedJSON.CornerY2
+				for(var x=0;x<object.geometry.vertices.length;x++){
+					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
+					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
+				}
+				object.geometry.verticesNeedUpdate = true;
+				object.removeVertices()
+				object.drawV()				
+				object.position.z= savedJSON.ZValue
+				object.matNum= parseInt(savedJSON.Image);
+				object.material.map=videoTextures[object.matNum]
+				//object.updateCorners();
+			  }
+			  object.changeImage=function(){
+					object.matNum=parseInt(effectController.Image)
+					object.material.map=videoTextures[object.matNum];
+			  }
+			  object.showChildren=function(){
+					for(var x=0; x<object.children.length ;x++){
+						if(object.targetOpacity){
+							object.children[x].visible=true;
+						}
+					}
+			  }
+			  object.addChild=function(x,y, name, object , colorParam, w, h,vertNum){
+				var  geo = new THREE.BoxGeometry( w, h, 0 );
+				var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: colorParam } );
+				var mesh1 = new THREE.Mesh( geo, mat );
+				mesh1.name=name;
+				mesh1.vertNum="NA"
+				if (vertNum!=undefined) {
+					mesh1.vertNum=vertNum;
+				}
+				mesh1.position.x=x;
+				mesh1.position.y=y;
+				mesh1.position.z=-5;
+				mesh1.visible=false;
+				object.add(mesh1)
+				objects.push(mesh1)
+				objects[currentObjIndex].showChildren();
+			  }
+			  object.hideChildren=function(){
+				for(var x=object.children.length-1;x>=0 ;x--){
+						object.children[x].visible=false;			
+				}
+			  }
+			  object.removeVertices=function(){
+				var temp=[];
+				for(var x=object.children.length-1;x>=0 ;x--){
+					//if (object.children[x].name.indexOf('vertice') != -1) {
+						temp.push(object.children[x].uuid)
+						object.remove(object.children[x])					
+					//}
+				}
+				for(var x=0;x<temp.length;x++){
+					findAndRemove("uuid",temp[x])
+				}
+			  }
+			  object.removeWithChildren=function(){
+				var allChildren=object.children;
+				console.log(allChildren)
+				for(var x=0;x<allChildren.length;x++){
+					findAndRemove("uuid",allChildren[x].uuid)
+				}
+				findAndRemove("uuid",object.uuid)
+
+				scene.remove(object)				
+			  }
+			  object.drawV=function(){
+				object.cornerNum=[];
+				object.cornerNum[0]=0;
+				object.cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+				object.cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+				object.cornerNum[3]=object.geometry.vertices.length-1
+				for(var x=0; x<object.geometry.vertices.length ; x++ ){
+					 if (x == object.cornerNum[2]) {
+						  object.controlsX=object.geometry.vertices[x].x;
+						  object.controlsY=object.geometry.vertices[x].y;
+						  object.addChild(object.controlsX, object.controlsY-10, "translate", object, 0x73438e, 10, 10,x)
+					  }
+					  if (x == object.cornerNum[0] || x == object.cornerNum[1] || x == object.cornerNum[2] || x == object.cornerNum[3]) {
+						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "corner-"+"vertice"+x, object, 0x0000ff, 10 ,10,x)					
+					  }else{
+							object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 10, 10,x)
+					  }
+				}
+			  }
+			  object.updateCorners=function(){
+					var cornerNum=[];
+					cornerNum[0]=0;
+					cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+					cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+					cornerNum[3]=object.geometry.vertices.length-1
+					var x1 = object.geometry.vertices[cornerNum[0]].x
+					var y1 = object.geometry.vertices[cornerNum[0]].y
+					var x2 = object.geometry.vertices[cornerNum[1]].x
+					var y2 = object.geometry.vertices[cornerNum[1]].y
+					var x3 = object.geometry.vertices[cornerNum[2]].x
+					var y3 = object.geometry.vertices[cornerNum[2]].y
+					var x4 = object.geometry.vertices[cornerNum[3]].x
+					var y4 = object.geometry.vertices[cornerNum[3]].y
+					var xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					var yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x3-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y3-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x4-x3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=object.geometry.vertices.length-1; x>object.geometry.vertices.length-Math.sqrt(object.geometry.vertices.length);x--){
+						 object.geometry.vertices[x].x=object.geometry.vertices[object.geometry.vertices.length-1].x+xDiff1*(x-(object.geometry.vertices.length-1));
+						 object.geometry.vertices[x].y=object.geometry.vertices[object.geometry.vertices.length-1].y+yDiff1*(x-(object.geometry.vertices.length-1));
+					}
+					xDiff1=(x4-x2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].x=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].x+xDiff1*(x);
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].y=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].y+yDiff1*(x);
+					}
+					var sqrt=(Math.sqrt(object.geometry.vertices.length))
+					var numOfMiddleRows=(Math.sqrt(object.geometry.vertices.length)-2)
+					for(var rowNum = 1; rowNum < (Math.sqrt(object.geometry.vertices.length)-1) ; rowNum ++){
+						 var x1 = object.geometry.vertices[rowNum*sqrt].x
+						 var y1 = object.geometry.vertices[rowNum*sqrt].y
+						 var x2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].x
+						 var y2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].y
+						 xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 for(var x=0; x<(Math.sqrt(object.geometry.vertices.length)-1) ; x++ ){
+							  object.geometry.vertices[rowNum*sqrt+x].x= x1+xDiff1*x;
+							  object.geometry.vertices[rowNum*sqrt+x].y= y1+yDiff1*x;
+						 }
+					}
+					
+					object.geometry.verticesNeedUpdate = true;
+					object.removeVertices()
+					object.drawV()
+					for(var x=0;x<object.geometry.vertices.length;x++){
+						mappingController["VerticeX"+x]=object.geometry.vertices[x].x;
+						mappingController["VerticeY"+x]=object.geometry.vertices[x].y;
+					}
+					updateControlsValues();
+					//updateControlsView();
+				}
+			  scene.add( object );
+			  objects.push(object)
+			  object.drawV();
+			  //object.visible=false;
+			}
+				
+			function findAndRemove(property, value) {
+				objects.forEach(function(result, index) {
+				  if(result[property] === value) {
+					//Remove from array
+					objects.splice(index, 1);
+				  }    
+				});
+			}					
+			function onWindowResize() {
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.left   = - frustumSize * aspect / 2;
+				camera.right  =   frustumSize * aspect / 2;
+				camera.top    =   frustumSize / 2;
+				camera.bottom = - frustumSize / 2;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			
+			
+			function animate() {
+				if (globalController.LoopSpeed != 0) {
+				    var temp=globalController.LoopPosition;
+				    globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
+					if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
+						globalController.selectedScene=Math.floor(globalController.LoopPosition);
+						updateControlsView();syncObjectsToJson();calcCurrentObjIndex();
+						gui.__folders.Global.__controllers[1].updateDisplay();
+					}
+				}
+				requestAnimationFrame( animate );
+				render();
+				//stats.update();
+			}
+			
+			function render() {
+				controls.update();
+				renderer.render( scene, camera );
+			}
+			
+			function requestFullScreen() {
+				// Supports most browsers and their versions.
+				var element = document.body; // Make the body go full screen.
+				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+			
+				if (requestMethod) { // Native full screen.
+					requestMethod.call(element);
+				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+					var wscript = new ActiveXObject("WScript.Shell");
+					if (wscript !== null) {
+						wscript.SendKeys("{F11}");
+					}
+				}
+			}
+			
+			function calcCurrentObjIndex(){
+				var DOCount=0;
+				for(var x=0;x<objects.length ;x++){
+				   if(objects[x].name!="displayObject"){
+					  objects[x].visible=false;
+				   }else{
+					  objects[x].DONum=DOCount;
+					  DOCount=DOCount+1;
+				   }
+				}
+				for(var x=0;x<objects.length ;x++){
+				   if(objects[x].DONum==globalController.selectedFixture){
+					  objects[x].showChildren();
+					  currentObjIndex=x;
+				   }
+				}							  
+			}
+
+			function saveState(){
+				var requestBody=JSON.stringify(statesArray)
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName, true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+			
+			function recallState(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					 statesArray=JSON.parse(xmlhttp.response)
+					 updateControlsView()
+					 syncObjectsToJson()
+				}
+			}
+			
+			setTimeout(recallState(),1000)
+		</script>
+	</body>
+</html>
+
