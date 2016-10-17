@@ -668,8 +668,8 @@
 				if ( SELECTED ) {
 					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
 						if (SELECTED.name == "translate") {
-								SELECTED.position.x=intersection.x;
-								SELECTED.position.y=intersection.y;
+								SELECTED.position.x=intersection.x-SELECTED.parent.position.x;
+								SELECTED.position.y=intersection.y-SELECTED.parent.position.y;
 								mappingController.OriginX=intersection.x-SELECTED.parent.controlsX;
 								mappingController.OriginY=intersection.y-SELECTED.parent.controlsY;
 						}
@@ -695,7 +695,7 @@
 								mappingController.CornerY2=SELECTED.position.y;
 							}
 						}
-						if (SELECTED.name.indexOf('vertice') != -1 || SELECTED.name.indexOf('corner') != -1) {
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
 							SELECTED.position.copy(intersection.sub( offset ));
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
