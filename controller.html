@@ -74,6 +74,10 @@
 					}
 					statesArray.scenes.push(sceneJSON)
 				}
+				statesArray.global={};
+				statesArray.global.selectedScene=globalController.selectedScene
+				statesArray.global.LoopSpeed=globalController.LoopSpeed
+				statesArray.global.FadeTime=globalController.TransitionTime
 				for(var x=0;x<12;x++){
 					addPlane();
 				}
@@ -99,6 +103,7 @@
 				//stats = new Stats();
 				//container.appendChild( stats.dom );
 				window.addEventListener( 'resize', onWindowResize, false );
+				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 			}
 			
 			function addControls(){
@@ -108,7 +113,7 @@
 					 GridSize:4,
 					 LoopSpeed:0,
 					 LoopPosition:0,
-					 FadeTime:.01,
+					 TransitionTime:.01,
 					 Master:false,
 					 MasterInterval:0,
 					 Slave:false,
@@ -162,23 +167,25 @@
 				gui = new dat.GUI();
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
-				globalFolder.add(globalController, "selectedFixture", 0, 11, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
-				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJsonNoMap();});
-				globalFolder.add( globalController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
-				controlsFolder=gui.addFolder( "MappingControls" )
-				controlsFolder.open();
-				controlsFolder.add( mappingController, "OriginX", -1200, 1200, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "OriginY", -600, 600, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "CornerX1", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerY1", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerX2", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerY2", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerX3", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerY3", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerX4", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
-				controlsFolder.add( mappingController, "CornerY4", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});	
-				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//globalFolder.add(globalController, "selectedFixture", 0, 11, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
+				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJsonNoMap();statesArray.global.selectedScene=globalController.selectedScene;});
+				globalFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){statesArray.global.LoopSpeed=globalController.LoopSpeed;});
+				globalFolder.add( globalController, "TransitionTime", 0, .5, .001 ).onChange(function(){statesArray.global.FadeTime=globalController.TransitionTime;});					
+				//globalFolder.add( globalController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
+				//controlsFolder=gui.addFolder( "MappingControls" )
+				//controlsFolder.open();
+				//controlsFolder.add( mappingController, "OriginX", -1200, 1200, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//controlsFolder.add( mappingController, "OriginY", -600, 600, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//controlsFolder.add( mappingController, "CornerX1", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerY1", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerX2", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerY2", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerX3", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerY3", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerX4", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				//controlsFolder.add( mappingController, "CornerY4", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});	
+				//controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				painterFolder=gui.addFolder( "PainterControls" )
 				painterFolder.open();
 				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();syncObjectsToJson()});
@@ -189,12 +196,10 @@
 				painterFolder.add( painterController, "ColorChangeRate", 1, 600, 1 ).onChange(function(){painterController.ColorChangeRate=parseFloat(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
 				//painterFolder.add( painterController, "ImageBank", 0, 3, 1 ).onChange(function(){painterController.ColorChangeRate=parseInt(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
-				utilsFolder.open()
-				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
-				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
-				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){});
-				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){});			
+				//utilsFolder.open()
+				//utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				//utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
+				//utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});							
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 			}
 			
@@ -230,27 +235,27 @@
 					}
 				}
 				
-				for (var i in gui.__folders.MappingControls.__controllers) {
-				    gui.__folders.MappingControls.__controllers[i].updateDisplay();
-				}
+				//for (var i in gui.__folders.MappingControls.__controllers) {
+				//    gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				//}
 				
 				for (var i in gui.__folders.PainterControls.__controllers) {
 				  painterController[gui.__folders.PainterControls.__controllers[i].property]=statesArray.scenes[parseInt(globalController.selectedScene)][gui.__folders.PainterControls.__controllers[i].property];
 				  gui.__folders.PainterControls.__controllers[i].updateDisplay();
 				}
 				globalController["Visible"]=statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)];
-				gui.__folders.Global.__controllers[2].updateDisplay();
+				//gui.__folders.Global.__controllers[2].updateDisplay();
 			}
 			
 			function updateControlsValues(){  
-				for (var i in gui.__folders.MappingControls.__controllers) {
-				  statesArray.objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
-				}
-				for(var x in mappingController){
-					if (x != "Visible") {
-						statesArray.objects[parseInt(globalController.selectedFixture)][x]=mappingController[x];
-					}
-				}
+				//for (var i in gui.__folders.MappingControls.__controllers) {
+				//  statesArray.objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				//}
+				//for(var x in mappingController){
+				//	if (x != "Visible") {
+				//		statesArray.objects[parseInt(globalController.selectedFixture)][x]=mappingController[x];
+				//	}
+				//}
 				for (var i in gui.__folders.PainterControls.__controllers) {
 				  statesArray.scenes[parseInt(globalController.selectedScene)][gui.__folders.PainterControls.__controllers[i].property]=painterController[gui.__folders.PainterControls.__controllers[i].property];
 				}
@@ -506,6 +511,10 @@
 			}
 			
 			
+			function onDocumentMouseDown( event ) {
+				requestFullScreen();
+			}
+			
 			function animate() {
 				if (globalController.LoopSpeed != 0) {
 				    var temp=globalController.LoopPosition;
@@ -573,8 +582,15 @@
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					 statesArray=JSON.parse(xmlhttp.response)
+					globalController.selectedScene=statesArray.global.selectedScene;
+					globalController.LoopSpeed=statesArray.global.LoopSpeed;
+					globalController.TransitionTime=statesArray.global.FadeTime;
+					gui.__folders.Global.__controllers[0].updateDisplay();
+					gui.__folders.Global.__controllers[1].updateDisplay();
+					gui.__folders.Global.__controllers[2].updateDisplay();
 					 updateControlsView()
 					 syncObjectsToJson()
+					 globalController.MasterInterval=setInterval("saveState()",1000);
 				}
 			}
 			

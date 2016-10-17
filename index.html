@@ -132,6 +132,10 @@
 					}
 					statesArray.scenes.push(sceneJSON)
 				}
+				statesArray.global={};
+				statesArray.global.selectedScene=globalController.selectedScene
+				statesArray.global.LoopSpeed=globalController.LoopSpeed
+				statesArray.global.FadeTime=globalController.FadeTime
 				for(var x=0;x<12;x++){
 					addPlane();
 				}
@@ -301,7 +305,7 @@
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 11, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
-				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJsonNoMap();});
+				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJsonNoMap();statesArray.global.selectedScene=globalController.selectedScene;});
 				globalFolder.add( globalController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -332,8 +336,8 @@
 				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen() ;gui.close(); document.getElementsByClassName("close-button")[0].innerHTML="";for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}};}},'PresentationMode');				
 				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
 				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
-				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){});
-				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){});			
+				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){statesArray.global.LoopSpeed=globalController.LoopSpeed;});
+				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){statesArray.global.FadeTime=globalController.FadeTime;});			
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 			}
 			
@@ -858,6 +862,12 @@
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					 statesArray=JSON.parse(xmlhttp.response)
+					globalController.selectedScene=statesArray.global.selectedScene;
+					globalController.LoopSpeed=statesArray.global.LoopSpeed;
+					globalController.FadeTime=statesArray.global.FadeTime;
+					gui.__folders.Global.__controllers[1].updateDisplay();
+					gui.__folders.Utils.__controllers[4].updateDisplay();
+					gui.__folders.Utils.__controllers[5].updateDisplay();
 					 updateControlsView()
 					 syncObjectsToJson()
 				}
