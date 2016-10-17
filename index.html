@@ -765,12 +765,13 @@
 			}
 			
 			function animate() {
-				if (globalController.LoopSpeed != 0) {
+				if (globalController.LoopSpeed != 0 && !globalController.Slave) {
 				    var temp=globalController.LoopPosition;
 				    globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
 					if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
 						globalController.selectedScene=Math.floor(globalController.LoopPosition);
 						updateControlsView();syncObjectsToJson();calcCurrentObjIndex();
+						statesArray.global.selectedScene
 						gui.__folders.Global.__controllers[1].updateDisplay();
 					}
 				}

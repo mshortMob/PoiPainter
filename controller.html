@@ -521,8 +521,9 @@
 				    globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
 					if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
 						globalController.selectedScene=Math.floor(globalController.LoopPosition);
+						statesArray.global.selectedScene=Math.floor(globalController.LoopPosition);
 						updateControlsView();syncObjectsToJson();calcCurrentObjIndex();
-						gui.__folders.Global.__controllers[1].updateDisplay();
+						gui.__folders.Global.__controllers[0].updateDisplay();
 					}
 				}
 				requestAnimationFrame( animate );
