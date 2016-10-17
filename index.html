@@ -22,7 +22,7 @@
 	<body>
 		<canvas id="tempCanvas" width="128" height="64" style="opacity: 0;display:none;"></canvas>
 		<canvas id="tracerCanvas" width="128" height="64" style='display: none; width:100%;height:100%;'></canvas>
-		<video id="video" autoplay width='128' height='64' style="top:0px;left:0px;z-index:-1;position:fixed;"></video>
+		<video id="video" autoplay width='128' height='64' style="display: none; top:0px;left:0px;z-index:-1;position:fixed;"></video>
 		<video src="anim1.mp4" autoplay width="128" height="64" id="video1" autoplay loop style="display:none"></video>
 		<video src="anim2.mp4" autoplay width="128" height="64" id="video2" autoplay loop style="display:none"></video>
 		<video src="anim3.mp4" autoplay width="128" height="64" id="video3" autoplay loop style="display:none"></video>
@@ -244,9 +244,7 @@
 					 selectedFixture:0,
 					 selectedScene:0,
 					 GridSize:4,
-					 DryWet:1,
-					 LoopScenes:false,
-					 LoopSpeed:.001,
+					 LoopSpeed:0,
 					 LoopPosition:0,
 					 FadeTime:.01,
 					 Master:false,
@@ -334,10 +332,8 @@
 				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen() ;gui.close(); document.getElementsByClassName("close-button")[0].innerHTML="";for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}};}},'PresentationMode');				
 				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
 				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
-				utilsFolder.add( globalController, "LoopScenes", true ).onChange(function(){});
 				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){});
-				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){});	
-				utilsFolder.add( globalController, "DryWet", 0, 1, .01 ).onChange(function(){renderer.setClearColor( 0x000000 , globalController.DryWet)});			
+				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){});			
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 			}
 			
@@ -765,7 +761,7 @@
 			}
 			
 			function animate() {
-				if (globalController.LoopScenes) {
+				if (globalController.LoopSpeed != 0) {
 				    var temp=globalController.LoopPosition;
 				    globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
 					if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
