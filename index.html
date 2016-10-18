@@ -136,6 +136,7 @@
 				statesArray.global.selectedScene=globalController.selectedScene
 				statesArray.global.LoopSpeed=globalController.LoopSpeed
 				statesArray.global.FadeTime=globalController.FadeTime
+				statesArray.global.LastModifiedTime=(new Date()).toString()
 				for(var x=0;x<12;x++){
 					addPlane();
 				}
@@ -765,15 +766,15 @@
 			}
 			
 			function animate() {
-				if (globalController.LoopSpeed != 0 && !globalController.Slave) {
-				    var temp=globalController.LoopPosition;
-				    globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
-					if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
-						globalController.selectedScene=Math.floor(globalController.LoopPosition);
-						updateControlsView();syncObjectsToJson();calcCurrentObjIndex();
-						statesArray.global.selectedScene
-						gui.__folders.Global.__controllers[1].updateDisplay();
-					}
+				if (globalController.LoopSpeed != 0 && Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) > 5000) {				
+						var temp=globalController.LoopPosition;
+						globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
+						if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
+							globalController.selectedScene=Math.floor(globalController.LoopPosition);
+							updateControlsView();syncObjectsToJson();calcCurrentObjIndex();
+							statesArray.global.selectedScene
+							gui.__folders.Global.__controllers[1].updateDisplay();
+						}
 				}
 				for(var x=0;x<objects.length;x++){
 					 if(objects[x].name=="displayObject"){
@@ -850,6 +851,7 @@
 			}
 
 			function saveState(){
+			    statesArray.global.LastModifiedTime=(new Date()).toString();
 				var requestBody=JSON.stringify(statesArray)
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName, true);
@@ -862,8 +864,10 @@
 				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
-					 statesArray=JSON.parse(xmlhttp.response)
-					globalController.selectedScene=statesArray.global.selectedScene;
+					statesArray=JSON.parse(xmlhttp.response)
+					if (Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) < 5000){
+						globalController.selectedScene=statesArray.global.selectedScene;
+					}
 					globalController.LoopSpeed=statesArray.global.LoopSpeed;
 					globalController.FadeTime=statesArray.global.FadeTime;
 					gui.__folders.Global.__controllers[1].updateDisplay();

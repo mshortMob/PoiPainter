@@ -78,6 +78,7 @@
 				statesArray.global.selectedScene=globalController.selectedScene
 				statesArray.global.LoopSpeed=globalController.LoopSpeed
 				statesArray.global.FadeTime=globalController.TransitionTime
+				statesArray.global.LastModifiedTime=(new Date()).toString()
 				for(var x=0;x<12;x++){
 					addPlane();
 				}
@@ -513,10 +514,11 @@
 			
 			function onDocumentMouseDown( event ) {
 				requestFullScreen();
+				gui.width=350;
 			}
 			
 			function animate() {
-				if (globalController.LoopSpeed != 0) {
+				if (globalController.LoopSpeed != 0 && Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) > 5000) {	
 				    var temp=globalController.LoopPosition;
 				    globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
 					if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
@@ -570,6 +572,7 @@
 			}
 
 			function saveState(){
+				statesArray.global.LastModifiedTime=(new Date()).toString();
 				var requestBody=JSON.stringify(statesArray)
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName, true);
@@ -582,10 +585,12 @@
 				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
-					 statesArray=JSON.parse(xmlhttp.response)
-					globalController.selectedScene=statesArray.global.selectedScene;
+					statesArray=JSON.parse(xmlhttp.response)
+					if (Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) < 5000){
+						globalController.selectedScene=statesArray.global.selectedScene;
+					}
 					globalController.LoopSpeed=statesArray.global.LoopSpeed;
-					globalController.TransitionTime=statesArray.global.FadeTime;
+					globalController.FadeTime=statesArray.global.FadeTime;
 					gui.__folders.Global.__controllers[0].updateDisplay();
 					gui.__folders.Global.__controllers[1].updateDisplay();
 					gui.__folders.Global.__controllers[2].updateDisplay();
@@ -595,7 +600,7 @@
 				}
 			}
 			
-			setTimeout(recallState(),1000)
+			setTimeout(function(){recallState();globalController.selectedScene=0;statesArray.global.selectedScene=0;gui.__folders.Global.__controllers[0].updateDisplay();},1000)
 		</script>
 	</body>
 </html>
