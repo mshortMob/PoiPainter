@@ -766,7 +766,7 @@
 			}
 			
 			function animate() {
-				if (globalController.LoopSpeed != 0 && Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) > 5000) {				
+				if (globalController.LoopSpeed != 0 && Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) > 60000) {				
 						var temp=globalController.LoopPosition;
 						globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
 						if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
@@ -865,7 +865,7 @@
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response)
-					if (Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) < 5000){
+					if (Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) < 60000){
 						globalController.selectedScene=statesArray.global.selectedScene;
 					}
 					globalController.LoopSpeed=statesArray.global.LoopSpeed;
