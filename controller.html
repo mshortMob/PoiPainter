@@ -29,7 +29,8 @@
 		<script src="NURBSSurface.js"></script>
 		<script src="NURBSUtils.js"></script>
 		<script src="TrackballControls.js"></script>
-		<script>		
+		<script>
+			document.body.onclick=function(){requestFullScreen();gui.width=350;}
 			initGlobalVars();
 			function initGlobalVars(){
 				currentObjIndex=0;
@@ -618,7 +619,7 @@
       
 				}
 			}
-			setInterval("recallStatusIndicator()",2000)
+			setInterval("recallStatusIndicator()",8000)
 		</script>
 	</body>
 </html>
