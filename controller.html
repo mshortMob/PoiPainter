@@ -1,4 +1,4 @@
-<html>
+<html id="html">
 	<head>
 		<title>FlowMapper</title>
 		<style>
@@ -89,7 +89,7 @@
 			
 			function initScene() {
 				container = document.createElement( 'div' );
-				container.style.display="none"
+				//container.style.display="none"
 				document.body.appendChild( container );
 				frustumSize = 1000;
 				var aspect = window.innerWidth / window.innerHeight;
@@ -506,6 +506,9 @@
 				});
 			}					
 			function onWindowResize() {
+								container.style.display='none'
+				document.body.style.width=window.innerWidth
+				document.body.style.height=window.innerHeight
 				var aspect = window.innerWidth / window.innerHeight;
 				camera.left   = - frustumSize * aspect / 2;
 				camera.right  =   frustumSize * aspect / 2;
@@ -604,17 +607,19 @@
 				}
 			}
 			
-			setTimeout(function(){recallState();globalController.selectedScene=0;statesArray.global.selectedScene=0;gui.__folders.Global.__controllers[0].updateDisplay();},1000)
+			setTimeout(function(){container.style.display='none';document.body.style.width=window.innerWidth;document.body.style.height=window.innerHeight;recallStatusIndicator();recallState();globalController.selectedScene=0;statesArray.global.selectedScene=0;gui.__folders.Global.__controllers[0].updateDisplay();},1000)
 			function recallStatusIndicator(){
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("GET", "read.php?fn=statusIndicator.txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statusIndicator=xmlhttp.response;
-					if (Math.abs((new Date(statusIndicator)).getTime() - (new Date()).getTime()) < 30000) {
+					if (Math.abs((new Date(statusIndicator)).getTime() - (new Date()).getTime()) < 60000) {
 						document.body.style.backgroundColor='green'
+						document.getElementById("html").style.backgroundColor='green'
 					}else{
 						document.body.style.backgroundColor='red'
+						document.getElementById("html").style.backgroundColor='red'
 					}
       
 				}
