@@ -876,7 +876,17 @@
 					 updateControlsView()
 					 syncObjectsToJson()
 				}
-			}			
+			}
+			
+			function saveStatusIndicator(){
+				var requestBody=(new Date()).toString();
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "write.php?fn=statusIndicator.txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+			
+			setInterval("saveStatusIndicator()",20000)
 		</script>
 	</body>
 </html>

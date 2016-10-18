@@ -3,7 +3,9 @@
 		<title>FlowMapper</title>
 		<style>
 			body{
-			    margin:0px;    
+				background-color:black;
+			    margin:0px;
+				z-index: 10;
 			}	
 			video{
 				opacity: 1;
@@ -86,6 +88,7 @@
 			
 			function initScene() {
 				container = document.createElement( 'div' );
+				container.style.display="none"
 				document.body.appendChild( container );
 				frustumSize = 1000;
 				var aspect = window.innerWidth / window.innerHeight;
@@ -601,6 +604,21 @@
 			}
 			
 			setTimeout(function(){recallState();globalController.selectedScene=0;statesArray.global.selectedScene=0;gui.__folders.Global.__controllers[0].updateDisplay();},1000)
+			function recallStatusIndicator(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn=statusIndicator.txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					statusIndicator=xmlhttp.response;
+					if (Math.abs((new Date(statusIndicator)).getTime() - (new Date()).getTime()) < 30000) {
+						document.body.style.backgroundColor='green'
+					}else{
+						document.body.style.backgroundColor='red'
+					}
+      
+				}
+			}
+			setInterval("recallStatusIndicator()",2000)
 		</script>
 	</body>
 </html>
