@@ -156,6 +156,7 @@
 					 ColorMix:.9,
 					 PPResolution:120,
 					 ColorChangeRate:100,
+					 ColorChangeHop:1,
 					 Visible1:false,
 					 Visible2:false,
 					 Visible3:false,
@@ -197,8 +198,9 @@
 				painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();syncObjectsToJson()});
-				painterFolder.add( painterController, "PPResolution", 10, 400, 1 ).onChange(function(){painterController.PPResolution=parseFloat(painterController.PPResolution);setPoiPainterResolution(painterController.PPResolution);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "PPResolution", 10, 400, 1 ).onChange(function(){painterController.PPResolution=parseFloat(painterController.PPResolution);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "ColorChangeRate", 1, 600, 1 ).onChange(function(){painterController.ColorChangeRate=parseFloat(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorChangeHop", 1, 20, 1 ).onChange(function(){painterController.ColorChangeHop=parseFloat(painterController.ColorChangeHop);updateControlsValues();syncObjectsToJson()});
 				//painterFolder.add( painterController, "ImageBank", 0, 3, 1 ).onChange(function(){painterController.ColorChangeRate=parseInt(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				//utilsFolder.open()

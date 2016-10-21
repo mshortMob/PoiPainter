@@ -42,9 +42,12 @@
 				this.currentColRGB.b=255;
 				this.timeElapsed=0;
 				this.ci=0;
-				this.rList=[255,255,255,255,200,100,000,000,000,000,000,000,000,100,200,255,255,255];
-				this.gList=[000,100,200,255,255,255,255,255,255,255,200,100,000,000,000,000,000,000];
-				this.bList=[000,000,000,000,000,000,000,100,200,255,255,255,255,255,255,255,200,100];
+				//this.rList=[255,255,255,255,200,100,000,000,000,000,000,000,000,100,200,255,255,255];
+				//this.gList=[000,100,200,255,255,255,255,255,255,255,200,100,000,000,000,000,000,000];
+				//this.bList=[000,000,000,000,000,000,000,100,200,255,255,255,255,255,255,255,200,100];
+				this.rList=[255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255];
+				this.gList=[000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000];
+				this.bList=[000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050];
 				ci=this.ci;
 				this.rgbToHex=function(r, g, b) {
 					return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -70,7 +73,7 @@
 				//this.requestR= function(){return this.currentColRGB.r;}
 				//this.requestG= function(){return this.currentColRGB.g;}
 				//this.requestB= function(){return this.currentColRGB.b;}
-				this.change= function(){ci=(ci+1) % 18;}	
+				this.change= function(){ci=(ci+parseInt(painterController.ColorChangeHop)) % 30;}	
 				this.requestR= function(){return this.rList[ci];}
 				this.requestG= function(){return this.gList[ci];}
 				this.requestB= function(){return this.bList[ci];}		
@@ -289,6 +292,7 @@
 					 ColorMix:.9,
 					 PPResolution:120,
 					 ColorChangeRate:100,
+					 ColorChangeHop:1,
 					 Visible1:false,
 					 Visible2:false,
 					 Visible3:false,
@@ -330,6 +334,7 @@
 				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "PPResolution", 10, 400, 1 ).onChange(function(){painterController.PPResolution=parseFloat(painterController.PPResolution);setPoiPainterResolution(painterController.PPResolution);updateControlsValues();syncObjectsToJson()});
 				painterFolder.add( painterController, "ColorChangeRate", 1, 600, 1 ).onChange(function(){painterController.ColorChangeRate=parseFloat(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorChangeHop", 1, 20, 1 ).onChange(function(){painterController.ColorChangeHop=parseFloat(painterController.ColorChangeHop);updateControlsValues();syncObjectsToJson()});
 				//painterFolder.add( painterController, "ImageBank", 0, 3, 1 ).onChange(function(){painterController.ColorChangeRate=parseInt(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open()
@@ -472,9 +477,9 @@
 				}
 				object.removeVertices()
 				object.drawV()
-			  }
-			  object.updateCornersFromDat=function(){
-			
+				if (parseInt(painterController.PPResolution) != document.getElementById('video').width) {
+					setPoiPainterResolution(painterController.PPResolution)
+				}
 			  }
 			  object.setState=function(savedJSON,visBool){
 				if (visBool) {
@@ -502,6 +507,9 @@
 				object.position.z= savedJSON.ZValue
 				object.matNum= parseInt(savedJSON.Image);
 				object.material.map=videoTextures[object.matNum]
+				if (parseInt(painterController.PPResolution) != document.getElementById('video').width) {
+					setPoiPainterResolution(painterController.PPResolution)
+				}
 				//object.updateCorners();
 			  }
 			  object.changeImage=function(){
