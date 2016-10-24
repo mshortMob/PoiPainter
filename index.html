@@ -148,9 +148,9 @@
 			function setPoiPainterResolution(width){
 				//var width = 14;
 				document.getElementById("tempCanvas").setAttribute("width",width);
-				document.getElementById("tempCanvas").setAttribute("height", width*.5);
+				document.getElementById("tempCanvas").setAttribute("height", width*.75);
 				document.getElementById("video").setAttribute("width",width);
-				document.getElementById("video").setAttribute("height", width*.5);
+				document.getElementById("video").setAttribute("height", width*.75);
 				document.getElementById("tracerCanvas").setAttribute("width",width);
 				document.getElementById("tracerCanvas").setAttribute("height",width*.5);
 			}
@@ -231,19 +231,19 @@
 			function initVideos(){
 			  video1      = document.getElementById('tracerCanvas');
 			  videoTexture1 = new THREE.Texture( video1 );
-			  videoTexture1.minFilter=THREE.LinearFilter;
+			  //videoTexture1.minFilter=THREE.LinearFilter;
 			  videoTextures.push(videoTexture1)
 			  video2      = document.getElementById('video1');
 			  videoTexture2 = new THREE.Texture( video2 )
-			  videoTexture2.minFilter=THREE.LinearFilter;			  
+			  //videoTexture2.minFilter=THREE.LinearFilter;			  
 			  videoTextures.push(videoTexture2)
 			  video3      = document.getElementById('video2');
 			  videoTexture3 = new THREE.Texture( video3 )
-			  videoTexture3.minFilter=THREE.LinearFilter;			  
+			  //videoTexture3.minFilter=THREE.LinearFilter;			  
 			  videoTextures.push(videoTexture3)
 			  video4      = document.getElementById('video3');
 			  videoTexture4 = new THREE.Texture( video4 )
-			  videoTexture4.minFilter=THREE.LinearFilter;			  
+			  //videoTexture4.minFilter=THREE.LinearFilter;			  
 			  videoTextures.push(videoTexture4)
 			}
 			
@@ -309,7 +309,7 @@
 				gui = new dat.GUI();
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
-				globalFolder.add(globalController, "selectedFixture", 0, 11, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
+				globalFolder.add(globalController, "selectedFixture", 0, 10, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
 				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJsonNoMap();statesArray.global.selectedScene=globalController.selectedScene;});
 				globalFolder.add( globalController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder=gui.addFolder( "MappingControls" )
@@ -339,7 +339,7 @@
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open()
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen() ;gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){document.getElementsByClassName("close-button")[0].style.width=20; document.getElementsByClassName("close-button")[0].style.right=0;},1000); for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}};}},'PresentationMode');				
+				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen(); globalController.selectedFixture=11; gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000); for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}}; globalController.Slave=true;if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)}; updateControlsView();syncObjectsToJson();calcCurrentObjIndex();}},'PresentationMode');				
 				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
 				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
 				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){statesArray.global.LoopSpeed=globalController.LoopSpeed;});
