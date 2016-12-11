@@ -753,11 +753,26 @@
 				raycaster.setFromCamera( mouse, camera );
 				if ( SELECTED ) {
 					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
-						if (SELECTED.name == "translate") {
+						if (SELECTED.name == "translate" || SELECTED.name == "triPoint") {
 								SELECTED.position.x=intersection.x-SELECTED.parent.position.x;
 								SELECTED.position.y=intersection.y-SELECTED.parent.position.y;
 								mappingController.OriginX=intersection.x-SELECTED.parent.controlsX;
 								mappingController.OriginY=intersection.y-SELECTED.parent.controlsY;
+						}
+						if (SELECTED.name == "tri" && SELECTED.name != "triPoint") {
+								SELECTED.position.x=intersection.x-SELECTED.parent.position.x;
+								SELECTED.position.y=intersection.y-SELECTED.parent.position.y;
+								mappingController.OriginX=intersection.x-SELECTED.parent.controlsX;
+								mappingController.OriginY=intersection.y-SELECTED.parent.controlsY;
+						}
+						if (SELECTED.name == "triPoint") {
+								SELECTED.position.x=intersection.x-SELECTED.parent.position.x;
+								SELECTED.position.y=intersection.y-SELECTED.parent.position.y;
+								SELECTED.parent.geometry.vertices[SELECTED.vertNum].x=intersection.x-SELECTED.parent.position.x;
+								SELECTED.parent.geometry.vertices[SELECTED.vertNum].y=intersection.y-SELECTED.parent.position.y;
+								SELECTED.parent.geometry.verticesNeedUpdate=true;
+								SELECTED.parent.redrawLines();
+								SELECTED.parent.setRandomColors();
 						}
 						if (SELECTED.name.indexOf('corner') != -1) {
 						    SELECTED.position.copy(intersection.sub( offset ));
@@ -973,9 +988,92 @@
 				document.getElementById("video2").src="anim"+(4*parseInt(mappingController.ImageBank)+2)+".mp4"
 				document.getElementById("video3").src="anim"+(4*parseInt(mappingController.ImageBank)+3)+".mp4"
 			  }
+
+			  function addTri(){
+				 triangleShape = new THREE.Shape();
+				triangleShape.moveTo(  -200, -200 );
+				triangleShape.lineTo(  200, -200 );
+				triangleShape.lineTo( 0, 200 );
+				//triangleShape.lineTo(  -200, -200 ); // close path
+				
+				triangleShape.autoClose = true;
+				 points = triangleShape.createPointsGeometry();
+				var spacedPoints = triangleShape.createSpacedPointsGeometry( 500 );
+				
+				var geometry = new THREE.ShapeGeometry( triangleShape );
+				var material11=new THREE.MeshPhongMaterial( { color: 0x00ff00, side: THREE.DoubleSide } )
+				var mesh = new THREE.Mesh( geometry, material11);
+				mesh.position.set( 0, 0, 0  );
+				mesh.rotation.set( 0, 0, 0  );
+				mesh.scale.set( 1 , 1, 1 );
+				mesh.name="tri";
+				scene.add( mesh );
+				objects.push(mesh)
+				mesh.material.color={r: Math.random(), g: Math.random(), b: Math.random()}
+				
+				//for(var x=1; x<mesh.geometry.vertices.length; x++){
+				//	if (x == mesh.geometry.vertices.length-1) {
+				//
+				//	}else{
+				//		var line = new THREE.Line(  [new THREE.Vector2(mesh.geometry.vertices[x].x , mesh.geometry.vertices[x].y),new THREE.Vector2(mesh.geometry.vertices[x+1].x , mesh.geometry.vertices[x+1].y)] ,new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 5 } ) );
+				//		line.position.set( 0, 0, 0  );
+				//		line.rotation.set( 0, 0, 0  );
+				//		line.scale.set( 1, 1, 1 );
+				//		scene.add( line );
+				//		objects.push(line)
+				//		line.material.color={r: Math.random(), g: Math.random(), b: Math.random()}						
+				//	}
+				//}
+				
+				for(var x=1; x<mesh.geometry.vertices.length; x++){
+				console.log(mesh.geometry.vertices[x].x + "  " + mesh.geometry.vertices[x].y)
+					var geometry1 = new THREE.BoxGeometry(20,20,0 );
+					var material111=new THREE.MeshPhongMaterial( { color: 0x00ff00, side: THREE.DoubleSide } )
+					var mesh1 = new THREE.Mesh( geometry1, material111);
+					mesh1.position.set( mesh.geometry.vertices[x].x, mesh.geometry.vertices[x].y, 0  );
+					mesh1.rotation.set( 0, 0, -15  );
+					mesh1.scale.set( 1 , 1, 1 );
+					mesh1.name="triPoint";
+					mesh1.vertNum=x;
+					mesh.add( mesh1 );
+					objects.push(mesh1)
+				}
+				points = triangleShape.createPointsGeometry();
+				var line = new THREE.Line( points, new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 5 } ) );
+				line.position.set( 0, 0, -2  );
+				line.rotation.set( 0, 0, 0  );
+				line.scale.set( 1, 1, 1 );
+				line.name="lines";
+				mesh.add( line );
+				objects.push(line)
+				line.material.color={r: Math.random(), g: Math.random(), b: Math.random()}
+				
+				mesh.redrawLines=function(){
+					for(var x=1; x<mesh.geometry.vertices.length ;x++){
+						line.geometry.vertices[x]=mesh.geometry.vertices[x]
+					}
+					line.geometry.vertices[0]=mesh.geometry.vertices[3]
+					line.geometry.verticesNeedUpdate=true;
+				}
+				
+				mesh.setRandomColors=function(){
+					line.material.color={r: Math.random(), g: Math.random(), b: Math.random()};
+					mesh.material.color={r: Math.random(), g: Math.random(), b: Math.random()};
+					
+				}
+				//var particles = new THREE.Points( points, new THREE.PointsMaterial( { color: 0x0000ff, size: 50 } ) );
+				//particles.position.set( 0, 0, -100  );
+				//particles.rotation.set( 0, 0, 0  );
+				//particles.scale.set( 1, 1, 1 );
+				//particles.name="triPoint";
+				//scene.add( particles );
+				//objects.push(particles)
+				//particles.material.color={r: Math.random(), g: Math.random(), b: Math.random()}
+			}
 			
 			//setTimeout(function(){recallState()},5000);
 		</script>
 	</body>
 </html>
+
 
