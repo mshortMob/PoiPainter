@@ -452,25 +452,25 @@
 				scannersFolder=gui.addFolder( "Scanners" )
 				//scannersFolder.open()
 				scannersFolder.add( scannerController, "visible", true ).onChange(function(){updateScannerValues();});				
-				scannersFolder.add(scannerController, "xorigin", -500, 500, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "xrange", 0, 500, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xorigin", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xrange", 0, 1000, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "xfreq", 0, 4, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "xphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "yorigin", -500, 500, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "yrange", 0, 500, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yorigin", -1000, 100, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yrange", 0, 100, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "yfreq", 0, 4, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "yphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "zorigin", -500, 500, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "zrange", 0, 500, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zorigin", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zrange", 0, 1000, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "zfreq", 0, 1, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "zphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "corigin", 0, 29, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "crange", 0, 29, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "cfreq", 0, 4, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "cfreq", 0, 10, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "cphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});							
-				scannersFolder.add(scannerController, "sorigin", 0, 10, .01 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "srange", 0, 10, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "sfreq", 0, 4, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "sorigin", 0, 20, .01 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "srange", 0, 20, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "sfreq", 0, 10, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "sphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "sr", 0, 2, .001 ).onChange(function(){updateScannerValues();});	
 				scannersFolder.add(scannerController, "shape", 0, 2, 1 ).onChange(function(){updateScannerValues();});
