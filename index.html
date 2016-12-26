@@ -340,7 +340,9 @@
 					 SlaveInterval:0,
 					 Visible:false,
 					 PresetName:"statesStorage",
-					 DryWet:0
+					 DryWet:0,
+					 SoundSpeed:0,
+					 SoundIndex:0
 				}
 				scannerController={
 					 xorigin:0,
@@ -483,6 +485,7 @@
 				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){statesArray.global.FadeTime=globalController.FadeTime;});			
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 				utilsFolder.add( globalController, "DryWet", 0, 1, .01 ).onChange(function(){renderer.setClearColor( 0x000000 , globalController.DryWet)});
+				utilsFolder.add( globalController, "SoundSpeed", 0, 5, .01 ).onChange(function(){});
 			}
 			
 			function updateScannerView(){  
@@ -991,6 +994,12 @@
 							}
 						}
 					 }
+				}
+				if (globalController.SoundSpeed !=0) {
+					globalController.SoundIndex=globalController.SoundIndex+meter.volume*globalController.SoundSpeed;
+					globalController.selectedPattern=Math.floor(globalController.SoundIndex%4)
+					gui.__folders.Global.__controllers[3].updateDisplay();
+					updateScannerView();
 				}
 				animationIndex=animationIndex+.05
 				for(var x=0;x<scanners.length;x++){
