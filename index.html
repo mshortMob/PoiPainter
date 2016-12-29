@@ -160,7 +160,7 @@
 				statesArray={};
 				statesArray.objects=[];
 				statesArray.scenes=[];
-				for(var x=0;x<12;x++){
+				for(var x=0;x<16;x++){
 					var objectJSON ={}
 					for (var key in mappingController) {
 						objectJSON[key]=mappingController[key]
@@ -180,22 +180,25 @@
 				statesArray.global.FadeTime=globalController.FadeTime
 				statesArray.global.LastModifiedTime=(new Date()).toString()
 				scannerStatesArray=[];
-				var temparray=[];
-				for(var z=0;z<4;z++){
+				for(var c=0;c<4;c++){
 					var temparray=[];
-					for(var y=0;y<12;y++){
-						for(var x=0;x<4;x++){
-							var objectJSON ={}
-							for (var key in scannerController) {
-								objectJSON[key]=scannerController[key]
+					for(var z=0;z<4;z++){
+						var temparray2=[];
+						for(var y=0;y<8;y++){
+							for(var x=0;x<4;x++){
+								var objectJSON ={}
+								for (var key in scannerController) {
+									objectJSON[key]=scannerController[key]
+								}
 							}
+							temparray2.push(objectJSON)
 						}
-						temparray.push(objectJSON)
+						temparray.push(temparray2);
 					}
-					scannerStatesArray.push(temparray);
+					scannerStatesArray.push(temparray)
 				}
 				
-				for(var x=0;x<12;x++){
+				for(var x=0;x<16;x++){
 					addPlane();
 				}
 				for(var x=0;x<8;x++){
@@ -368,7 +371,8 @@
 					 shape:0,
 					 sr:1,
 					 layer:0,
-					 visible:false
+					 visible:false,
+					 waveform:0
 				}
 				mappingController  = {
 					 Visible:false,
@@ -419,7 +423,7 @@
 				gui.width=260;
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
-				globalFolder.add(globalController, "selectedFixture", 0, 10, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
+				globalFolder.add(globalController, "selectedFixture", 0, 14, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
 				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();updateScannerView();syncObjectsToJsonNoMap();statesArray.global.selectedScene=globalController.selectedScene;});
 				globalFolder.add(globalController, "selectedScanner", 0, 7, 1 ).onChange(function(){globalController.selectedScanner=parseInt(globalController.selectedScanner);updateScannerView();});
 				globalFolder.add(globalController, "selectedPattern", 0, 3, 1 ).onChange(function(){globalController.selectedPattern=parseInt(globalController.selectedPattern);updateScannerView();});
@@ -452,17 +456,17 @@
 				scannersFolder=gui.addFolder( "Scanners" )
 				//scannersFolder.open()
 				scannersFolder.add( scannerController, "visible", true ).onChange(function(){updateScannerValues();});				
-				scannersFolder.add(scannerController, "xorigin", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "xrange", 0, 2000, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "xfreq", 0, 4, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xorigin", -2000, 2000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xrange", 0, 4000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xfreq", -4, 4, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "xphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "yorigin", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "yrange", 0, 1000, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "yfreq", 0, 4, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yorigin", -1000, 2000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yrange", 0, 2000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yfreq", -4, 4, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "yphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "zorigin", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "zrange", 0, 1000, 1 ).onChange(function(){updateScannerValues();});
-				scannersFolder.add(scannerController, "zfreq", 0, 1, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zfreq", -1, 1, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "zphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "corigin", 0, 29, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "crange", 0, 29, 1 ).onChange(function(){updateScannerValues();});
@@ -474,11 +478,12 @@
 				scannersFolder.add(scannerController, "sphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "sr", 0, 2, .001 ).onChange(function(){updateScannerValues();});	
 				scannersFolder.add(scannerController, "shape", 0, 2, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "waveform", 0, 1, 1 ).onChange(function(){updateScannerValues();});
 				scannersFolder.add(scannerController, "layer", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});	
 				utilsFolder=gui.addFolder( "Utils" )
 				//utilsFolder.open()
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen(); globalController.selectedFixture=11; gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000); for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}}; updateControlsView();syncObjectsToJson();calcCurrentObjIndex();}},'PresentationMode');				
+				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen(); globalController.selectedFixture=15; gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000); for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}}; updateControlsView();syncObjectsToJson();calcCurrentObjIndex();}},'PresentationMode');				
 				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
 				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
 				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){statesArray.global.LoopSpeed=globalController.LoopSpeed;});
@@ -491,7 +496,7 @@
 			function updateScannerView(){  
 				for (var i in gui.__folders.Scanners.__controllers) {
 				  //fixtureController[gui.__folders.Fixtures.__controllers[i].property]=objects[parseInt(globalController.selectedFixture)][gui.__folders.Fixtures.__controllers[i].property];
-				  scannerController[gui.__folders.Scanners.__controllers[i].property]=scannerStatesArray[globalController.selectedPattern][parseInt(globalController.selectedScanner)][gui.__folders.Scanners.__controllers[i].property];
+				  scannerController[gui.__folders.Scanners.__controllers[i].property]=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][parseInt(globalController.selectedScanner)][gui.__folders.Scanners.__controllers[i].property];
 				  gui.__folders.Scanners.__controllers[i].updateDisplay();
 				}
 			}
@@ -499,7 +504,7 @@
 			function updateScannerValues(){  
 				for (var i in gui.__folders.Scanners.__controllers) {
 				  //fixtureController[gui.__folders.Fixtures.__controllers[i].property]=objects[parseInt(globalController.selectedFixture)][gui.__folders.Fixtures.__controllers[i].property];
-				  scannerStatesArray[globalController.selectedPattern][parseInt(globalController.selectedScanner)][gui.__folders.Scanners.__controllers[i].property]=scannerController[gui.__folders.Scanners.__controllers[i].property];
+				  scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][parseInt(globalController.selectedScanner)][gui.__folders.Scanners.__controllers[i].property]=scannerController[gui.__folders.Scanners.__controllers[i].property];
 				  gui.__folders.Scanners.__controllers[i].updateDisplay();
 				}
 			}
@@ -1168,7 +1173,7 @@
 				mesh.sr=1;
 				mesh.shape=0;
 				mesh.layer=0;
-				mesh.wave=0;
+				mesh.waveform=0;
 				//=======
 				mesh.colorInd=0;
 				//mesh.colorDebounce=true;
@@ -1184,35 +1189,45 @@
 					}
 				}
 				mesh.animate=function(x){
-					mesh.visible=scannerStatesArray[globalController.selectedPattern][x].visible;
-				    mesh.layer=scannerStatesArray[globalController.selectedPattern][x].layer;
+					mesh.waveform=Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].waveform);
+					mesh.visible=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].visible;
+					mesh.layer=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].layer;
+					mesh.cfreq=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq;
+			 		if (mesh.waveform==0) {
+						mesh.position.x=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xrange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xphase));
+						mesh.position.y=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yrange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yphase));
+						mesh.rotation.z=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zrange*animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zphase);
+						mesh.scale.x=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sphase)));
+						mesh.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].crange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cphase))));
+					}
+					if (mesh.waveform==1) {
+						mesh.position.x=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xrange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xrange+.1);
+						mesh.position.y=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yrange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yrange+.1);
+						mesh.rotation.z=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zrange*animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zphase);
+						mesh.scale.x=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange+.1));
+						mesh.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].crange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cphase))));
+					}
+						mesh.material.color={"r":colorObj.rList[mesh.colorInd]/255 , "g":colorObj.gList[mesh.colorInd]/255, "b":colorObj.bList[mesh.colorInd]/255}
+						mesh.box.material.color={"r":colorObj.rList[mesh.colorInd]/255 , "g":colorObj.gList[mesh.colorInd]/255, "b":colorObj.bList[mesh.colorInd]/255}
+						mesh.circ.material.color={"r":colorObj.rList[mesh.colorInd]/255 , "g":colorObj.gList[mesh.colorInd]/255, "b":colorObj.bList[mesh.colorInd]/255}
+					mesh.sr=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sr;
 					mesh.position.z=mesh.layer;
-					mesh.cfreq=scannerStatesArray[globalController.selectedPattern][x].cfreq;
-					mesh.position.x=scannerStatesArray[globalController.selectedPattern][x].xorigin+(scannerStatesArray[globalController.selectedPattern][x].xrange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedPattern][x].xfreq+scannerStatesArray[globalController.selectedPattern][x].xphase));
-					mesh.position.y=scannerStatesArray[globalController.selectedPattern][x].yorigin+(scannerStatesArray[globalController.selectedPattern][x].yrange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedPattern][x].yfreq+scannerStatesArray[globalController.selectedPattern][x].yphase));
-					mesh.rotation.z=scannerStatesArray[globalController.selectedPattern][x].zorigin+(scannerStatesArray[globalController.selectedPattern][x].zrange*animationIndex*scannerStatesArray[globalController.selectedPattern][x].zfreq+scannerStatesArray[globalController.selectedPattern][x].zphase);
-					mesh.scale.x=Math.abs(scannerStatesArray[globalController.selectedPattern][x].sorigin+(scannerStatesArray[globalController.selectedPattern][x].srange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedPattern][x].sfreq+scannerStatesArray[globalController.selectedPattern][x].sphase)));
-					mesh.sr=scannerStatesArray[globalController.selectedPattern][x].sr;
 					mesh.scale.y=mesh.scale.x*mesh.sr;
-					mesh.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedPattern][x].crange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedPattern][x].cphase))));
-					mesh.material.color={"r":colorObj.rList[mesh.colorInd]/255 , "g":colorObj.gList[mesh.colorInd]/255, "b":colorObj.bList[mesh.colorInd]/255}
-					mesh.box.material.color={"r":colorObj.rList[mesh.colorInd]/255 , "g":colorObj.gList[mesh.colorInd]/255, "b":colorObj.bList[mesh.colorInd]/255}
-					mesh.circ.material.color={"r":colorObj.rList[mesh.colorInd]/255 , "g":colorObj.gList[mesh.colorInd]/255, "b":colorObj.bList[mesh.colorInd]/255}
-					if (mesh.shape != scannerStatesArray[globalController.selectedPattern][x].shape) {
-						mesh.shape=scannerStatesArray[globalController.selectedPattern][x].shape;
-						if (Math.floor(scannerStatesArray[globalController.selectedPattern][x].shape)==0) {
+					if (mesh.shape != scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape) {
+						mesh.shape=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape;
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==0) {
 							mesh.material.opacity=1;
 							mesh.line.visible=true;
 							mesh.box.visible=false;
 							mesh.circ.visible=false;
 						}
-						if (Math.floor(scannerStatesArray[globalController.selectedPattern][x].shape)==1) {
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==1) {
 							mesh.material.opacity=0;
 							mesh.line.visible=false;
 							mesh.box.visible=true;
 							mesh.circ.visible=false;
 						}
-						if (Math.floor(scannerStatesArray[globalController.selectedPattern][x].shape)==2) {
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==2) {
 							mesh.material.opacity=0;
 							mesh.line.visible=false;
 							mesh.box.visible=false;
