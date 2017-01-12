@@ -1142,7 +1142,7 @@
 				triangleShape.lineTo( -200, -200 );
 				//triangleShape.autoClose = true;
 				points = triangleShape.createPointsGeometry();
-				var spacedPoints = triangleShape.createSpacedPointsGeometry( 500 );
+				var spacedPoints = triangleShape.createSpacedPointsGeometry( 25 );
 				var geometry = new THREE.ShapeGeometry( triangleShape );
 				var material11=new THREE.MeshBasicMaterial( { color: 0x00ff00, side: THREE.DoubleSide, transparent:true } )
 				group.tri = new THREE.Mesh( geometry, material11);
@@ -1154,10 +1154,10 @@
 				scanners.push(group)
 				group.tri.material.color={r: Math.random(), g: Math.random(), b: Math.random()}
 				var points = triangleShape.createPointsGeometry();
-				group.tri.line= new THREE.Points( spacedPoints, new THREE.PointsMaterial( { color: 0x00ff00, size: 30 } ) );
-				group.tri.line.material.color={r: Math.random(), g: Math.random(), b: Math.random()}	
-				group.add( group.tri.line );
-				group.tri.line.visible=false;
+				group.triLine= new THREE.Points( spacedPoints, new THREE.PointsMaterial( { color: 0x00ff00, size: 30 } ) );
+				group.triLine.material.color={r: Math.random(), g: Math.random(), b: Math.random()}	
+				group.add( group.triLine );
+				group.triLine.visible=false;
 				//=======
 				group.xorigin=0;
 				group.xfreq=0;
@@ -1204,12 +1204,19 @@
 				group.animate=function(x){
 				    if (group.box.visible) {
 						group.box.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.box.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
 					}
 				    if (group.tri.visible) {
 						group.tri.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.tri.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}					
 					}
 				    if (group.circ.visible) {
 						group.circ.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.circ.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
+					}
+				    if (group.triLine.visible) {
+						group.triLine.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.triLine.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
 					}
 					group.waveform=Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].waveform);
 					group.visible=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].visible;
@@ -1230,9 +1237,6 @@
 						group.scale.x=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange+.1));
 						//group.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].crange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cphase))));
 					}
-						group.tri.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
-						group.box.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
-						group.circ.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
 					group.sr=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sr;
 					group.position.z=group.layer;
 					group.scale.y=group.scale.x*group.sr;
@@ -1245,6 +1249,7 @@
 							//group.box.line.visible=false;
 							group.circ.visible=false;
 							//group.circ.line.visible=false;
+							group.triLine.visible=false;
 						}
 						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==1) {
 							group.tri.visible=false;
@@ -1253,6 +1258,7 @@
 							//group.box.line.visible=true;
 							group.circ.visible=false;
 							//group.circ.line.visible=false;
+							group.triLine.visible=false;
 						}
 						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==2) {
 							group.tri.visible=false;
@@ -1261,7 +1267,16 @@
 							//group.box.line.visible=false;
 							group.circ.visible=true;
 							//group.circ.line.visible=true;
+							group.triLine.visible=false;	
 						}
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==3) {
+							group.tri.visible=false;
+							//group.tri.line.visible=false;
+							group.box.visible=false;
+							//group.box.line.visible=false;
+							group.circ.visible=false;
+							//group.circ.line.visible=true;
+							group.triLine.visible=true;						}
 					}
 					
 				}
