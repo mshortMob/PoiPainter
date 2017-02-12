@@ -345,7 +345,8 @@
 					 PresetName:"statesStorage",
 					 DryWet:0,
 					 SoundSpeed:0,
-					 SoundIndex:0
+					 SoundIndex:0,
+					 handleIndex:0
 				}
 				scannerController={
 					 xorigin:0,
@@ -499,6 +500,7 @@
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 				utilsFolder.add( globalController, "DryWet", 0, 1, .01 ).onChange(function(){renderer.setClearColor( 0x000000 , globalController.DryWet)});
 				utilsFolder.add( globalController, "SoundSpeed", 0, 5, .01 ).onChange(function(){});
+				utilsFolder.add( globalController, "handleIndex", 0, 1, 1 ).onChange(function(){syncObjectsToJsonNoMap();});
 			}
 			
 			function updateScannerView(){  
@@ -709,8 +711,17 @@
 			  }
 			  object.showChildren=function(){
 					for(var x=0; x<object.children.length ;x++){
-						if(object.targetOpacity){
-							object.children[x].visible=true;
+						if (parseInt(globalController.handleIndex)==0) {							
+							if (object.children[x].name.indexOf('corner')!=-1) {
+								object.children[x].visible=true;
+							}
+							
+						}
+						if (parseInt(globalController.handleIndex)==1) {
+							if (object.children[x].name.indexOf('corner')==-1) {
+								object.children[x].visible=true;
+							}
+							
 						}
 					}
 			  }
@@ -771,7 +782,8 @@
 						  object.addChild(object.controlsX, object.controlsY-10, "translate", object, 0x73438e, 10, 10,x)
 					  }
 					  if (x == object.cornerNum[0] || x == object.cornerNum[1] || x == object.cornerNum[2] || x == object.cornerNum[3]) {
-						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "corner-"+"vertice"+x, object, 0x0000ff, 10 ,10,x)					
+						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "corner-"+"vertice"+x, object, 0x0000ff, 10 ,10,x)
+						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 10, 10,x)
 					  }else{
 							object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 10, 10,x)
 					  }
@@ -900,6 +912,7 @@
 							}
 						}
 						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
+						    console.log(SELECTED.name)
 							SELECTED.position.copy(intersection.sub( offset ));
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
