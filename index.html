@@ -236,7 +236,7 @@
 				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
 				var delVal=100-parseFloat(painterController.FadeTime)*100;
 				var mixVal=1-parseFloat(painterController.ColorMix)
-				for (x=0; x < ((width * height) * 4); x=x+4) {
+				for (x=0; x < ((width * height) * 4); x=x+4) {			
 					if (tracerCanvasData.data[x+3] > 0) {
 						tracerCanvasData.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
 					}
