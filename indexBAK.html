@@ -1,0 +1,1401 @@
+<html>
+	<head>
+		<title>FlowMapper</title>
+		<style>
+			body{
+			    margin:0px;    
+			}	
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="tempCanvas" width="128" height="64" style="opacity: 0;display:none;"></canvas>
+		<canvas id="tracerCanvas" width="128" height="64" style='display: none; width:100%;height:100%;'></canvas>
+		<video id="video" autoplay width='128' height='64' style=" top:0px;left:0px;z-index:-1;position:fixed;"></video>
+		<video src="anim1.mp4" autoplay width="128" height="64" id="video1" autoplay loop style="display:none"></video>
+		<video src="anim2.mp4" autoplay width="128" height="64" id="video2" autoplay loop style="display:none"></video>
+		<video src="anim3.mp4" autoplay width="128" height="64" id="video3" autoplay loop style="display:none"></video>
+		<script src="three.js"></script>
+		<script src='dat.gui.min.js'></script>
+		<script src="Detector.js"></script>
+		<script src="NURBSCurve.js"></script>
+		<script src="NURBSSurface.js"></script>
+		<script src="NURBSUtils.js"></script>
+		<script src="TrackballControls.js"></script>
+		<script id="fragment_shh" type="x-shader/x-fragment">
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+			uniform sampler2D tOne;
+			uniform sampler2D tSec;
+			uniform float time;
+			varying vec2 vUv;
+			
+			void main(void)
+			{
+				vec3 c;
+				vec4 Ca = texture2D(tOne, vUv);
+				vec4 Cb = texture2D(tSec, vUv);
+				c = (Ca.rgb * .1 + Cb.rgb * Cb.a * (1.0 - Ca.a))*time;
+			    gl_FragColor= vec4(c, 1.0);
+			}
+			
+		</script>
+		
+		<script id="vertex_shh" type="x-shader/x-vertex">
+		
+			varying vec2 vUv;
+			
+			void main()
+			{
+				vUv = uv;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_Position = projectionMatrix * mvPosition;
+			}
+			
+		</script>
+		<script>
+			var colorObject = function() {
+				this.currentColHex="ff00ff";
+				this.currentColRGB={};
+				this.currentColRGB.r=255;
+				this.currentColRGB.g=0;
+				this.currentColRGB.b=255;
+				this.timeElapsed=0;
+				this.ci=0;
+				//this.rList=[255,255,255,255,200,100,000,000,000,000,000,000,000,100,200,255,255,255];
+				//this.gList=[000,100,200,255,255,255,255,255,255,255,200,100,000,000,000,000,000,000];
+				//this.bList=[000,000,000,000,000,000,000,100,200,255,255,255,255,255,255,255,200,100];
+				this.rList=[255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255];
+				this.gList=[000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000];
+				this.bList=[000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050];
+				ci=this.ci;
+				this.rgbToHex=function(r, g, b) {
+					return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+				}
+				this.hexToRgb=function(hex) {
+					var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+					return result ? {
+						r: parseInt(result[1], 16),
+						g: parseInt(result[2], 16),
+						b: parseInt(result[3], 16)
+					} : null;
+				}
+				this.addHexColor=function() {
+					var hexStr = (parseInt(this.currentColHex, 16) + parseInt("F1010f", 16)).toString(16);
+					while (hexStr.length < 5) { hexStr = '0' + hexStr; } // Zero pad.
+					return hexStr;
+				}
+				//this.change= function(){
+				//	this.currentColHex=this.addHexColor()
+				//	this.currentColRGB=this.hexToRgb("#"+this.currentColHex.substring(1,this.currentColHex.length))
+				//
+				//}	
+				//this.requestR= function(){return this.currentColRGB.r;}
+				//this.requestG= function(){return this.currentColRGB.g;}
+				//this.requestB= function(){return this.currentColRGB.b;}
+				this.change= function(){ci=(ci+parseInt(painterController.ColorChangeHop)) % 30;}	
+				this.requestR= function(){return this.rList[ci];}
+				this.requestG= function(){return this.gList[ci];}
+				this.requestB= function(){return this.bList[ci];}		
+			}
+			
+			initGlobalVars();
+			function initGlobalVars(){
+				vertShader = document.getElementById('vertex_shh').innerHTML;
+				fragShader = document.getElementById('fragment_shh').innerHTML;
+				colorObj=new colorObject();
+				bufferTextures=[];
+				bufferScenes=[];
+				scanners=[];
+				currentObjIndex=0;
+				ppModeAnimVal=0;
+				animationIndex=0;
+				tracerCanvasDataContext=tracerCanvas.getContext("2d");
+				firstTraceComputation=true;
+				initializeVideo();
+				clr= new colorObject();
+				vid=[];
+				colorInterval=0;
+				setTimeout(function(){
+					setPoiPainterResolution(128)
+					tracerCanvasDataContext.fillRect(0,0,document.getElementById('tracerCanvas').width,document.getElementById('tracerCanvas').height);
+				},1000);
+				addControls();			
+				timeCycle=0;
+				currentScene=0;
+				videoTextures=[];
+				material=[];
+				vertices=[];
+				initVideos();
+				points=[];
+				container=null;
+				stats=null;
+				camera=null;
+				controls=null;
+				scene=null;
+				renderer=null;
+				renderer2=null;
+				objects = [];
+				plane = new THREE.Plane();
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				offset = new THREE.Vector3();
+				intersection = new THREE.Vector3();
+				INTERSECTED=null;
+				SELECTED=null;
+				initScene();
+				animate();
+				statesArray={};
+				statesArray.objects=[];
+				statesArray.scenes=[];
+				for(var x=0;x<16;x++){
+					var objectJSON ={}
+					for (var key in mappingController) {
+						objectJSON[key]=mappingController[key]
+					}
+					statesArray.objects.push(objectJSON)
+				}
+				for(var x=0;x<4;x++){
+					var sceneJSON ={}
+					for (var key in painterController) {
+						sceneJSON[key]=painterController[key]
+					}
+					statesArray.scenes.push(sceneJSON)
+				}
+				statesArray.global={};
+				statesArray.global.selectedScene=globalController.selectedScene
+				statesArray.global.LoopSpeed=globalController.LoopSpeed
+				statesArray.global.FadeTime=globalController.FadeTime
+				statesArray.global.LastModifiedTime=(new Date()).toString()
+				scannerStatesArray=[];
+				for(var c=0;c<4;c++){
+					var temparray=[];
+					for(var z=0;z<4;z++){
+						var temparray2=[];
+						for(var y=0;y<8;y++){
+							for(var x=0;x<4;x++){
+								var objectJSON ={}
+								for (var key in scannerController) {
+									objectJSON[key]=scannerController[key]
+								}
+							}
+							temparray2.push(objectJSON)
+						}
+						temparray.push(temparray2);
+					}
+					scannerStatesArray.push(temparray)
+				}
+				
+				for(var x=0;x<16;x++){
+					addPlane();
+				}
+				for(var x=0;x<8;x++){
+					addTri(x);
+				}
+				videoTextures[0]=bufferTextures[0];
+				videoTextures[1]=bufferTextures[1];
+			}
+			
+			function setPoiPainterResolution(width){
+				//var width = 14;
+				document.getElementById("tempCanvas").setAttribute("width",width);
+				document.getElementById("tempCanvas").setAttribute("height", width*.75);
+				document.getElementById("video").setAttribute("width",width);
+				document.getElementById("video").setAttribute("height", width*.75);
+				document.getElementById("tracerCanvas").setAttribute("width",width);
+				document.getElementById("tracerCanvas").setAttribute("height",width*.5);
+			}
+
+			function computeTraces() {
+				var width=document.getElementById('video').width;
+				var height=document.getElementById('video').height;
+				tempCanvas.getContext('2d').drawImage(video, 0, 0,width ,height );
+				vidDataContext = tempCanvas.getContext("2d");
+				if (firstTraceComputation!=true) {
+					oldvid=vid;
+				}
+				vid=vidDataContext.getImageData(0,0,width,height);
+				tracerCanvasData=tracerCanvasDataContext.getImageData(0,0,width,height);
+				if (firstTraceComputation==true) {
+					oldvid=vid;
+					firstTraceComputation=false;
+				}
+				var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
+				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
+				var delVal=100-parseFloat(painterController.FadeTime)*100;
+				var mixVal=1-parseFloat(painterController.ColorMix)
+				for (x=0; x < ((width * height) * 4); x=x+4) {			
+					if (tracerCanvasData.data[x+3] > 0) {
+						tracerCanvasData.data[x+3]=tracerCanvasData.data[x+3]-(delVal);
+					}
+					if (Math.abs((vid.data[x]+vid.data[x+1]+vid.data[x+2])-(oldvid.data[x]+oldvid.data[x+1]+oldvid.data[x+2])) > (velVal) && (vid.data[x]+vid.data[x+1]+vid.data[x+2] > briVal)) {
+						tracerCanvasData.data[x]=clr.requestR()*(1-(mixVal))+vid.data[x]*((mixVal));
+						tracerCanvasData.data[x+1]=clr.requestG()*(1-(mixVal))+vid.data[x+1]*((mixVal));
+						tracerCanvasData.data[x+2]=clr.requestB()*(1-(mixVal))+vid.data[x+2]*((mixVal));
+						tracerCanvasData.data[x+3]=255;
+					}
+				}
+				tracerCanvasDataContext.putImageData(tracerCanvasData,0,0);
+			}
+			
+			function initializeVideo() {
+				window.addEventListener("DOMContentLoaded", function() {
+				video = document.getElementById("video"),
+				videoObj = { "video": true },
+				errBack = function(error) {
+					console.log("Video capture error: ", error.code); 
+				};
+				if(navigator.webkitGetUserMedia) {
+					navigator.webkitGetUserMedia(videoObj, function(stream){
+						video.src = window.URL.createObjectURL(stream);
+						video.play();
+					}, errBack);
+				}
+				}, false);
+			}
+			
+			function initScene() {
+				for(var x=0;x<3;x++){
+					var bufferScene = new THREE.Scene();
+					//Create the texture that will store our result
+					var bufferTexture = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { side:THREE.DoubleSide, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});					
+				    bufferTextures.push(bufferTexture);
+					bufferScenes.push(bufferScene);
+				}
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				frustumSize = 1000;
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10000 );
+				camera.position.z = -1000;
+				controls = new THREE.TrackballControls( camera , container);
+				controls.enabled=false;
+				scene = new THREE.Scene();
+				scene.add( new THREE.AmbientLight( 0xffffff ) );
+				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
+				renderer.setClearColor( 0x000000 , 1);
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = false;
+				container.appendChild( renderer.domElement );
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+			
+			function initVideos(){
+			  video1      = document.getElementById('tracerCanvas');
+			  videoTexture1 = new THREE.Texture( video1 );
+			  videoTexture1.minFilter=THREE.LinearFilter;
+			  videoTextures.push(videoTexture1)
+			  video2      = document.getElementById('tracerCanvas');
+			  videoTexture2 = new THREE.Texture( video2 )
+			  videoTexture2.minFilter=THREE.LinearFilter;			  
+			  videoTextures.push(videoTexture2)
+			  video3      = document.getElementById('tracerCanvas');
+			  videoTexture3 = new THREE.Texture( video3 )
+			  videoTexture3.minFilter=THREE.LinearFilter;			  
+			  videoTextures.push(videoTexture3)
+			  video4      = document.getElementById('video3');
+			  videoTexture4 = new THREE.Texture( video4 )
+			  videoTexture4.minFilter=THREE.LinearFilter;			  
+			  videoTextures.push(videoTexture4)
+			  maskTextures=[]
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask0.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask1.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask2.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask3.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask4.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask5.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask6.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask7.png"))
+			  maskTextures.push(THREE.ImageUtils.loadTexture( "mask8.png"))
+			}
+			
+			function addControls(){
+				globalController  = {
+					 selectedFixture:0,
+					 selectedScene:0,
+					 selectedScanner:0,
+					 selectedPattern:0,
+					 GridSize:4,
+					 LoopSpeed:0,
+					 LoopPosition:0,
+					 FadeTime:.01,
+					 Master:false,
+					 MasterInterval:0,
+					 Slave:false,
+					 SlaveInterval:0,
+					 Visible:false,
+					 PresetName:"statesStorage",
+					 DryWet:0,
+					 SoundSpeed:0,
+					 SoundIndex:0,
+					 handleIndex:0
+				}
+				scannerController={
+					 xorigin:0,
+					 xrange:0,
+					 xfreq:0.0,
+					 xphase:0,
+					 yorigin:0,
+					 yrange:0,
+					 yfreq:0.0,
+					 yphase:0,
+					 zorigin:0,
+					 zrange:0,
+					 zfreq:0.0,
+					 zphase:0,
+					 corigin:0,
+					 crange:0,
+					 cfreq:0.0,
+					 cphase:0,
+					 sorigin:1,
+					 srange:0,
+					 sfreq:0.0,
+					 sphase:0,
+					 shape:0,
+					 sr:1,
+					 layer:0,
+					 visible:false,
+					 waveform:0,
+					 aorigin:1,
+					 arange:0,
+					 afreq:0,
+					 aphase:0
+				}
+				mappingController  = {
+					 Visible:false,
+					 OriginX:0,
+					 OriginY:0,
+					 CornerX1:-200,
+					 CornerY1:-200,
+					 CornerX2:-200,
+					 CornerY2:200,
+					 CornerX3:200,
+					 CornerY3:200,
+					 CornerX4:200,
+					 CornerY4:-200,
+					 ZValue:0,
+					 Image:0,
+					 Mask:0,
+				};
+				var count=0;
+				for(var y=0; y<5;y++){
+					for(var x=0; x<5;x++){
+						mappingController["VerticeX"+count]=-200+100*x;
+						mappingController["VerticeY"+count]=-200+100*y;
+						count=count+1;
+					}
+				}
+				painterController  = {
+					 VelocitySensitivity:.94,
+					 BrightnessSensitivity:1.0,
+					 FadeTime:.95,
+					 ColorMix:.9,
+					 PPResolution:120,
+					 ColorChangeRate:100,
+					 ColorChangeHop:1,
+					 Visible1:false,
+					 Visible2:false,
+					 Visible3:false,
+					 Visible4:false,
+					 Visible5:false,
+					 Visible6:false,
+					 Visible7:false,
+					 Visible8:false,
+					 Visible9:false,
+					 Visible10:false,
+					 Visible11:false,
+					 Visible12:false
+				};
+				gui = new dat.GUI();
+				gui.width=260;
+				globalFolder=gui.addFolder( "Global" )
+				globalFolder.open();
+				globalFolder.add(globalController, "selectedFixture", 0, 14, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();calcCurrentObjIndex();});
+				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();updateScannerView();syncObjectsToJsonNoMap();statesArray.global.selectedScene=globalController.selectedScene;});
+				globalFolder.add(globalController, "selectedScanner", 0, 7, 1 ).onChange(function(){globalController.selectedScanner=parseInt(globalController.selectedScanner);updateScannerView();});
+				globalFolder.add(globalController, "selectedPattern", 0, 3, 1 ).onChange(function(){globalController.selectedPattern=parseInt(globalController.selectedPattern);updateScannerView();});
+				globalFolder.add( globalController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
+				controlsFolder=gui.addFolder( "MappingControls" )
+				//controlsFolder.open();
+				controlsFolder.add( mappingController, "OriginX", -1200, 1200, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "OriginY", -600, 600, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "CornerX1", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY1", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerX2", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY2", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerX3", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY3", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerX4", -1200, 1200, 1 ).onChange(function(){updateCornersFromDatGui()});
+				controlsFolder.add( mappingController, "CornerY4", -600, 600, 1 ).onChange(function(){updateCornersFromDatGui()});	
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Mask", 0, 8, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});				
+				painterFolder=gui.addFolder( "PainterControls" )
+				//painterFolder.open();
+				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "PPResolution", 10, 400, 1 ).onChange(function(){painterController.PPResolution=parseFloat(painterController.PPResolution);setPoiPainterResolution(painterController.PPResolution);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorChangeRate", 1, 600, 1 ).onChange(function(){painterController.ColorChangeRate=parseFloat(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
+				painterFolder.add( painterController, "ColorChangeHop", 1, 20, 1 ).onChange(function(){painterController.ColorChangeHop=parseFloat(painterController.ColorChangeHop);updateControlsValues();syncObjectsToJson()});
+				//painterFolder.add( painterController, "ImageBank", 0, 3, 1 ).onChange(function(){painterController.ColorChangeRate=parseInt(painterController.ColorChangeRate);updateControlsValues();syncObjectsToJson()});
+				scannersFolder=gui.addFolder( "Scanners" )
+				//scannersFolder.open()
+				scannersFolder.add( scannerController, "visible", true ).onChange(function(){updateScannerValues();});				
+				scannersFolder.add(scannerController, "xorigin", -2000, 2000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xrange", 0, 4000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xfreq", -4, 4, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "xphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yorigin", -1000, 2000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yrange", 0, 2000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yfreq", -4, 4, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "yphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zorigin", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zrange", 0, 1000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zfreq", -1, 1, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "zphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "corigin", 0, 29, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "crange", 0, 29, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "cfreq", 0, 10, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "cphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});							
+				scannersFolder.add(scannerController, "sorigin", 0, 20, .01 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "srange", 0, 20, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "sfreq", 0, 10, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "sphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "sr", 0, 2, .001 ).onChange(function(){updateScannerValues();});	
+				scannersFolder.add(scannerController, "shape", 0, 4, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "waveform", 0, 1, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "layer", -1000, 1000, 1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "aorigin", 0, 1, .001 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "arange", 0, 1, .001 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "afreq", 0, 10, .1 ).onChange(function(){updateScannerValues();});
+				scannersFolder.add(scannerController, "aphase", 0, 6.14, .1 ).onChange(function(){updateScannerValues();});
+				utilsFolder=gui.addFolder( "Utils" )
+				//utilsFolder.open()
+				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add({ 'PresentationMode':function(){ requestFullScreen(); globalController.selectedFixture=15; gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000); for(var x=0;x<objects.length ;x++){if(objects[x].name!="displayObject"){objects[x].visible=false;}}; updateControlsView();syncObjectsToJson();calcCurrentObjIndex();}},'PresentationMode');				
+				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
+				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});			
+				utilsFolder.add( globalController, "LoopSpeed", 0, .01, .0001 ).onChange(function(){statesArray.global.LoopSpeed=globalController.LoopSpeed;});
+				utilsFolder.add( globalController, "FadeTime", 0, .5, .001 ).onChange(function(){statesArray.global.FadeTime=globalController.FadeTime;});			
+				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				utilsFolder.add( globalController, "DryWet", 0, 1, .01 ).onChange(function(){renderer.setClearColor( 0x000000 , globalController.DryWet)});
+				utilsFolder.add( globalController, "SoundSpeed", 0, 5, .01 ).onChange(function(){});
+				utilsFolder.add( globalController, "handleIndex", 0, 1, 1 ).onChange(function(){syncObjectsToJsonNoMap();});
+			}
+			
+			function updateScannerView(){  
+				for (var i in gui.__folders.Scanners.__controllers) {
+				  //fixtureController[gui.__folders.Fixtures.__controllers[i].property]=objects[parseInt(globalController.selectedFixture)][gui.__folders.Fixtures.__controllers[i].property];
+				  scannerController[gui.__folders.Scanners.__controllers[i].property]=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][parseInt(globalController.selectedScanner)][gui.__folders.Scanners.__controllers[i].property];
+				  gui.__folders.Scanners.__controllers[i].updateDisplay();
+				}
+			}
+			
+			function updateScannerValues(){  
+				for (var i in gui.__folders.Scanners.__controllers) {
+				  //fixtureController[gui.__folders.Fixtures.__controllers[i].property]=objects[parseInt(globalController.selectedFixture)][gui.__folders.Fixtures.__controllers[i].property];
+				  scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][parseInt(globalController.selectedScanner)][gui.__folders.Scanners.__controllers[i].property]=scannerController[gui.__folders.Scanners.__controllers[i].property];
+				  gui.__folders.Scanners.__controllers[i].updateDisplay();
+				}
+			}
+
+			function updateCornersFromDatGui(){
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[0]].x=mappingController.CornerX1
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[0]].y=mappingController.CornerY1
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[1]].x=mappingController.CornerX4
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[1]].y=mappingController.CornerY4
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[3]].x=mappingController.CornerX3
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[3]].y=mappingController.CornerY3
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[2]].x=mappingController.CornerX2
+				objects[currentObjIndex].geometry.vertices[objects[currentObjIndex].cornerNum[2]].y=mappingController.CornerY2
+				objects[currentObjIndex].updateCorners();							
+				objects[currentObjIndex].showChildren();
+				updateControlsValues();
+				syncObjectsToJson();
+			}	
+						
+			function updateControlsView(){  
+				//for (var i in gui.__folders.MappingControls.__controllers) {
+				//  if (gui.__folders.MappingControls.__controllers[i].property!="Visible") {
+					//mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray.objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
+					//gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				//  }else{
+				//	mappingController["Visible"]=statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)];
+				//	gui.__folders.MappingControls.__controllers[0].updateDisplay();
+				//  }
+				//}
+				for(var x in mappingController){
+					if (x != "Visible") {
+						mappingController[x]=statesArray.objects[parseInt(globalController.selectedFixture)][x];
+					}
+				}
+				
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				    gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				}
+				
+				for (var i in gui.__folders.PainterControls.__controllers) {
+				  painterController[gui.__folders.PainterControls.__controllers[i].property]=statesArray.scenes[parseInt(globalController.selectedScene)][gui.__folders.PainterControls.__controllers[i].property];
+				  gui.__folders.PainterControls.__controllers[i].updateDisplay();
+				}
+				globalController["Visible"]=statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)];
+				gui.__folders.Global.__controllers[4].updateDisplay();
+			}
+			
+			function updateControlsValues(){  
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				  statesArray.objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				}
+				for(var x in mappingController){
+					if (x != "Visible") {
+						statesArray.objects[parseInt(globalController.selectedFixture)][x]=mappingController[x];
+					}
+				}
+				for (var i in gui.__folders.PainterControls.__controllers) {
+				  statesArray.scenes[parseInt(globalController.selectedScene)][gui.__folders.PainterControls.__controllers[i].property]=painterController[gui.__folders.PainterControls.__controllers[i].property];
+				}
+				statesArray.scenes[parseInt(globalController.selectedScene)]["Visible"+(parseInt(globalController.selectedFixture)+1)]=globalController["Visible"];
+			}
+			
+			function syncObjectsToJson(){
+				var objNum=0;
+				for(var x=0;x<objects.length;x++){
+					if(objects[x].name=="displayObject"){
+						 objects[x].setState(statesArray.objects[objNum],statesArray.scenes[globalController.selectedScene]["Visible"+(objNum+1)])
+						 objNum=objNum+1;
+					}
+				}
+				objects[currentObjIndex].showChildren()
+				//changeImageBank();
+			}
+			
+			function syncObjectsToJsonNoMap(){
+				var objNum=0;
+				for(var x=0;x<objects.length;x++){
+					if(objects[x].name=="displayObject"){
+						 objects[x].setSceneOnly(statesArray.objects[objNum],statesArray.scenes[globalController.selectedScene]["Visible"+(objNum+1)])
+						 objNum=objNum+1;
+					}
+				}
+				objects[currentObjIndex].showChildren()
+				//changeImageBank();
+			}
+			
+			function addPlane(){
+			 nsControlPoints = [
+				  [
+					  new THREE.Vector4 ( -200, -200, 0, 1 ),
+					  new THREE.Vector4 ( -200, -100, 0, 1 ),
+					  new THREE.Vector4 ( -200, 100, 0, 1 ),
+					  new THREE.Vector4 ( -200, 200, 0, 1 )
+				  ],
+				  [
+					  new THREE.Vector4 ( 0, -200, 0, 1 ),
+					  new THREE.Vector4 ( 0, -100, 0, 1 ),
+					  new THREE.Vector4 ( 0, 100, 0, 1 ),
+					  new THREE.Vector4 ( 0, 200, 0, 1 )
+				  ],
+				  [
+					  new THREE.Vector4 ( 200, -200, 0, 1 ),
+					  new THREE.Vector4 ( 200, -100, 0, 1 ),
+					  new THREE.Vector4 ( 200, 100, 0, 1 ),
+					  new THREE.Vector4 ( 200, 200, 0, 1 )
+				  ]
+			  ];
+			  var degree1 = 2;
+			  var degree2 = 3;
+			  var knots1 = [0, 0, 0, 1, 1, 1];
+			  var knots2 = [0, 0, 0, 0, 1, 1, 1, 1];
+			  var nurbsSurface = new THREE.NURBSSurface(degree1, degree2, knots1, knots2, nsControlPoints);
+			  getSurfacePoint = function(u, v) {
+				  return nurbsSurface.getPoint(u, v);
+			  };
+			  var geometry = new THREE.ParametricGeometry( getSurfacePoint, globalController.GridSize, globalController.GridSize );			  
+			  //var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));
+			  //---
+		      var object = new THREE.Mesh( geometry,new THREE.MeshBasicMaterial({}));
+			
+				object.uniforms = {
+				  time: { value: .1 },
+				  tOne: { type: "t", value: THREE.ImageUtils.loadTexture( "mask0.png" ) },
+				  tSec: { type: "t", value: videoTextures[1] }
+				};
+				var material_shh = new THREE.ShaderMaterial({
+				  uniforms: object.uniforms,
+				  side: THREE.DoubleSide,
+				  transparent:true,
+				  morphTargets: true,
+				  vertexShader: vertShader,
+				  fragmentShader: fragShader
+			
+				});
+			  object.material=material_shh;			  
+			  
+			  object.position.set( 0, 0, 0 );
+			  object.scale.multiplyScalar( 1 );
+			  object.name="displayObject"
+			  object.matNum=1;
+			  object.controlsX=0;
+			  object.controlsY=0;
+			  object.targetOpacity=false;
+			  object.material.opacity=0;
+			  object.setSceneOnly=function(savedJSON,visBool){
+				if (visBool) {
+				  	object.targetOpacity=true;
+				}else{
+					object.targetOpacity=false;
+				}
+				object.removeVertices()
+				object.drawV()
+				if (parseInt(painterController.PPResolution) != document.getElementById('video').width) {
+					setPoiPainterResolution(painterController.PPResolution)
+				}
+			  }
+			  object.setState=function(savedJSON,visBool){
+				if (visBool) {
+				  	object.targetOpacity=true;
+				}else{
+					object.targetOpacity=false;
+				}
+				object.position.x= savedJSON.OriginX
+				object.position.y= savedJSON.OriginY
+				//object.geometry.vertices[object.cornerNum[0]].x= savedJSON.CornerX1
+				//object.geometry.vertices[object.cornerNum[0]].y= savedJSON.CornerY1
+				//object.geometry.vertices[object.cornerNum[1]].x= savedJSON.CornerX4
+				//object.geometry.vertices[object.cornerNum[1]].y= savedJSON.CornerY4
+				//object.geometry.vertices[object.cornerNum[3]].x= savedJSON.CornerX3
+				//object.geometry.vertices[object.cornerNum[3]].y= savedJSON.CornerY3
+				//object.geometry.vertices[object.cornerNum[2]].x= savedJSON.CornerX2
+				//object.geometry.vertices[object.cornerNum[2]].y= savedJSON.CornerY2
+				for(var x=0;x<object.geometry.vertices.length;x++){
+					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
+					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
+				}
+				object.geometry.verticesNeedUpdate = true;
+				object.removeVertices()
+				object.drawV()				
+				object.position.z= savedJSON.ZValue
+				//object.matNum= parseInt(savedJSON.Image);
+				//object.material.map=videoTextures[object.matNum]
+				object.matNum= parseInt(savedJSON.Image);
+				object.material.uniforms.tSec.value=videoTextures[object.matNum]
+				object.material.uniforms.tOne.value=maskTextures[parseInt(savedJSON.Mask)]
+				if (parseInt(painterController.PPResolution) != document.getElementById('video').width) {
+					setPoiPainterResolution(painterController.PPResolution)
+				}
+				//object.updateCorners();
+			  }
+			  object.changeImage=function(){
+					object.matNum=parseInt(effectController.Image)
+					object.material.map=videoTextures[object.matNum];
+			  }
+			  object.showChildren=function(){
+					for(var x=0; x<object.children.length ;x++){
+						if (parseInt(globalController.handleIndex)==0) {							
+							if (object.children[x].name.indexOf('corner')!=-1) {
+								object.children[x].visible=true;
+							}
+							
+						}
+						if (parseInt(globalController.handleIndex)==1) {
+							if (object.children[x].name.indexOf('corner')==-1) {
+								object.children[x].visible=true;
+							}
+							
+						}
+					}
+			  }
+			  object.addChild=function(x,y, name, object , colorParam, w, h,vertNum){
+				var  geo = new THREE.BoxGeometry( w, h, 0 );
+				var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: colorParam } );
+				var mesh1 = new THREE.Mesh( geo, mat );
+				mesh1.name=name;
+				mesh1.vertNum="NA"
+				if (vertNum!=undefined) {
+					mesh1.vertNum=vertNum;
+				}
+				mesh1.position.x=x;
+				mesh1.position.y=y;
+				mesh1.position.z=-5;
+				mesh1.visible=false;
+				object.add(mesh1)
+				objects.push(mesh1)
+				objects[currentObjIndex].showChildren();
+			  }
+			  object.hideChildren=function(){
+				for(var x=object.children.length-1;x>=0 ;x--){
+						object.children[x].visible=false;			
+				}
+			  }
+			  object.removeVertices=function(){
+				var temp=[];
+				for(var x=object.children.length-1;x>=0 ;x--){
+					//if (object.children[x].name.indexOf('vertice') != -1) {
+						temp.push(object.children[x].uuid)
+						object.remove(object.children[x])					
+					//}
+				}
+				for(var x=0;x<temp.length;x++){
+					findAndRemove("uuid",temp[x])
+				}
+			  }
+			  object.removeWithChildren=function(){
+				var allChildren=object.children;
+				console.log(allChildren)
+				for(var x=0;x<allChildren.length;x++){
+					findAndRemove("uuid",allChildren[x].uuid)
+				}
+				findAndRemove("uuid",object.uuid)
+
+				scene.remove(object)				
+			  }
+			  object.drawV=function(){
+				object.cornerNum=[];
+				object.cornerNum[0]=0;
+				object.cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+				object.cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+				object.cornerNum[3]=object.geometry.vertices.length-1
+				for(var x=0; x<object.geometry.vertices.length ; x++ ){
+					 if (x == object.cornerNum[2]) {
+						  object.controlsX=object.geometry.vertices[x].x;
+						  object.controlsY=object.geometry.vertices[x].y;
+						  object.addChild(object.controlsX, object.controlsY-10, "translate", object, 0x73438e, 10, 10,x)
+					  }
+					  if (x == object.cornerNum[0] || x == object.cornerNum[1] || x == object.cornerNum[2] || x == object.cornerNum[3]) {
+						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "corner-"+"vertice"+x, object, 0x0000ff, 10 ,10,x)
+						   object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 10, 10,x)
+					  }else{
+							object.addChild(object.geometry.vertices[x].x, object.geometry.vertices[x].y, "vertice"+x, object, 0xffffff, 10, 10,x)
+					  }
+				}
+			  }
+			  object.updateCorners=function(){
+					var cornerNum=[];
+					cornerNum[0]=0;
+					cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+					cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+					cornerNum[3]=object.geometry.vertices.length-1
+					var x1 = object.geometry.vertices[cornerNum[0]].x
+					var y1 = object.geometry.vertices[cornerNum[0]].y
+					var x2 = object.geometry.vertices[cornerNum[1]].x
+					var y2 = object.geometry.vertices[cornerNum[1]].y
+					var x3 = object.geometry.vertices[cornerNum[2]].x
+					var y3 = object.geometry.vertices[cornerNum[2]].y
+					var x4 = object.geometry.vertices[cornerNum[3]].x
+					var y4 = object.geometry.vertices[cornerNum[3]].y
+					var xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					var yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x3-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y3-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x4-x3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=object.geometry.vertices.length-1; x>object.geometry.vertices.length-Math.sqrt(object.geometry.vertices.length);x--){
+						 object.geometry.vertices[x].x=object.geometry.vertices[object.geometry.vertices.length-1].x+xDiff1*(x-(object.geometry.vertices.length-1));
+						 object.geometry.vertices[x].y=object.geometry.vertices[object.geometry.vertices.length-1].y+yDiff1*(x-(object.geometry.vertices.length-1));
+					}
+					xDiff1=(x4-x2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].x=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].x+xDiff1*(x);
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].y=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].y+yDiff1*(x);
+					}
+					var sqrt=(Math.sqrt(object.geometry.vertices.length))
+					var numOfMiddleRows=(Math.sqrt(object.geometry.vertices.length)-2)
+					for(var rowNum = 1; rowNum < (Math.sqrt(object.geometry.vertices.length)-1) ; rowNum ++){
+						 var x1 = object.geometry.vertices[rowNum*sqrt].x
+						 var y1 = object.geometry.vertices[rowNum*sqrt].y
+						 var x2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].x
+						 var y2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].y
+						 xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 for(var x=0; x<(Math.sqrt(object.geometry.vertices.length)-1) ; x++ ){
+							  object.geometry.vertices[rowNum*sqrt+x].x= x1+xDiff1*x;
+							  object.geometry.vertices[rowNum*sqrt+x].y= y1+yDiff1*x;
+						 }
+					}
+					
+					object.geometry.verticesNeedUpdate = true;
+					object.removeVertices()
+					object.drawV()
+					for(var x=0;x<object.geometry.vertices.length;x++){
+						mappingController["VerticeX"+x]=object.geometry.vertices[x].x;
+						mappingController["VerticeY"+x]=object.geometry.vertices[x].y;
+					}
+					updateControlsValues();
+					//updateControlsView();
+				}
+			  scene.add( object );
+			  objects.push(object)
+			  object.drawV();
+			  //object.visible=false;
+			}
+				
+			function findAndRemove(property, value) {
+				objects.forEach(function(result, index) {
+				  if(result[property] === value) {
+					//Remove from array
+					objects.splice(index, 1);
+				  }    
+				});
+			}					
+			function onWindowResize() {
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.left   = - frustumSize * aspect / 2;
+				camera.right  =   frustumSize * aspect / 2;
+				camera.top    =   frustumSize / 2;
+				camera.bottom = - frustumSize / 2;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			
+			function onDocumentMouseMove( event ) {
+				event.preventDefault();
+				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
+				raycaster.setFromCamera( mouse, camera );
+				if ( SELECTED ) {
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						if (SELECTED.name == "translate") {
+								SELECTED.position.x=intersection.x-SELECTED.parent.position.x;
+								SELECTED.position.y=intersection.y-SELECTED.parent.position.y;
+								mappingController.OriginX=intersection.x-SELECTED.parent.controlsX;
+								mappingController.OriginY=intersection.y-SELECTED.parent.controlsY;
+						}
+						if (SELECTED.name.indexOf('corner') != -1) {
+						    SELECTED.position.copy(intersection.sub( offset ));
+					     	SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+							SELECTED.parent.geometry.verticesNeedUpdate = true;
+							if(SELECTED.parent.cornerNum[0]==SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)){
+								mappingController.CornerX1=SELECTED.position.x;
+								mappingController.CornerY1=SELECTED.position.y;
+							}
+							if(SELECTED.parent.cornerNum[1]==SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)){
+								mappingController.CornerX4=SELECTED.position.x;
+								mappingController.CornerY4=SELECTED.position.y;
+							}
+							if(SELECTED.parent.cornerNum[3]==SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)){
+								mappingController.CornerX3=SELECTED.position.x;
+								mappingController.CornerY3=SELECTED.position.y;
+							}
+							if(SELECTED.parent.cornerNum[2]==SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)){
+								mappingController.CornerX2=SELECTED.position.x;
+								mappingController.CornerY2=SELECTED.position.y;
+							}
+						}
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
+						    console.log(SELECTED.name)
+							SELECTED.position.copy(intersection.sub( offset ));
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+							SELECTED.parent.geometry.verticesNeedUpdate = true;
+							mappingController["VerticeX"+SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)]=SELECTED.position.x;
+							mappingController["VerticeY"+SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)]=SELECTED.position.y;
+							updateControlsValues();
+						}
+					}
+					return;
+				}
+				var intersects = raycaster.intersectObjects( objects);
+				if ( intersects.length > 0 ) {
+					if ( INTERSECTED != intersects[ 0 ].object ) {
+						//if ( INTERSECTED ) INTERSECTED.uniforms[0].material.color.setHex( INTERSECTED.currentHex );
+						INTERSECTED = intersects[ 0 ].object;
+						//INTERSECTED.currentHex = INTERSECTED.uniforms[0].material.color.getHex();
+						plane.setFromNormalAndCoplanarPoint(
+							camera.getWorldDirection( plane.normal ),
+							INTERSECTED.position );
+					}
+					container.style.cursor = 'pointer';
+				} else {
+					//if ( INTERSECTED ) INTERSECTED.uniforms[0].material.color.setHex( INTERSECTED.currentHex );
+					INTERSECTED = null;
+					container.style.cursor = 'auto';
+				}
+			}
+			
+			function onDocumentMouseDown( event ) {
+				//event.preventDefault();
+				raycaster.setFromCamera( mouse, camera );
+				intersects = raycaster.intersectObjects( objects);
+				if ( intersects.length > 0 ) {
+					SELECTED = intersects[ 0 ].object;
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						offset.copy( intersection ).sub( SELECTED.position );
+					}
+					container.style.cursor = 'move';
+				}
+			}
+			
+			function onDocumentMouseUp( event ) {
+				//event.preventDefault();
+				if ( SELECTED != undefined) {
+					if (SELECTED.name.indexOf('corner') != -1 ) {
+							SELECTED.parent.updateCorners();
+							objects[currentObjIndex].showChildren();
+							updateControlsValues();
+							updateControlsView();
+							syncObjectsToJson();
+					}
+					if (SELECTED.name.indexOf('translate') != -1) {
+						updateControlsValues()
+						updateControlsView()
+						syncObjectsToJson()
+					}
+				}
+				if ( INTERSECTED ) {
+					SELECTED = null;
+				}
+				container.style.cursor = 'auto';
+			}
+			
+			function animate() {
+				if (globalController.LoopSpeed != 0 && Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) > 60000) {				
+						var temp=globalController.LoopPosition;
+						globalController.LoopPosition=(globalController.LoopPosition+globalController.LoopSpeed)%4
+						if (Math.floor(temp)!=Math.floor(globalController.LoopPosition)) {
+							globalController.selectedScene=Math.floor(globalController.LoopPosition);
+							updateControlsView();syncObjectsToJson();calcCurrentObjIndex();
+							statesArray.global.selectedScene
+							gui.__folders.Global.__controllers[4].updateDisplay();
+						}
+				}
+				//for(var x=0;x<objects.length;x++){
+				//	 if(objects[x].name=="displayObject"){
+				//		if (objects[x].targetOpacity) {
+				//			if (objects[x].material.opacity<1) {
+				//				objects[x].material.opacity=objects[x].material.opacity+globalController.FadeTime
+				//			}
+				//		}else{
+				//			if (objects[x].material.opacity>=0) {
+				//				objects[x].material.opacity=objects[x].material.opacity-globalController.FadeTime
+				//			}
+				//		}
+				//	 }
+				//}
+				for(var x=0;x<objects.length;x++){
+					 if(objects[x].name=="displayObject"){
+						if (objects[x].targetOpacity) {
+						    if (!objects[x].visible) {
+								objects[x].visible=true;
+							}
+							if (objects[x].material.uniforms.time.value<1) {
+								objects[x].material.uniforms.time.value=objects[x].material.uniforms.time.value+globalController.FadeTime
+							}
+						}else{
+							if (objects[x].material.uniforms.time.value>=0) {
+								objects[x].material.uniforms.time.value=objects[x].material.uniforms.time.value-globalController.FadeTime
+							}else{
+								if (objects[x].visible) {
+									objects[x].visible=false;
+								}
+							}
+						}
+					 }
+				}
+				if (globalController.SoundSpeed !=0) {
+					globalController.SoundIndex=globalController.SoundIndex+meter.volume*globalController.SoundSpeed;
+					globalController.selectedPattern=Math.floor(globalController.SoundIndex%4)
+					gui.__folders.Global.__controllers[3].updateDisplay();
+					updateScannerView();
+				}
+				animationIndex=animationIndex+.05
+				for(var x=0;x<scanners.length;x++){
+					scanners[x].animate(x);
+				}
+				clr.timeElapsed=clr.timeElapsed+painterController.ColorChangeRate;
+				if (clr.timeElapsed >= 1000) {
+					clr.change();
+					clr.timeElapsed=0;
+				}
+				computeTraces();
+				requestAnimationFrame( animate );
+				render();
+				//stats.update();
+			}
+			
+			function render() {
+				//if( video1.readyState === video1.HAVE_ENOUGH_DATA ){
+				//  videoTexture1.needsUpdate = true;
+				//}
+				if( video2.readyState === video2.HAVE_ENOUGH_DATA ){
+				  videoTexture2.needsUpdate = true;
+				}
+				if( video3.readyState === video3.HAVE_ENOUGH_DATA ){
+				  videoTexture3.needsUpdate = true;
+				}
+				if( video4.readyState === video4.HAVE_ENOUGH_DATA ){
+				  videoTexture4.needsUpdate = true;
+				}
+				controls.update();
+				for(var z=0;z<bufferScenes.length;z++){
+					renderer.render(bufferScenes[z],camera,bufferTextures[z]);
+				}
+				renderer.render( scene, camera );
+			}
+			
+			function requestFullScreen() {
+				// Supports most browsers and their versions.
+				var element = document.body; // Make the body go full screen.
+				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+			
+				if (requestMethod) { // Native full screen.
+					requestMethod.call(element);
+				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+					var wscript = new ActiveXObject("WScript.Shell");
+					if (wscript !== null) {
+						wscript.SendKeys("{F11}");
+					}
+				}
+			}
+			
+			function calcCurrentObjIndex(){
+				var DOCount=0;
+				for(var x=0;x<objects.length ;x++){
+				   if(objects[x].name!="displayObject"){
+					  objects[x].visible=false;
+				   }else{
+					  objects[x].DONum=DOCount;
+					  DOCount=DOCount+1;
+				   }
+				}
+				for(var x=0;x<objects.length ;x++){
+				   if(objects[x].DONum==globalController.selectedFixture){
+					  objects[x].showChildren();
+					  currentObjIndex=x;
+				   }
+				}							  
+			}
+
+			function saveState(){
+			    statesArray.global.LastModifiedTime=(new Date()).toString();
+				var requestBody=JSON.stringify(statesArray)
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName, true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+				//--
+				var requestBody2=JSON.stringify(scannerStatesArray)
+				var xmlhttp2=new XMLHttpRequest();
+				xmlhttp2.open("POST", "write.php?fn="+"scan"+globalController.PresetName, true);
+				xmlhttp2.send(requestBody2);
+				xmlhttp2.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+			
+			function recallState(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName, true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					statesArray=JSON.parse(xmlhttp.response)
+					if (Math.abs((new Date(statesArray.global.LastModifiedTime)).getTime()-(new Date()).getTime()) < 60000){
+						globalController.selectedScene=statesArray.global.selectedScene;
+					}
+					globalController.LoopSpeed=statesArray.global.LoopSpeed;
+					globalController.FadeTime=statesArray.global.FadeTime;
+					gui.__folders.Global.__controllers[1].updateDisplay();
+					gui.__folders.Utils.__controllers[4].updateDisplay();
+					gui.__folders.Utils.__controllers[5].updateDisplay();
+					 updateControlsView()
+					 syncObjectsToJson()
+				}
+				//---
+				var xmlhttp2=new XMLHttpRequest();
+				xmlhttp2.open("GET", "read.php?fn="+"scan"+globalController.PresetName, true);
+				xmlhttp2.send();
+				xmlhttp2.onload = function(e){
+					scannerStatesArray=JSON.parse(xmlhttp2.response)
+					updateScannerView()
+				}
+			}
+			
+			function saveStatusIndicator(){
+				var requestBody=(new Date()).toString();
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "write.php?fn=statusIndicator.txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+			
+			setInterval("saveStatusIndicator()",20000)
+			function addTri(n){
+				var group = new THREE.Object3D();
+				triangleShape = new THREE.Shape();
+				triangleShape.moveTo(  -200, -200 );
+				triangleShape.lineTo(  200, -200 );
+				triangleShape.lineTo( 0, 200 );
+				triangleShape.lineTo( -200, -200 );
+				//triangleShape.autoClose = true;
+				points = triangleShape.createPointsGeometry();
+				var spacedPoints = triangleShape.createSpacedPointsGeometry( 25 );
+				var geometry = new THREE.ShapeGeometry( triangleShape );
+				var material11=new THREE.MeshBasicMaterial( { color: 0x00ff00, side: THREE.DoubleSide, transparent:true } )
+				group.tri = new THREE.Mesh( geometry, material11);
+				group.add(group.tri)
+				//group.tri.position.z=-300;
+				bufferScenes[Math.floor(n/4)].add( group );
+				//bufferScenes[0].add( mesh );
+				//bufferScene.add( mesh );
+				scanners.push(group)
+				group.tri.material.color={r: Math.random(), g: Math.random(), b: Math.random()}
+				var points = triangleShape.createPointsGeometry();
+				group.triLine= new THREE.Points( spacedPoints, new THREE.PointsMaterial( { color: 0x00ff00, size: 30 } ) );
+				group.triLine.material.color={r: Math.random(), g: Math.random(), b: Math.random()}	
+				group.add( group.triLine );
+				group.triLine.visible=false;
+				//=======
+				group.xorigin=0;
+				group.xfreq=0;
+				group.xrange=0;
+				group.xphase=0;
+				group.yorigin=0;
+				group.yfreq=0;
+				group.yrange=0;
+				group.yphase=0;
+				group.zorigin=0;
+				group.zfreq=0;
+				group.zrange=0;
+				group.zphase=0;
+				group.corign=0;
+				group.cfreq=0;
+				group.crange=0;
+				group.cphase=0;
+				group.sorigin=1;
+				group.sfreq=0;
+				group.srange=0;
+				group.sphase=0;
+				group.sr=1;
+				group.shape=0;
+				group.layer=0;
+				group.waveform=0;
+				group.aorign=1;
+				group.afreq=0;
+				group.arange=0;
+				group.aphase=0;
+				//=======
+				group.colorInd=0;
+				//mesh.colorDebounce=true;
+				group.setRandomColors=function(){
+					if (mesh.colorDebounce) {
+						//line.material.color={r: Math.random(), g: Math.random(), b: Math.random()};
+						group.tri.material.color={r: Math.random(), g: Math.random(), b: Math.random()};
+						group.box.material.color={r: Math.random(), g: Math.random(), b: Math.random()};
+						group.circ.material.color={r: Math.random(), g: Math.random(), b: Math.random()};
+						group.colorDebounce=false;
+						setTimeout(function(){group.colorDebounce=true;},parseInt(group.cfreq))
+						//console.log(parseInt(mesh.cfreq))
+					}
+				}
+				group.animate=function(x){
+				    if (group.box.visible) {
+						group.box.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.box.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
+					}
+				    if (group.tri.visible) {
+						group.tri.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.tri.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}					
+					}
+				    if (group.circ.visible) {
+						group.circ.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.circ.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
+					}
+				    if (group.triLine.visible) {
+						group.triLine.material.opacity=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].arange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].afreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].aphase)));						
+						group.triLine.material.color={"r":colorObj.rList[group.colorInd]/255 , "g":colorObj.gList[group.colorInd]/255, "b":colorObj.bList[group.colorInd]/255}
+					}
+					group.waveform=Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].waveform);
+					group.visible=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].visible;
+					group.layer=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].layer;
+					group.cfreq=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq;
+					group.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].crange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cphase))));
+					if (group.waveform==0) {
+						group.position.x=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xrange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xphase));
+						group.position.y=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yrange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yphase));
+						group.rotation.z=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zrange*animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zphase);
+						group.scale.x=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sphase)));
+						//group.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].crange*Math.sin(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cphase))));
+					}
+					if (group.waveform==1) {
+						group.position.x=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xrange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].xrange+.1);
+						group.position.y=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yrange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].yrange+.1);
+						group.rotation.z=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zorigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zrange*animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].zphase);
+						group.scale.x=Math.abs(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sorigin+((scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sphase)))%(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].srange+.1));
+						//group.colorInd=Math.abs(Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].corigin+(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].crange*(animationIndex*scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cfreq+scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].cphase))));
+					}
+					group.sr=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].sr;
+					group.position.z=group.layer;
+					group.scale.y=group.scale.x*group.sr;
+					if (group.shape != scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape) {
+						group.shape=scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape;
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==0) {
+							group.tri.visible=true;
+							//group.tri.line.visible=true;
+							group.box.visible=false;
+							//group.box.line.visible=false;
+							group.circ.visible=false;
+							//group.circ.line.visible=false;
+							group.triLine.visible=false;
+						}
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==1) {
+							group.tri.visible=false;
+							//group.tri.line.visible=false;
+							group.box.visible=true;
+							//group.box.line.visible=true;
+							group.circ.visible=false;
+							//group.circ.line.visible=false;
+							group.triLine.visible=false;
+						}
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==2) {
+							group.tri.visible=false;
+							//group.tri.line.visible=false;
+							group.box.visible=false;
+							//group.box.line.visible=false;
+							group.circ.visible=true;
+							//group.circ.line.visible=true;
+							group.triLine.visible=false;	
+						}
+						if (Math.floor(scannerStatesArray[globalController.selectedScene][globalController.selectedPattern][x].shape)==3) {
+							group.tri.visible=false;
+							//group.tri.line.visible=false;
+							group.box.visible=false;
+							//group.box.line.visible=false;
+							group.circ.visible=false;
+							//group.circ.line.visible=true;
+							group.triLine.visible=true;						}
+					}
+					
+				}
+				group.box=(new THREE.Mesh(new THREE.BoxGeometry(200,200,10), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color: 0x00ff00})));
+				group.box.visible=false;
+				group.add(group.box);
+				var sqLength = 200;
+				var squareShape = new THREE.Shape();
+				squareShape.moveTo( 0,0 );
+				squareShape.lineTo( 0, sqLength );
+				squareShape.lineTo( sqLength, sqLength );
+				squareShape.lineTo( sqLength, 0 );
+				squareShape.lineTo( 0, 0 );
+				var spacedPointsBox = squareShape.createSpacedPointsGeometry( 100 );
+				group.box.line=new THREE.Points( spacedPointsBox, new THREE.PointsMaterial( { color: 0x00ff00, size: 30 } ) );
+				group.box.line.material.color={r: Math.random(), g: Math.random(), b: Math.random()}	
+				group.box.line.visible=false;
+				group.add( group.box.line );
+				var circleRadius = 200;
+				var circleShape = new THREE.Shape();
+				circleShape.moveTo( 0, circleRadius );
+				circleShape.quadraticCurveTo( circleRadius, circleRadius, circleRadius, 0 );
+				circleShape.quadraticCurveTo( circleRadius, -circleRadius, 0, -circleRadius );
+				circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -circleRadius, 0 );
+				circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
+				var geometryCirc = new THREE.ShapeGeometry( circleShape );
+				var material111=new THREE.MeshBasicMaterial( { color: 0x00ff00, side: THREE.DoubleSide, transparent:true } )
+				var meshCirc = new THREE.Mesh( geometryCirc, material111);
+				group.circ=meshCirc;
+				group.circ.visible=false;
+				group.add(group.circ);
+				var spacedPointsCirc = circleShape.createSpacedPointsGeometry( 100 );
+				group.circ.line= new THREE.Points( spacedPointsCirc, new THREE.PointsMaterial( { color: 0x00ff00, size: 30 } ) );
+				group.circ.line.material.color={r: Math.random(), g: Math.random(), b: Math.random()}	
+				group.circ.line.visible=false;
+				group.add( group.circ.line );
+			}
+
+			var audioContext = null;
+			var meter = null;
+			window.onload = function() {
+				window.AudioContext = window.AudioContext || window.webkitAudioContext;
+				audioContext = new AudioContext();
+				try {
+					navigator.getUserMedia = 
+						navigator.getUserMedia ||
+						navigator.webkitGetUserMedia ||
+						navigator.mozGetUserMedia;
+					navigator.getUserMedia(
+					{
+						"audio": {
+							"mandatory": {
+								"googEchoCancellation": "false",
+								"googAutoGainControl": "false",
+								"googNoiseSuppression": "false",
+								"googHighpassFilter": "false"
+							},
+							"optional": []
+						},
+					}, gotStream, didntGetStream);
+				} catch (e) {
+					alert('getUserMedia threw exception :' + e);
+				}
+			}
+			
+			function didntGetStream() {
+				alert('Stream generation failed.');
+			}
+			
+			var mediaStreamSource = null;
+			function gotStream(stream) {
+				mediaStreamSource = audioContext.createMediaStreamSource(stream);
+				meter = createAudioMeter(audioContext);
+				mediaStreamSource.connect(meter);
+			}
+			
+			function createAudioMeter(audioContext,clipLevel,averaging,clipLag) {
+				var processor = audioContext.createScriptProcessor(512);
+				processor.onaudioprocess = volumeAudioProcess;
+				processor.clipping = false;
+				processor.lastClip = 0;
+				processor.volume = 0;
+				processor.clipLevel = clipLevel || 0.98;
+				processor.averaging = averaging || 0.95;
+				processor.clipLag = clipLag || 750;
+				processor.connect(audioContext.destination);
+				return processor;
+			}
+			
+			function volumeAudioProcess( event ) {
+				var buf = event.inputBuffer.getChannelData(0);
+				var bufLength = buf.length;
+				var sum = 0;
+				var x;
+				for (var i=0; i<bufLength; i++) {
+					x = buf[i];
+					if (Math.abs(x)>=this.clipLevel) {
+						this.clipping = true;
+						this.lastClip = window.performance.now();
+					}
+					sum += x * x;
+				}
+				var rms =  Math.sqrt(sum / bufLength);
+				this.volume = Math.max(rms, this.volume*this.averaging);
+			}
+		</script>
+	</body>
+</html>
+
