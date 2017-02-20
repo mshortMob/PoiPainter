@@ -20,7 +20,6 @@
 		</style>
 	</head>
 	<body>
-		<div id="test">Mouse X: Y:</div>
 		<video src="anim1.mp4" autoplay width="128" height="64" id="video1" autoplay loop style="display:none"></video>
 		<video src="anim2.mp4" autoplay width="128" height="64" id="video2" autoplay loop style="display:none"></video>
 		<video src="anim3.mp4" autoplay width="128" height="64" id="video3" autoplay loop style="display:none"></video>
@@ -269,10 +268,6 @@
 				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
 				raycaster.setFromCamera( mouse, camera );
-				document.getElementById('test').innerHTML="Mouse X:"+mouse.x+" Y:"+mouse.y
-				if (SELECTED) {
-					document.getElementById('test').innerHTML="Mouse X:"+mouse.x+" Y:"+mouse.y+"  "+SELECTED.name
-				}
 				if ( SELECTED ) {
 					
 					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
@@ -318,12 +313,29 @@
 					}
 					container.style.cursor = 'move';
 				}
+				if (SELECTED) {
+					for(var x=0; x<SELECTED.parent.children.length;x++){
+						SELECTED.parent.children[x].material.color.r=1;
+						SELECTED.parent.children[x].material.color.g=1;
+						SELECTED.parent.children[x].material.color.b=1;
+					}
+					SELECTED.material.color.r=0;
+					SELECTED.material.color.g=0;
+					SELECTED.material.color.b=1;
+				}
+				setTimeout(function(){
+					for(var x=0; x<SELECTED.parent.children.length;x++){
+						SELECTED.parent.children[x].material.color.r=1;
+						SELECTED.parent.children[x].material.color.g=1;
+						SELECTED.parent.children[x].material.color.b=1;
+					}
+					SELECTED = null;
+				},700)
 			}
 			
 			function onDocumentMouseUp( event ) {
 				//event.preventDefault();
 				//SELECTED = null;
-				setTimeout(function(){SELECTED = null;},700)
 				container.style.cursor = 'auto';
 			}
 			
