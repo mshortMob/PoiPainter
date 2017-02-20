@@ -20,6 +20,7 @@
 		</style>
 	</head>
 	<body>
+		<div id="test">Mouse X: Y:</div>
 		<video src="anim1.mp4" autoplay width="128" height="64" id="video1" autoplay loop style="display:none"></video>
 		<video src="anim2.mp4" autoplay width="128" height="64" id="video2" autoplay loop style="display:none"></video>
 		<video src="anim3.mp4" autoplay width="128" height="64" id="video3" autoplay loop style="display:none"></video>
@@ -223,7 +224,7 @@
 			  }
 			  object.drawV=function(){
 				for(var x=0; x<object.geometry.vertices.length ; x++ ){
-					var  geo = new THREE.BoxGeometry( 50, 50, 0 );
+					var  geo = new THREE.BoxGeometry( 70, 70, 0 );
 					var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
 					var mesh1 = new THREE.Mesh( geo, mat );
 					mesh1.name="vertice"+x;
@@ -264,11 +265,16 @@
 			}
 			
 			function onDocumentMouseMove( event ) {
-				event.preventDefault();
+				//event.preventDefault();
 				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
 				raycaster.setFromCamera( mouse, camera );
+				document.getElementById('test').innerHTML="Mouse X:"+mouse.x+" Y:"+mouse.y
+				if (SELECTED) {
+					document.getElementById('test').innerHTML="Mouse X:"+mouse.x+" Y:"+mouse.y+"  "+SELECTED.name
+				}
 				if ( SELECTED ) {
+					
 					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
 						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
 						    console.log(SELECTED.name)
@@ -302,7 +308,7 @@
 			
 			function onDocumentMouseDown( event ) {
 				//event.preventDefault();
-				requestFullScreen();
+				//requestFullScreen();
 				raycaster.setFromCamera( mouse, camera );
 				intersects = raycaster.intersectObjects( objects);
 				if ( intersects.length > 0 ) {
@@ -316,7 +322,8 @@
 			
 			function onDocumentMouseUp( event ) {
 				//event.preventDefault();
-				SELECTED = null;
+				//SELECTED = null;
+				setTimeout(function(){SELECTED = null;},700)
 				container.style.cursor = 'auto';
 			}
 			
