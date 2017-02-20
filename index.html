@@ -54,21 +54,16 @@
 				SELECTED=null;
 				initScene();
 				animate();
-				statesArray={};
 				statesArray=[];
-				oneState={};
-				for(var y=0;y<4;y++){
-					var oneState={};
-					oneState.objects=[];
-					for(var x=0;x<4;x++){
-						var objectJSON ={}
-						for (var key in mappingController) {
-							objectJSON[key]=mappingController[key]
-						}
-						oneState.objects.push(objectJSON)
+				for(var x=0;x<4;x++){
+					var objectJSON ={}
+					for (var key in mappingController) {
+						objectJSON[key]=mappingController[key]
 					}
-					statesArray.push(oneState)
-                	addPlane();
+					statesArray.push(objectJSON)
+				}
+				for(var y=0;y<4;y++){
+					addPlane();
 				}
 			}
 			
@@ -117,7 +112,6 @@
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
-					 selectedScene:0
 				}
 				mappingController  = {
 					 Visible:false,
@@ -136,7 +130,6 @@
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
-				globalFolder.add(globalController, "selectedScene", 0, 3, 1 ).onChange(function(){globalController.selectedScene=parseInt(globalController.selectedScene);updateControlsView();syncObjectsToJson();});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -153,7 +146,7 @@
 			function updateControlsView(){
 				for (var i in gui.__folders.MappingControls.__controllers) {
 					//mappingController[i]=statesArray[globalController.selectedScene].objects[globalController.selectedFixture]
-				  mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[globalController.selectedScene].objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
+				  mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
 
 					gui.__folders.MappingControls.__controllers[i].updateDisplay();
 				}
@@ -161,13 +154,13 @@
 			
 			function updateControlsValues(){  
 				for (var i in gui.__folders.MappingControls.__controllers) {
-				  statesArray[globalController.selectedScene].objects[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
 				}
 			}
 			
 			function syncObjectsToJson(){
 				for(var x=0;x<displayObjects.length;x++){
-					displayObjects[x].setState(statesArray[globalController.selectedScene].objects[x])
+					displayObjects[x].setState(statesArray[x])
 					displayObjects[x].hideChildren();
 				}
 				displayObjects[globalController.selectedFixture].showChildren();
@@ -205,6 +198,7 @@
 			  }
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 3, 3 );			  
+				//var geometry=new THREE.BoxGeometry( 10, 10, 0 );
 				var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));				
 			    return object;
 			  }
@@ -221,7 +215,7 @@
 			  }
 			  object.drawV=function(){
 				for(var x=0; x<object.geometry.vertices.length ; x++ ){
-					var  geo = new THREE.BoxGeometry( 10, 10, 0 );
+					var  geo = new THREE.BoxGeometry( 20, 20, 0 );
 					var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
 					var mesh1 = new THREE.Mesh( geo, mat );
 					mesh1.name="vertice"+x;
@@ -274,8 +268,8 @@
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
 							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
 							SELECTED.parent.geometry.verticesNeedUpdate = true;
-							statesArray[globalController.selectedScene].objects[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
-							statesArray[globalController.selectedScene].objects[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
 						}
 					}
 					return;
@@ -350,17 +344,18 @@
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "write.php?fn="+"storage", true);
+				xmlhttp.open("POST", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn="+"storage", true);
+				xmlhttp.open("GET", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
-					var temp=JSON.parse(xmlhttp.response)
+					temp=JSON.parse(xmlhttp.response)
+					temp=JSON.parse(temp)
 					statesArray=temp.storage;
 					updateControlsView();
 					syncObjectsToJson();
