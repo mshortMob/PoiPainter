@@ -302,6 +302,7 @@
 			
 			function onDocumentMouseDown( event ) {
 				//event.preventDefault();
+				requestFullScreen();
 				raycaster.setFromCamera( mouse, camera );
 				intersects = raycaster.intersectObjects( objects);
 				if ( intersects.length > 0 ) {
