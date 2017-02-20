@@ -323,22 +323,20 @@
 					SELECTED.material.color.g=0;
 					SELECTED.material.color.b=1;
 				}
-				if (SELECTED) {
-					setTimeout(function(){
-						for(var x=0; x<SELECTED.parent.children.length;x++){
-							SELECTED.parent.children[x].material.color.r=1;
-							SELECTED.parent.children[x].material.color.g=1;
-							SELECTED.parent.children[x].material.color.b=1;
-						}
-						SELECTED = null;
-					},700)
-				}
 			}
 			
 			function onDocumentMouseUp( event ) {
 				//event.preventDefault();
 				//SELECTED = null;
 				container.style.cursor = 'auto';
+				setTimeout(function(){
+					for(var x=0; x<SELECTED.parent.children.length;x++){
+						SELECTED.parent.children[x].material.color.r=1;
+						SELECTED.parent.children[x].material.color.g=1;
+						SELECTED.parent.children[x].material.color.b=1;
+					}
+					SELECTED = null;
+				},700)
 			}
 			
 			function animate() {
