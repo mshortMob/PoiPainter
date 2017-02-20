@@ -110,6 +110,11 @@
 			  videoTexture4 = new THREE.Texture( video4 );
 			  videoTexture4.minFilter=THREE.LinearFilter;
 			  videoTextures.push(videoTexture4)
+			  videoElements=[];
+			  videoElements.push(video1)
+			  videoElements.push(video2)			  
+			  videoElements.push(video3)
+			  videoElements.push(video4)
 			}
 			
 			function addControls(){
@@ -321,7 +326,7 @@
 			
 			function render() {
 				for(var x=0; x<videoTextures.length;x++){
-				    if( video1.readyState === video1.HAVE_ENOUGH_DATA ){
+				    if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
 						videoTextures[x].needsUpdate = true;
 					}
 				}
