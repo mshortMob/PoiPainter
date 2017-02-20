@@ -269,6 +269,28 @@
 				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
 				raycaster.setFromCamera( mouse, camera );
+				if (!PICKED) {
+					if (SELECTED) {
+						for(var x=0; x<SELECTED.parent.children.length;x++){
+							SELECTED.parent.children[x].material.color.r=1;
+							SELECTED.parent.children[x].material.color.g=1;
+							SELECTED.parent.children[x].material.color.b=1;
+						}
+						SELECTED.material.color.r=0;
+						SELECTED.material.color.g=0;
+						SELECTED.material.color.b=1;
+						PICKED=true;
+						setTimeout(function(){
+							for(var x=0; x<SELECTED.parent.children.length;x++){
+								SELECTED.parent.children[x].material.color.r=1;
+								SELECTED.parent.children[x].material.color.g=1;
+								SELECTED.parent.children[x].material.color.b=1;
+							}
+							SELECTED = null;
+							PICKED=false;
+						},1500)
+					}
+				}
 				if ( SELECTED ) {
 					
 					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
@@ -313,28 +335,6 @@
 						offset.copy( intersection ).sub( SELECTED.position );
 					}
 					container.style.cursor = 'move';
-				}
-				if (!PICKED) {
-					if (SELECTED) {
-						for(var x=0; x<SELECTED.parent.children.length;x++){
-							SELECTED.parent.children[x].material.color.r=1;
-							SELECTED.parent.children[x].material.color.g=1;
-							SELECTED.parent.children[x].material.color.b=1;
-						}
-						SELECTED.material.color.r=0;
-						SELECTED.material.color.g=0;
-						SELECTED.material.color.b=1;
-						PICKED=true;
-						setTimeout(function(){
-							for(var x=0; x<SELECTED.parent.children.length;x++){
-								SELECTED.parent.children[x].material.color.r=1;
-								SELECTED.parent.children[x].material.color.g=1;
-								SELECTED.parent.children[x].material.color.b=1;
-							}
-							SELECTED = null;
-							PICKED=false;
-						},1500)
-					}
 				}
 			}
 			
