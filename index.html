@@ -314,7 +314,7 @@
 			
 			function onDocumentMouseDown( event ) {
 				//event.preventDefault();
-				//requestFullScreen();
+				requestFullScreen();
 				if (!SELECTED) {
 					raycaster.setFromCamera( mouse, camera );
 					intersects = raycaster.intersectObjects( objects);
@@ -351,7 +351,7 @@
 						SELECTED.material.color.g=1;
 						SELECTED.material.color.b=1;
 						SELECTED=null;
-					},100);
+					},300);
 				}
 			}
 			
@@ -411,7 +411,7 @@
 					syncObjectsToJson();
 				}
 			}
-			setTimeout(function(){recallState();},100)
+			//setTimeout(function(){recallState();},100)
 			window.addEventListener('devicemotion', function(event) {
 				if (Math.abs(event.acceleration.x) > 10.0) {
 					for(var x=0; x<4; x++){
