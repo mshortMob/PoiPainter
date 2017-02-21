@@ -419,7 +419,14 @@
 				}
 			}
 			setTimeout(function(){recallState();},100)
-			//setInterval(function(){console.log(mouse.x)},500)
+			window.addEventListener('devicemotion', function(event) {
+				if (Math.abs(event.acceleration.x) > 10.0) {
+					for(var x=0; x<4; x++){
+						statesArray[x].Image=(Math.floor(statesArray[x].Image)+1)%4
+					}
+					syncObjectsToJson();
+				}
+			  });
 		</script>
 	</body>
 </html>
