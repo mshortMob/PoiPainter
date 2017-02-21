@@ -334,30 +334,24 @@
 						SELECTED.material.color.r=0;
 						SELECTED.material.color.g=0;
 						SELECTED.material.color.b=1;
-						//setTimeout(function(){
-						//	for(var x=0; x<SELECTED.parent.children.length;x++){
-						//		SELECTED.parent.children[x].material.color.r=1;
-						//		SELECTED.parent.children[x].material.color.g=1;
-						//		SELECTED.parent.children[x].material.color.b=1;
-						//		SELECTED=null;
-						//}						
-						//},1000);
 					}
 				}else{
-					console.log(SELECTED.name)
-					mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
-					mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
-					console.log(intersection)
-					SELECTED.position.copy(raycaster.ray.origin);	
-					SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
-					SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
-					SELECTED.parent.geometry.verticesNeedUpdate = true;
-					statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
-					statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
-					SELECTED.material.color.r=1;
-					SELECTED.material.color.g=1;
-					SELECTED.material.color.b=1;
-					SELECTED=null;
+					setTimeout(function(){
+						console.log(SELECTED.name)
+						mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
+						mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
+						console.log(intersection)
+						SELECTED.position.copy(raycaster.ray.origin);	
+						SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+						SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+						SELECTED.parent.geometry.verticesNeedUpdate = true;
+						statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+						statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+						SELECTED.material.color.r=1;
+						SELECTED.material.color.g=1;
+						SELECTED.material.color.b=1;
+						SELECTED=null;
+					},100);
 				}
 			}
 			
