@@ -4,7 +4,7 @@
 		<style>
 			body{
 			    margin:0px;
-				/*background-color:black;*/
+				background-color:black;
 			}	
 			video{
 				opacity: 1;
@@ -21,7 +21,6 @@
 		</style>
 	</head>
 	<body>
-		<div id='test'>TEST:</div>
 		<video src="anim1.mp4" autoplay width="64" height="64" id="video1" autoplay loop style="display:none"></video>
 		<video src="anim2.mp4" autoplay width="64" height="64" id="video2" autoplay loop style="display:none"></video>
 		<video src="anim3.mp4" autoplay width="64" height="64" id="video3" autoplay loop style="display:none"></video>
@@ -88,7 +87,7 @@
 				renderer.sortObjects = false;
 				container.appendChild( renderer.domElement );
 				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				//renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 				//renderer.domElement.addEventListener( 'touchmove', onDocumentMouseMove, false );
 				//renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
