@@ -87,12 +87,11 @@
 				renderer.sortObjects = false;
 				container.appendChild( renderer.domElement );
 				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				//renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 				//renderer.domElement.addEventListener( 'touchmove', onDocumentMouseMove, false );
-				//renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
-				//renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
-				renderer.domElement.addEventListener( 'touchmove', onDocumentMouseDown, false );
+				renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
+				renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 			}
 			
@@ -315,7 +314,7 @@
 			
 			function onDocumentMouseDown( event ) {
 				//event.preventDefault();
-				//requestFullScreen();
+				requestFullScreen();
 				if (!SELECTED) {
 					raycaster.setFromCamera( mouse, camera );
 					intersects = raycaster.intersectObjects( objects);
