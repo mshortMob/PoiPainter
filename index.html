@@ -4,7 +4,7 @@
 		<style>
 			body{
 			    margin:0px;
-				background-color:black;
+				/*background-color:black;*/
 			}	
 			video{
 				opacity: 1;
@@ -21,6 +21,7 @@
 		</style>
 	</head>
 	<body>
+		<div id='test'>TEST:</div>
 		<video src="anim1.mp4" autoplay width="64" height="64" id="video1" autoplay loop style="display:none"></video>
 		<video src="anim2.mp4" autoplay width="64" height="64" id="video2" autoplay loop style="display:none"></video>
 		<video src="anim3.mp4" autoplay width="64" height="64" id="video3" autoplay loop style="display:none"></video>
@@ -89,9 +90,10 @@
 				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
-				renderer.domElement.addEventListener( 'touchmove', onDocumentMouseMove, false );
-				renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
-				renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
+				//renderer.domElement.addEventListener( 'touchmove', onDocumentMouseMove, false );
+				//renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
+				//renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
+				renderer.domElement.addEventListener( 'touchmove', onDocumentMouseDown, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 			}
 			
@@ -314,7 +316,7 @@
 			
 			function onDocumentMouseDown( event ) {
 				//event.preventDefault();
-				requestFullScreen();
+				//requestFullScreen();
 				if (!SELECTED) {
 					raycaster.setFromCamera( mouse, camera );
 					intersects = raycaster.intersectObjects( objects);
@@ -341,18 +343,16 @@
 						mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 						mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
 						console.log(intersection)
-						if (raycaster.ray.origin!= undefined && raycaster.ray.origin!= NaN ){ 
-							SELECTED.position.copy(raycaster.ray.origin);	
-							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
-							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
-							SELECTED.parent.geometry.verticesNeedUpdate = true;
-							statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
-							statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
-							SELECTED.material.color.r=1;
-							SELECTED.material.color.g=1;
-							SELECTED.material.color.b=1;
-							SELECTED=null;
-						}
+						SELECTED.position.copy(raycaster.ray.origin);	
+						SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+						SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+						SELECTED.parent.geometry.verticesNeedUpdate = true;
+						statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+						statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+						SELECTED.material.color.r=1;
+						SELECTED.material.color.g=1;
+						SELECTED.material.color.b=1;
+						SELECTED=null;
 					},300);
 				}
 			}
