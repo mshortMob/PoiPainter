@@ -93,6 +93,13 @@
 				renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
 				renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
 				window.addEventListener( 'resize', onWindowResize, false );
+				//make dat.gui compatible with css filters
+				//document.getElementsByTagName('canvas')[0].style.filter='sepia(1)'
+				tempElem=document.body.getElementsByClassName('ac')[0];
+				tempElem.className="";
+				tempElem.style.zIndex='10000000'
+				tempElem.style.position='fixed'
+				tempElem.style.right='0px';
 			}
 			
 			function initVideos(){
@@ -418,6 +425,9 @@
 						statesArray[x].Image=(Math.floor(statesArray[x].Image)+1)%4
 					}
 					syncObjectsToJson();
+				}
+				if (Math.abs(event.acceleration.y) > 3.0) {
+					document.getElementsByTagName('canvas')[0].style.filter='hue-rotate('+event.acceleration.y+')';
 				}
 			  });
 		</script>
