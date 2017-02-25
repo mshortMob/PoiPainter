@@ -90,8 +90,8 @@
 				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 				//renderer.domElement.addEventListener( 'touchmove', onDocumentMouseMove, false );
-				renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
-				renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
+				//renderer.domElement.addEventListener( 'touchstart', onDocumentMouseDown, false );
+				//renderer.domElement.addEventListener( 'touchend', onDocumentMouseUp, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 				//make dat.gui compatible with css filters
 				//document.getElementsByTagName('canvas')[0].style.filter='sepia(1)'
@@ -129,6 +129,7 @@
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
+					 mappingMode:0
 				}
 				mappingController  = {
 					 Visible:false,
@@ -147,6 +148,7 @@
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
+				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -217,12 +219,21 @@
 				var geometry = new THREE.ParametricGeometry( createGeometry, 3, 3 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 0 );
 				var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));				
-			    return object;
+				return object;
 			  }
 			  var object = createObject();
 			  object.showChildren=function(){
-					for(var x=0; x<object.children.length ;x++){						
-						object.children[x].visible=true;
+			        if (globalController.mappingMode>.5) {
+						for(var x=0; x<object.children.length ;x++){
+								object.children[x].visible=true;							
+						}
+					}else{
+						for(var x=0; x<object.children.length ;x++){
+							if (object.children[x].isCorner==true) {
+								object.children[x].visible=true;
+								object.updatecorners;
+							}
+						}					
 					}
 			  }
 			  object.hideChildren=function(){
@@ -236,6 +247,10 @@
 					var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
 					var mesh1 = new THREE.Mesh( geo, mat );
 					mesh1.name="vertice"+x;
+					mesh1.isCorner=false;
+					if (x == 0 || x == 3 || x == 15 || x == 12) {
+						mesh1.isCorner=true;
+					}
 					mesh1.vertNum=x;
 					mesh1.position.x=object.geometry.vertices[x].x;
 					mesh1.position.y=object.geometry.vertices[x].y;
@@ -255,6 +270,76 @@
 					object.children[x].position.y=savedJSON["VerticeY"+x]
 				}
 				object.geometry.verticesNeedUpdate = true;			
+			  }
+			  object.updateCorners=function(){
+					var cornerNum=[];
+					cornerNum[0]=0;
+					cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+					cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+					cornerNum[3]=object.geometry.vertices.length-1
+					var x1 = object.geometry.vertices[cornerNum[0]].x
+					var y1 = object.geometry.vertices[cornerNum[0]].y
+					var x2 = object.geometry.vertices[cornerNum[1]].x
+					var y2 = object.geometry.vertices[cornerNum[1]].y
+					var x3 = object.geometry.vertices[cornerNum[2]].x
+					var y3 = object.geometry.vertices[cornerNum[2]].y
+					var x4 = object.geometry.vertices[cornerNum[3]].x
+					var y4 = object.geometry.vertices[cornerNum[3]].y
+					var xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					var yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x3-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y3-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x4-x3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=object.geometry.vertices.length-1; x>object.geometry.vertices.length-Math.sqrt(object.geometry.vertices.length);x--){
+						 object.geometry.vertices[x].x=object.geometry.vertices[object.geometry.vertices.length-1].x+xDiff1*(x-(object.geometry.vertices.length-1));
+						 object.geometry.vertices[x].y=object.geometry.vertices[object.geometry.vertices.length-1].y+yDiff1*(x-(object.geometry.vertices.length-1));
+					}
+					xDiff1=(x4-x2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].x=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].x+xDiff1*(x);
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].y=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].y+yDiff1*(x);
+					}
+					var sqrt=(Math.sqrt(object.geometry.vertices.length))
+					var numOfMiddleRows=(Math.sqrt(object.geometry.vertices.length)-2)
+					for(var rowNum = 1; rowNum < (Math.sqrt(object.geometry.vertices.length)-1) ; rowNum ++){
+						 var x1 = object.geometry.vertices[rowNum*sqrt].x
+						 var y1 = object.geometry.vertices[rowNum*sqrt].y
+						 var x2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].x
+						 var y2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].y
+						 xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 for(var x=0; x<(Math.sqrt(object.geometry.vertices.length)-1) ; x++ ){
+							  object.geometry.vertices[rowNum*sqrt+x].x= x1+xDiff1*x;
+							  object.geometry.vertices[rowNum*sqrt+x].y= y1+yDiff1*x;
+						 }
+					}
+					
+					object.geometry.verticesNeedUpdate = true;
+					//object.drawV()
+					for(var x=0;x<object.geometry.vertices.length;x++){
+						mappingController["VerticeX"+x]=object.geometry.vertices[x].x;
+						mappingController["VerticeY"+x]=object.geometry.vertices[x].y;
+					}
+					for(var x=0;x<object.children.length;x++){
+						if(object.children[x].name.indexOf("vertice"!=0)){
+							object.children[x].position.x=object.geometry.vertices[x].x;
+							object.children[x].position.y=object.geometry.vertices[x].y;
+							statesArray[globalController.selectedFixture]["VerticeX"+x]=object.geometry.vertices[x].x;
+							statesArray[globalController.selectedFixture]["VerticeY"+x]=object.geometry.vertices[x].y;
+						}		
+					}
+					updateControlsValues();
+					//updateControlsView();
 			  }
 			  object.drawV();
 			  object.visible=false;
@@ -278,28 +363,22 @@
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
 			//	////event.preventDefault();
 				raycaster.setFromCamera( mouse, camera );
-				//if ( SELECTED ) {
-				//	
-				//	if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
-				//		if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
-				//		    console.log(SELECTED.name)
-				//			SELECTED.position.copy(intersection.sub( offset ));
-				//			SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
-				//			SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
-				//			SELECTED.parent.geometry.verticesNeedUpdate = true;
-				//			statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
-				//			statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
-				//		}
-				//	}
-				//	//SELECTED=null;
-				//	return;
-				//}
-				//if (SELECTED) {
-				//	SELECTED.material.color.r=1;
-				//	SELECTED.material.color.g=1;
-				//	SELECTED.material.color.b=1;
-				//	SELECTED=null;
-				//}
+				if ( SELECTED ) {
+					
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
+						    console.log(SELECTED.name)
+							SELECTED.position.copy(intersection.sub( offset ));
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+							SELECTED.parent.geometry.verticesNeedUpdate = true;
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+						}
+					}
+					//SELECTED=null;
+					return;
+				}
 				var intersects = raycaster.intersectObjects( objects);
 				if ( intersects.length > 0 ) {
 					if ( INTERSECTED != intersects[ 0 ].object ) {
@@ -316,13 +395,12 @@
 					INTERSECTED = null;
 					container.style.cursor = 'auto';
 				}
-				//SELECTED=null;
 			}
 			
 			function onDocumentMouseDown( event ) {
 				//event.preventDefault();
-				requestFullScreen();
-				if (!SELECTED) {
+				//requestFullScreen();
+				//if (!SELECTED) {
 					raycaster.setFromCamera( mouse, camera );
 					intersects = raycaster.intersectObjects( objects);
 					if ( intersects.length > 0 ) {
@@ -332,39 +410,42 @@
 						}
 						container.style.cursor = 'move';
 					}
-					if (SELECTED) {
-						for(var x=0; x<SELECTED.parent.children.length;x++){
-							SELECTED.parent.children[x].material.color.r=1;
-							SELECTED.parent.children[x].material.color.g=1;
-							SELECTED.parent.children[x].material.color.b=1;
-						}
-						SELECTED.material.color.r=0;
-						SELECTED.material.color.g=0;
-						SELECTED.material.color.b=1;
-					}
-				}else{
-					setTimeout(function(){
-						console.log(SELECTED.name)
-						mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
-						mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
-						console.log(intersection)
-						SELECTED.position.copy(raycaster.ray.origin);	
-						SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
-						SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
-						SELECTED.parent.geometry.verticesNeedUpdate = true;
-						statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
-						statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
-						SELECTED.material.color.r=1;
-						SELECTED.material.color.g=1;
-						SELECTED.material.color.b=1;
-						SELECTED=null;
-					},300);
-				}
+				//	if (SELECTED) {
+				//		for(var x=0; x<SELECTED.parent.children.length;x++){
+				//			SELECTED.parent.children[x].material.color.r=1;
+				//			SELECTED.parent.children[x].material.color.g=1;
+				//			SELECTED.parent.children[x].material.color.b=1;
+				//		}
+				//		SELECTED.material.color.r=0;
+				//		SELECTED.material.color.g=0;
+				//		SELECTED.material.color.b=1;
+				//	}
+				//}else{
+				//	setTimeout(function(){
+				//		console.log(SELECTED.name)
+				//		mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
+				//		mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
+				//		console.log(intersection)
+				//		SELECTED.position.copy(raycaster.ray.origin);	
+				//		SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+				//		SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+				//		SELECTED.parent.geometry.verticesNeedUpdate = true;
+				//		statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+				//		statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+				//		SELECTED.material.color.r=1;
+				//		SELECTED.material.color.g=1;
+				//		SELECTED.material.color.b=1;
+				//		SELECTED=null;
+				//	},300);
+				//}
 			}
 			
 			function onDocumentMouseUp( event ) {
 				//event.preventDefault();
-				//SELECTED = null;
+				if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+					SELECTED.parent.updateCorners();
+				}
+				SELECTED = null;
 				container.style.cursor = 'auto';
 			}
 			
@@ -418,18 +499,18 @@
 					syncObjectsToJson();
 				}
 			}
-			setTimeout(function(){recallState();},100)
-			window.addEventListener('devicemotion', function(event) {
-				if (Math.abs(event.acceleration.x) > 10.0) {
-					for(var x=0; x<4; x++){
-						statesArray[x].Image=(Math.floor(statesArray[x].Image)+1)%4
-					}
-					syncObjectsToJson();
-				}
-				//if (Math.abs(event.acceleration.y) > 10.0) {
-				//	document.getElementsByTagName('canvas')[0].style.filter='hue-rotate('+event.acceleration.y*20+'deg)';
-				//}
-			  });
+			//setTimeout(function(){recallState();},100)
+			//window.addEventListener('devicemotion', function(event) {
+			//	if (Math.abs(event.acceleration.x) > 10.0) {
+			//		for(var x=0; x<4; x++){
+			//			statesArray[x].Image=(Math.floor(statesArray[x].Image)+1)%4
+			//		}
+			//		syncObjectsToJson();
+			//	}
+			//	//if (Math.abs(event.acceleration.y) > 10.0) {
+			//	//	document.getElementsByTagName('canvas')[0].style.filter='hue-rotate('+event.acceleration.y*20+'deg)';
+			//	//}
+			//  });
 		</script>
 	</body>
 </html>
