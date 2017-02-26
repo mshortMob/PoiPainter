@@ -21,10 +21,10 @@
 		</style>
 	</head>
 	<body>
-		<video src="anim1.mp4" autoplay width="64" height="64" id="video1" autoplay loop style="display:none"></video>
-		<video src="anim2.mp4" autoplay width="64" height="64" id="video2" autoplay loop style="display:none"></video>
-		<video src="anim3.mp4" autoplay width="64" height="64" id="video3" autoplay loop style="display:none"></video>
-		<video src="anim4.mp4" autoplay width="64" height="64" id="video4" autoplay loop style="display:none"></video>
+		<video src="anim1.mp4" autoplay width="64" height="64" id="video1" preload autoplay loop style="display:none"></video>
+		<video src="anim2.mp4" autoplay width="64" height="64" id="video2" preload autoplay loop style="display:none"></video>
+		<video src="anim3.mp4" autoplay width="64" height="64" id="video3" preload autoplay loop style="display:none"></video>
+		<video src="anim4.mp4" autoplay width="64" height="64" id="video4" preload autoplay loop style="display:none"></video>
 		<script src="three.js"></script>
 		<script src='dat.gui.min.js'></script>
 		<script src="Detector.js"></script>
@@ -79,7 +79,8 @@
 				controls = new THREE.TrackballControls( camera , container);
 				controls.enabled=false;
 				scene = new THREE.Scene();
-				scene.add( new THREE.AmbientLight( 0xffffff ) );
+				LIGHTING=new THREE.AmbientLight( 0xffffff ) 
+				scene.add( LIGHTING );
 				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
 				renderer.setClearColor( 0x000000 , 1);
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -134,7 +135,8 @@
 				mappingController  = {
 					 Visible:false,
 					 ZValue:0,
-					 Image:0
+					 Image:0,
+					 ImageRate:0
 				};
 				var count=0;
 				for(var y=0; y<4;y++){
@@ -155,6 +157,7 @@
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "ImageRate", 0, .1, .01 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -219,6 +222,7 @@
 				var geometry = new THREE.ParametricGeometry( createGeometry, 3, 3 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 0 );
 				var object = new THREE.Mesh( geometry,new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true}));				
+				object.imageNum=0;
 				return object;
 			  }
 			  var object = createObject();
@@ -243,9 +247,10 @@
 			  }
 			  object.drawV=function(){
 				for(var x=0; x<object.geometry.vertices.length ; x++ ){
-					var  geo = new THREE.BoxGeometry( 35, 35, 0 );
-					var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
-					var mesh1 = new THREE.Mesh( geo, mat );
+					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
+					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
+					//var mesh1 = new THREE.Mesh( geo, mat );
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(15, 15, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
 					mesh1.name="vertice"+x;
 					mesh1.isCorner=false;
 					if (x == 0 || x == 3 || x == 15 || x == 12) {
@@ -262,15 +267,20 @@
 			  object.setState=function(savedJSON){
 				object.visible=savedJSON.Visible;
 				object.position.z= savedJSON.ZValue
-				object.material.map=videoTextures[parseInt(savedJSON.Image)]
 				for(var x=0;x<object.geometry.vertices.length;x++){
 					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
 					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
 					object.children[x].position.x=savedJSON["VerticeX"+x]
 					object.children[x].position.y=savedJSON["VerticeY"+x]
 				}
-				object.geometry.verticesNeedUpdate = true;			
+				object.geometry.verticesNeedUpdate = true;
+				object.imageNum=parseInt(savedJSON.Image)
+				object.material.map=videoTextures[Math.floor(object.imageNum)];
 			  }
+			  object.setImage=function(savedJSON){
+				object.imageNum=parseInt(savedJSON)
+				object.material.map=videoTextures[Math.floor(object.imageNum)];
+			  }		  
 			  object.updateCorners=function(){
 					var cornerNum=[];
 					cornerNum[0]=0;
@@ -442,14 +452,25 @@
 			
 			function onDocumentMouseUp( event ) {
 				//event.preventDefault();
-				if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
-					SELECTED.parent.updateCorners();
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						SELECTED.parent.updateCorners();
+					}
 				}
 				SELECTED = null;
 				container.style.cursor = 'auto';
 			}
 			
 			function animate() {
+				for(var x=0; x<displayObjects.length; x++){
+					if (statesArray[x].ImageRate > 0) {
+						var prevImage=statesArray[x].Image;
+						statesArray[x].Image=(statesArray[x].Image+statesArray[x].ImageRate)%3
+						if (Math.floor(prevImage)!=Math.floor(statesArray[x].Image)) {
+							displayObjects[x].setImage(statesArray[x].Image);
+						}
+					}
+				}
 				requestAnimationFrame( animate );
 				render();
 			}
