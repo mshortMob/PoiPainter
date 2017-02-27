@@ -25,6 +25,10 @@
 		<video src="anim2.mp4" autoplay width="64" height="64" id="video2" preload autoplay loop style="display:none"></video>
 		<video src="anim3.mp4" autoplay width="64" height="64" id="video3" preload autoplay loop style="display:none"></video>
 		<video src="anim4.mp4" autoplay width="64" height="64" id="video4" preload autoplay loop style="display:none"></video>
+		<video src="anim5.mp4" autoplay width="64" height="64" id="video5" preload autoplay loop style="display:none"></video>
+		<video src="anim6.mp4" autoplay width="64" height="64" id="video6" preload autoplay loop style="display:none"></video>
+		<video src="anim7.mp4" autoplay width="64" height="64" id="video7" preload autoplay loop style="display:none"></video>
+		<video src="anim8.mp4" autoplay width="64" height="64" id="video8" preload autoplay loop style="display:none"></video>
 		<script src="three.js"></script>
 		<script src='dat.gui.min.js'></script>
 		<script src="Detector.js"></script>
@@ -120,11 +124,31 @@
 			  videoTexture4 = new THREE.Texture( video4 );
 			  videoTexture4.minFilter=THREE.LinearFilter;
 			  videoTextures.push(videoTexture4)
+			  video5      = document.getElementById('video5');
+			  videoTexture5 = new THREE.Texture( video5 );
+			  videoTexture5.minFilter=THREE.LinearFilter;
+			  videoTextures.push(videoTexture5)
+			  video6      = document.getElementById('video6');
+			  videoTexture6 = new THREE.Texture( video6 );
+			  videoTexture6.minFilter=THREE.LinearFilter;
+			  videoTextures.push(videoTexture6)
+			  video7    = document.getElementById('video7');
+			  videoTexture7 = new THREE.Texture( video7 );
+			  videoTexture7.minFilter=THREE.LinearFilter;
+			  videoTextures.push(videoTexture7)
+			  video8      = document.getElementById('video8');
+			  videoTexture8 = new THREE.Texture( video8 );
+			  videoTexture8.minFilter=THREE.LinearFilter;
+			  videoTextures.push(videoTexture8)
 			  videoElements=[];
 			  videoElements.push(video1)
 			  videoElements.push(video2)			  
 			  videoElements.push(video3)
 			  videoElements.push(video4)
+			  videoElements.push(video5)
+			  videoElements.push(video6)			  
+			  videoElements.push(video7)
+			  videoElements.push(video8)
 			}
 			
 			function addControls(){
@@ -156,8 +180,8 @@
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Image", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "ImageRate", 0, .1, .01 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "ImageRate", 0, .01, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -465,7 +489,7 @@
 				for(var x=0; x<displayObjects.length; x++){
 					if (statesArray[x].ImageRate > 0) {
 						var prevImage=statesArray[x].Image;
-						statesArray[x].Image=(statesArray[x].Image+statesArray[x].ImageRate)%3
+						statesArray[x].Image=(statesArray[x].Image+statesArray[x].ImageRate)%7
 						if (Math.floor(prevImage)!=Math.floor(statesArray[x].Image)) {
 							displayObjects[x].setImage(statesArray[x].Image);
 						}
