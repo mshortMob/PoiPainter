@@ -554,7 +554,7 @@
 				   navigator.getUserMedia({ audio: true, video: { width: 80, height: 80 } },
 					  function(stream) {
 						 console.log("Accessed the Microphone");
-					audioContext = new webkitAudioContext();
+					audioContext = new AudioContext();
 					analyser = audioContext.createAnalyser();
 					microphone = audioContext.createMediaStreamSource(stream);
 					//javascriptNode = audioContext.createScriptProcessor(16384, 1, 1);
