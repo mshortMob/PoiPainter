@@ -39,9 +39,7 @@
 		<script>
 			initGlobalVars();
 			function initGlobalVars(){
-				maxVolume=60;
 				initMicrophone();
-				setTimeout(function(){soundToVideoRate();},1000)
 				PICKED=false;
 				addControls();			
 				videoTextures=[];
@@ -157,13 +155,14 @@
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
-					 mappingMode:0
+					 mappingMode:0,
+					 volumeSensitivity:0
 				}
 				mappingController  = {
 					 Visible:false,
 					 ZValue:0,
 					 Image:0,
-					 ImageRate:0
+					 ImageRate:0.0
 				};
 				var count=0;
 				for(var y=0; y<4;y++){
@@ -178,6 +177,7 @@
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
+				globalFolder.add(globalController, "volumeSensitivity", 0.0, 40.0, .01 ).onChange(function(){});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -557,9 +557,10 @@
 					audioContext = new webkitAudioContext();
 					analyser = audioContext.createAnalyser();
 					microphone = audioContext.createMediaStreamSource(stream);
-					javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+					//javascriptNode = audioContext.createScriptProcessor(16384, 1, 1);
+					javascriptNode = audioContext.createScriptProcessor(8192, 1, 1);
 					analyser.smoothingTimeConstant = 0.3;
-					analyser.fftSize = 1024;
+					//analyser.fftSize = 1024;
 					microphone.connect(analyser);
 					analyser.connect(javascriptNode);
 					javascriptNode.connect(audioContext.destination);
@@ -572,9 +573,7 @@
 							values += array[i];
 						}
 						volumeLevel = values / length;
-						if (volumeLevel>maxVolume) {
-							maxVolume=volumeLevel
-						}
+						soundToVideoRate();
 						//console.log(volumeLevel)
 					}
 					  },
@@ -585,15 +584,17 @@
 				} else {
 				   console.log("getUserMedia not supported");
 				}
-			}			
+			}
+			
 			function soundToVideoRate() {
-				setInterval(function(){
 					for(var x=0; x<videoElements.length;x++){
-						if (volumeLevel/maxVolume*2>.5) {
-							videoElements[x].playbackRate=volumeLevel/maxVolume*2;
+						if (globalController.volumeSensitivity == 0) {
+							videoElements[x].playbackRate=1;
+						}else{
+							videoElements[x].playbackRate=globalController.volumeSensitivity*volumeLevel/100;
+							//console.log(globalController.volumeSensitivity*volumeLevel/100)
 						}
 					}
-				},100);	
 			}
 		</script>
 	</body>
