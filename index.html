@@ -39,6 +39,9 @@
 		<script>
 			initGlobalVars();
 			function initGlobalVars(){
+				maxVolume=60;
+				initMicrophone();
+				setTimeout(function(){soundToVideoRate();},1000)
 				PICKED=false;
 				addControls();			
 				videoTextures=[];
@@ -543,6 +546,54 @@
 					updateControlsView();
 					syncObjectsToJson();
 				}
+			}
+
+			function initMicrophone() {
+				navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+				if (navigator.getUserMedia) {
+				   navigator.getUserMedia({ audio: true, video: { width: 80, height: 80 } },
+					  function(stream) {
+						 console.log("Accessed the Microphone");
+					audioContext = new webkitAudioContext();
+					analyser = audioContext.createAnalyser();
+					microphone = audioContext.createMediaStreamSource(stream);
+					javascriptNode = audioContext.createScriptProcessor(16384, 1, 1);
+					analyser.smoothingTimeConstant = 0.3;
+					analyser.fftSize = 1024;
+					microphone.connect(analyser);
+					analyser.connect(javascriptNode);
+					javascriptNode.connect(audioContext.destination);
+					javascriptNode.onaudioprocess = function() {
+						var array =  new Uint8Array(analyser.frequencyBinCount);
+						analyser.getByteFrequencyData(array);
+						var values = 0;
+						var length = array.length;
+						for (var i = 0; i < length; i++) {
+							values += array[i];
+						}
+						volumeLevel = values / length;
+						if (volumeLevel>maxVolume) {
+							maxVolume=volumeLevel
+						}
+						//console.log(volumeLevel)
+					}
+					  },
+					  function(err) {
+						 console.log("The following error occured: " + err.name);
+					  }
+					);
+				} else {
+				   console.log("getUserMedia not supported");
+				}
+			}			
+			function soundToVideoRate() {
+				setInterval(function(){
+					for(var x=0; x<videoElements.length;x++){
+						if (volumeLevel/maxVolume*4>.5) {
+							videoElements[x].playbackRate=volumeLevel/maxVolume*4;
+						}
+					}
+				},500);	
 			}
 		</script>
 	</body>
