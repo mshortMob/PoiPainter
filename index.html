@@ -557,7 +557,7 @@
 					audioContext = new webkitAudioContext();
 					analyser = audioContext.createAnalyser();
 					microphone = audioContext.createMediaStreamSource(stream);
-					javascriptNode = audioContext.createScriptProcessor(16384, 1, 1);
+					javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
 					analyser.smoothingTimeConstant = 0.3;
 					analyser.fftSize = 1024;
 					microphone.connect(analyser);
@@ -589,11 +589,11 @@
 			function soundToVideoRate() {
 				setInterval(function(){
 					for(var x=0; x<videoElements.length;x++){
-						if (volumeLevel/maxVolume*4>.5) {
-							videoElements[x].playbackRate=volumeLevel/maxVolume*4;
+						if (volumeLevel/maxVolume*2>.5) {
+							videoElements[x].playbackRate=volumeLevel/maxVolume*2;
 						}
 					}
-				},500);	
+				},100);	
 			}
 		</script>
 	</body>
