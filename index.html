@@ -112,8 +112,8 @@
 					 volumeSensitivity:0
 				};
 				var count=0;
-				for(var y=0; y<4;y++){
-					for(var x=0; x<4;x++){
+				for(var y=0; y<5;y++){
+					for(var x=0; x<5;x++){
 						mappingController["VerticeX"+count]=-200+100*x;
 						mappingController["VerticeY"+count]=-200+100*y;
 						count=count+1;
@@ -193,7 +193,7 @@
 					 return nurbsSurface.getPoint(u, v);		
 			  }
 			  function createObject(){
-				var geometry = new THREE.ParametricGeometry( createGeometry, 3, 3 );			  
+				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 0 );
 				vid.id="video9"
 				vid.src="anim1.mp4"
@@ -237,7 +237,7 @@
 					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(15, 15, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
 					mesh1.name="vertice"+x;
 					mesh1.isCorner=false;
-					if (x == 0 || x == 3 || x == 15 || x == 12) {
+					if (x == 0 || x == 4 || x == 24 || x == 20) {
 						mesh1.isCorner=true;
 					}
 					mesh1.vertNum=x;
