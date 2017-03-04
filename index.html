@@ -102,14 +102,14 @@
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
-					 mappingMode:0,
-					 volumeSensitivity:0
+					 mappingMode:0
 				}
 				mappingController  = {
 					 Visible:false,
 					 ZValue:0,
 					 Image:0,
-					 ImageRate:0.0
+					 ImageRate:0.0,
+					 volumeSensitivity:0
 				};
 				var count=0;
 				for(var y=0; y<4;y++){
@@ -124,7 +124,6 @@
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add(globalController, "volumeSensitivity", 0.0, 40.0, .01 ).onChange(function(){});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -132,6 +131,7 @@
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "ImageRate", 0, .01, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add(mappingController, "volumeSensitivity", 0.0, 40.0, .01 ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -545,10 +545,10 @@
 			
 			function soundToVideoRate() {
 					for(var x=0; x<videoElements.length;x++){
-						if (globalController.volumeSensitivity == 0) {
+						if (statesArray[x].volumeSensitivity == 0) {
 							videoElements[x].playbackRate=1;
 						}else{
-							videoElements[x].playbackRate=globalController.volumeSensitivity*volumeLevel/100;
+							videoElements[x].playbackRate=statesArray[x].volumeSensitivity*volumeLevel/100;
 							//console.log(globalController.volumeSensitivity*volumeLevel/100)
 						}
 					}
