@@ -31,10 +31,21 @@
 			initGlobalVars();
 			function initGlobalVars(){
 				videoElements=[];
+				videoTextures=[];
+				for(var x=1; x<9; x++){
+					var vid = document.createElement('video');
+					vid.id="video+x"
+					vid.src="anim"+x+".mp4"
+					vid.autoplay=true;
+					vid.loop=true;
+					videoElements.push(vid)
+					var videoTexture1 = new THREE.Texture( vid );
+					videoTexture1.minFilter=THREE.LinearFilter;
+					videoTextures.push(videoTexture1)					
+				}
 				initMicrophone();
 				PICKED=false;
 				addControls();			
-				videoTextures=[];
 				points=[];
 				container=null;
 				camera=null;
@@ -102,14 +113,14 @@
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
-					 mappingMode:0
+					 mappingMode:0,
+					 volumeSensitivity:0
 				}
 				mappingController  = {
 					 Visible:false,
 					 ZValue:0,
 					 Image:0,
-					 ImageRate:0.0,
-					 volumeSensitivity:0
+					 ImageRate:0.0
 				};
 				var count=0;
 				for(var y=0; y<5;y++){
@@ -124,6 +135,7 @@
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
+				globalFolder.add(globalController, "volumeSensitivity", 0.0, 40.0, .01 ).onChange(function(){});					
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -131,7 +143,6 @@
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "ImageRate", 0, .01, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add(mappingController, "volumeSensitivity", 0.0, 40.0, .01 ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -195,20 +206,11 @@
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 0 );
-				vid.id="video9"
-				vid.src="anim1.mp4"
-				vid.autoplay=true;
-				vid.loop=true;
-				videoElements.push(vid)
-				var videoTexture1 = new THREE.Texture( vid );
-				videoTexture1.minFilter=THREE.LinearFilter;
-				videoTextures.push(videoTexture1)
-				var material = new THREE.MeshLambertMaterial({map : videoTexture1 , morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				var material = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				var object = new THREE.Mesh( geometry, material);				
 				object.imageNum=0;
 				return object;
 			  }
-			  var vid = document.createElement('video');
 			  var object = createObject();
 			  object.showChildren=function(){
 			        if (globalController.mappingMode>.5) {
@@ -259,11 +261,11 @@
 				}
 				object.geometry.verticesNeedUpdate = true;
 				object.imageNum=parseInt(savedJSON.Image)
-				vid.src="anim"+Math.floor(object.imageNum+1)+".mp4";
+				object.material.map=videoTextures[object.imageNum]
 			  }
 			  object.setImage=function(savedJSON){
 					object.imageNum=parseInt(savedJSON)
-					vid.src="anim"+Math.floor(object.imageNum+1)+".mp4";
+					object.material.map=videoTextures[object.imageNum]
 			  }		  
 			  object.updateCorners=function(){
 					var cornerNum=[];
@@ -545,10 +547,10 @@
 			
 			function soundToVideoRate() {
 					for(var x=0; x<videoElements.length;x++){
-						if (statesArray[x].volumeSensitivity == 0) {
+						if (globalController.volumeSensitivity == 0) {
 							videoElements[x].playbackRate=1;
 						}else{
-							videoElements[x].playbackRate=statesArray[x].volumeSensitivity*volumeLevel/100;
+							videoElements[x].playbackRate=globalController.volumeSensitivity*volumeLevel/100;
 							//console.log(globalController.volumeSensitivity*volumeLevel/100)
 						}
 					}
