@@ -570,9 +570,16 @@
 				xmlhttp1.onload = function(e){
 					sensorData=JSON.parse(xmlhttp1.response)
 					if (sensorData.bump==true) {
-						LIGHTING.color.r=Math.random();
-						LIGHTING.color.g=Math.random();
-						LIGHTING.color.b=Math.random();
+						//LIGHTING.color.r=Math.random();
+						//LIGHTING.color.g=Math.random();
+						//LIGHTING.color.b=Math.random();
+						for(var x=0; x<displayObjects.length; x++){
+							if (statesArray[x].ImageRate > 0) {
+								statesArray[x].Image=(statesArray[x].Image+1)%7
+							}
+						}
+						updateControlsView();
+						syncObjectsToJson();
 						var requestBody=JSON.stringify({"bump" : false})
 						var xmlhttp=new XMLHttpRequest();
 						xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
