@@ -1,0 +1,36 @@
+<html id="html">
+	<head>
+		<title>FlowMapper</title>
+		<style>
+			body{
+				background-color:black;
+			    margin:0px;
+				z-index: 10;
+			}	
+		</style>
+	</head>
+	<body>
+		<script>
+			PENDING=false
+			window.addEventListener('devicemotion', function(event) {
+				if (Math.abs(event.acceleration.x) > 10.0 && PENDING==false) {
+					PENDING=true;
+					document.body.style.backgroundColor='green';
+					saveState();
+				}
+			  });
+			
+			function saveState(){
+				var requestBody=JSON.stringify({"bump" : true})
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "senseState.txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){
+					PENDING=false;
+					document.body.style.backgroundColor='black';
+				}
+			}
+		</script>
+	</body>
+</html>
+
