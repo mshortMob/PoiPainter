@@ -15,15 +15,15 @@
 			window.addEventListener('devicemotion', function(event) {
 				if (Math.abs(event.acceleration.x) > 10.0 && PENDING==false) {
 					PENDING=true;
-					document.body.style.backgroundColor='green';
 					saveState();
 				}
 			  });
 			
 			function saveState(){
+				document.body.style.backgroundColor='green';
 				var requestBody=JSON.stringify({"bump" : true})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "senseState.txt", true);
+				xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){
 					PENDING=false;

@@ -562,6 +562,27 @@
 						}
 					}
 			}
+			
+			function checkSensors() {
+				var xmlhttp1=new XMLHttpRequest();
+				xmlhttp1.open("GET", "read.php?fn="+"senseState.txt", true);
+				xmlhttp1.send();
+				xmlhttp1.onload = function(e){
+					sensorData=JSON.parse(xmlhttp1.response)
+					if (sensorData.bump==true) {
+						LIGHTING.color.r=Math.random();
+						LIGHTING.color.g=Math.random();
+						LIGHTING.color.b=Math.random();
+						var requestBody=JSON.stringify({"bump" : false})
+						var xmlhttp=new XMLHttpRequest();
+						xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
+						xmlhttp.send(requestBody);
+						xmlhttp.onload = function(e){
+							setTimeout(function(){checkSensors();},500)
+						}
+					}else{setTimeout(function(){checkSensors();},500)}
+				}
+			}
 		</script>
 	</body>
 </html>
