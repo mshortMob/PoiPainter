@@ -14,21 +14,27 @@
 			PENDING=false
 			window.addEventListener('devicemotion', function(event) {
 				if (Math.abs(event.acceleration.x) > 10.0 && PENDING==false) {
+					bumpX=true;
+				}
+				if (Math.abs(event.acceleration.y) > 10.0 && PENDING==false) {
+					bumpY=true;
+				}
+				if (Math.abs(event.acceleration.y) > 10.0 && PENDING==false) {
 					PENDING=true;
 					saveState();
 				}
 			  });
 			
-			function saveState(){
+			function saveState(axis){
 				document.body.style.backgroundColor='green';
-				var requestBody=JSON.stringify({"bump" : true})
+				var requestBody=JSON.stringify({"bumpX" : bumpX, "bumpY" : bumpY})
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){
 					PENDING=false;
 					document.body.style.backgroundColor='black';
-				}
+                }
 			}
 		</script>
 	</body>

@@ -146,6 +146,7 @@
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add({ 'Use Sensors':function(){ checkSensors() }},'Use Sensors');
 				utilsFolder.add({ 'Save State':function(){ saveState() }},'Save State');
 				utilsFolder.add({ 'Recall State':function(){ recallState() }},'Recall State');
 			}
@@ -569,18 +570,22 @@
 				xmlhttp1.send();
 				xmlhttp1.onload = function(e){
 					sensorData=JSON.parse(xmlhttp1.response)
-					if (sensorData.bump==true) {
-						//LIGHTING.color.r=Math.random();
-						//LIGHTING.color.g=Math.random();
-						//LIGHTING.color.b=Math.random();
+					if (sensorData.bumpY==true) {
+						LIGHTING.color.r=Math.random();
+						LIGHTING.color.g=Math.random();
+						LIGHTING.color.b=Math.random();
+					}
+					if (sensorData.bumpX==true) {
 						for(var x=0; x<displayObjects.length; x++){
-							if (statesArray[x].ImageRate > 0) {
+							if (statesArray[x].ImageRate == 0) {
 								statesArray[x].Image=(statesArray[x].Image+1)%7
 							}
 						}
 						updateControlsView();
 						syncObjectsToJson();
-						var requestBody=JSON.stringify({"bump" : false})
+					}
+					if (sensorData.bumpX==true || sensorData.bumpY==true) {
+						var requestBody=JSON.stringify({"bumpX" : false, "bumpY" : false})
 						var xmlhttp=new XMLHttpRequest();
 						xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
 						xmlhttp.send(requestBody);
