@@ -13,6 +13,8 @@
 		<script>
 			PENDING=false
 			window.addEventListener('devicemotion', function(event) {
+				bumpX=false;
+				bumpY=false;
 				if (Math.abs(event.acceleration.x) > 10.0 && PENDING==false) {
 					bumpX=true;
 				}
