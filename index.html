@@ -30,6 +30,7 @@
 		<script>
 			initGlobalVars();
 			function initGlobalVars(){
+				imageCycle=0;
 				videoElements=[];
 				videoTextures=[];
 				for(var x=1; x<9; x++){
@@ -114,13 +115,13 @@
 				globalController  = {
 					 selectedFixture:0,
 					 mappingMode:0,
-					 volumeSensitivity:0
+					 volumeSensitivity:0.0,
+					 ImageRate:0.0
 				}
 				mappingController  = {
 					 Visible:false,
 					 ZValue:0,
-					 Image:0,
-					 ImageRate:0.0
+					 Image:0
 				};
 				var count=0;
 				for(var y=0; y<5;y++){
@@ -135,14 +136,14 @@
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add(globalController, "volumeSensitivity", 0.0, 40.0, .01 ).onChange(function(){});					
+				globalFolder.add(globalController, "volumeSensitivity", 0.0, 40.0, .001 ).onChange(function(){});					
+				globalFolder.add( globalController, "ImageRate", 0, .01, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "ImageRate", 0, .01, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -449,13 +450,16 @@
 			}
 			
 			function animate() {
-				for(var x=0; x<displayObjects.length; x++){
-					if (statesArray[x].ImageRate > 0) {
-						var prevImage=statesArray[x].Image;
-						statesArray[x].Image=(statesArray[x].Image+statesArray[x].ImageRate)%7
-						if (Math.floor(prevImage)!=Math.floor(statesArray[x].Image)) {
+				if (globalController.ImageRate != 0) {
+					imageCycle=imageCycle+globalController.ImageRate;
+					if (imageCycle>=10) {
+						imageCycle=0;
+						for(var x=0; x<displayObjects.length; x++){
+							var prevImage=statesArray[x].Image;
+							statesArray[x].Image=(statesArray[x].Image+1)%7
 							displayObjects[x].setImage(statesArray[x].Image);
 						}
+						updateControlsView();
 					}
 				}
 				requestAnimationFrame( animate );
@@ -551,10 +555,10 @@
 						if (globalController.volumeSensitivity == 0) {
 							videoElements[x].playbackRate=1;
 						}else{
-							if (globalController.volumeSensitivity*volumeLevel/100 < .1) {
-								videoElements[x].playbackRate=.1;
-							}else if (globalController.volumeSensitivity*volumeLevel/100 > 10) {
-								videoElements[x].playbackRate=10;
+							if (globalController.volumeSensitivity*volumeLevel/100 < .4) {
+								videoElements[x].playbackRate=.4;
+							}else if (globalController.volumeSensitivity*volumeLevel/100 > 6) {
+								videoElements[x].playbackRate=6;
 							}else{
 								videoElements[x].playbackRate=globalController.volumeSensitivity*volumeLevel/100;
 							}
