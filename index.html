@@ -494,7 +494,7 @@
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
-				if (window.location.hostname.indexOf("localhost"!=-1)) {
+				if (window.location.hostname.indexOf("localhost")!=-1) {
 					xmlhttp.open("POST", "write.php?fn=stateStorage.txt", true);
 				}else{
 					xmlhttp.open("POST", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
@@ -505,7 +505,7 @@
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				if (window.location.hostname.indexOf("localhost"!=-1)) {
+				if (window.location.hostname.indexOf("localhost")!=-1) {
 					xmlhttp.open("GET", "read.php?fn=stateStorage.txt", true);
 					xmlhttp.send();
 					xmlhttp.onload = function(e){
