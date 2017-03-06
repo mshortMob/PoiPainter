@@ -494,22 +494,37 @@
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
+				if (window.location.hostname.indexOf("localhost"!=-1)) {
+					xmlhttp.open("POST", "write.php?fn=stateStorage.txt", true);
+				}else{
+					xmlhttp.open("POST", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
+				}
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
-				xmlhttp.send();
-				xmlhttp.onload = function(e){
-					temp=JSON.parse(xmlhttp.response)
-					temp=JSON.parse(temp)
-					statesArray=temp.storage;
-					updateControlsView();
-					syncObjectsToJson();
+				if (window.location.hostname.indexOf("localhost"!=-1)) {
+					xmlhttp.open("GET", "read.php?fn=stateStorage.txt", true);
+					xmlhttp.send();
+					xmlhttp.onload = function(e){
+						statesArray=JSON.parse(xmlhttp.response).storage
+						updateControlsView();
+						syncObjectsToJson();
+					}
+				}else{
+					xmlhttp.open("GET", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
+					xmlhttp.send();
+					xmlhttp.onload = function(e){
+						var temp=JSON.parse(xmlhttp.response)
+						temp=JSON.parse(temp)
+						statesArray=temp.storage;
+						updateControlsView();
+						syncObjectsToJson();
+					}
 				}
+
 			}
 
 			function initMicrophone() {
