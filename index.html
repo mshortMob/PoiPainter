@@ -465,7 +465,7 @@
 					LIGHTING.color.r=LIGHTING.color.r-.025
 					LIGHTING.color.g=LIGHTING.color.g-.025
 					LIGHTING.color.b=LIGHTING.color.b-.025
-					if (LIGHTING.color.r<=0) {
+					if (LIGHTING.color.r<=.2) {
 						for(var x=0; x<displayObjects.length; x++){
 							statesArray[x].Image=(statesArray[x].Image+1)%7
 							displayObjects[x].setImage(statesArray[x].Image);
