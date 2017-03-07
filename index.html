@@ -31,6 +31,8 @@
 			initGlobalVars();
 			function initGlobalVars(){
 				imageCycle=0;
+				fadeCycle=false;
+				returnCycle=false;
 				videoElements=[];
 				videoTextures=[];
 				for(var x=1; x<9; x++){
@@ -451,16 +453,35 @@
 			}
 			
 			function animate() {
-				if (globalController.ImageRate != 0) {
+				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==false) {
 					imageCycle=imageCycle+globalController.ImageRate;
 					if (imageCycle>=10) {
 						imageCycle=0;
+						fadeCycle=true;
+						returnCycle=false;
+					}
+				}
+				if (globalController.ImageRate != 0 && fadeCycle==true && returnCycle==false) {
+					LIGHTING.color.r=LIGHTING.color.r-.05
+					LIGHTING.color.g=LIGHTING.color.g-.05
+					LIGHTING.color.b=LIGHTING.color.b-.05
+					if (LIGHTING.color.r<=0) {
 						for(var x=0; x<displayObjects.length; x++){
-							var prevImage=statesArray[x].Image;
 							statesArray[x].Image=(statesArray[x].Image+1)%7
 							displayObjects[x].setImage(statesArray[x].Image);
 						}
 						updateControlsView();
+						fadeCycle=false;
+						returnCycle=true;
+					}
+				}
+				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==true) {
+					LIGHTING.color.r=LIGHTING.color.r+.05
+					LIGHTING.color.g=LIGHTING.color.g+.05
+					LIGHTING.color.b=LIGHTING.color.b+.05
+					if (LIGHTING.color.r>=1) {
+						fadeCycle=false;
+						returnCycle=false;						
 					}
 				}
 				requestAnimationFrame( animate );
@@ -591,9 +612,9 @@
 				xmlhttp1.onload = function(e){
 					sensorData=JSON.parse(xmlhttp1.response)
 					if (sensorData.bumpY==true) {
-						LIGHTING.color.r=Math.random();
-						LIGHTING.color.g=Math.random();
-						LIGHTING.color.b=Math.random();
+						//LIGHTING.color.r=Math.random();
+						//LIGHTING.color.g=Math.random();
+						//LIGHTING.color.b=Math.random();
 					}
 					if (sensorData.bumpX==true) {
 						for(var x=0; x<displayObjects.length; x++){
