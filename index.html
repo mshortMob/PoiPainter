@@ -147,6 +147,7 @@
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add({ 'Hide Handles':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } }},'Hide Handles');
 				utilsFolder.add({ 'Use Sensors':function(){ checkSensors() }},'Use Sensors');
 				utilsFolder.add({ 'Save State':function(){ saveState() }},'Save State');
 				utilsFolder.add({ 'Recall State':function(){ recallState() }},'Recall State');
