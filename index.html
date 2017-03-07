@@ -462,9 +462,9 @@
 					}
 				}
 				if (globalController.ImageRate != 0 && fadeCycle==true && returnCycle==false) {
-					LIGHTING.color.r=LIGHTING.color.r-.05
-					LIGHTING.color.g=LIGHTING.color.g-.05
-					LIGHTING.color.b=LIGHTING.color.b-.05
+					LIGHTING.color.r=LIGHTING.color.r-.025
+					LIGHTING.color.g=LIGHTING.color.g-.025
+					LIGHTING.color.b=LIGHTING.color.b-.025
 					if (LIGHTING.color.r<=0) {
 						for(var x=0; x<displayObjects.length; x++){
 							statesArray[x].Image=(statesArray[x].Image+1)%7
@@ -476,9 +476,9 @@
 					}
 				}
 				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==true) {
-					LIGHTING.color.r=LIGHTING.color.r+.05
-					LIGHTING.color.g=LIGHTING.color.g+.05
-					LIGHTING.color.b=LIGHTING.color.b+.05
+					LIGHTING.color.r=LIGHTING.color.r+.025
+					LIGHTING.color.g=LIGHTING.color.g+.025
+					LIGHTING.color.b=LIGHTING.color.b+.025
 					if (LIGHTING.color.r>=1) {
 						fadeCycle=false;
 						returnCycle=false;						
