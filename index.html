@@ -35,7 +35,7 @@
 				returnCycle=false;
 				videoElements=[];
 				videoTextures=[];
-				for(var x=1; x<9; x++){
+				for(var x=1; x<11; x++){
 					var vid = document.createElement('video');
 					vid.id="video+x"
 					vid.src="anim"+x+".mp4"
@@ -145,7 +145,7 @@
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Image", 0, 9, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -467,7 +467,7 @@
 					LIGHTING.color.b=LIGHTING.color.b-.025
 					if (LIGHTING.color.r<=.2) {
 						for(var x=0; x<displayObjects.length; x++){
-							statesArray[x].Image=(statesArray[x].Image+1)%7
+							statesArray[x].Image=(statesArray[x].Image+1)%9
 							displayObjects[x].setImage(statesArray[x].Image);
 						}
 						updateControlsView();
