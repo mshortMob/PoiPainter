@@ -467,7 +467,7 @@
 					LIGHTING.color.b=LIGHTING.color.b-.025
 					if (LIGHTING.color.r<=.2) {
 						for(var x=0; x<displayObjects.length; x++){
-							statesArray[x].Image=(statesArray[x].Image+1)%9
+							statesArray[x].Image=(statesArray[x].Image+1)%10
 							displayObjects[x].setImage(statesArray[x].Image);
 						}
 						updateControlsView();
