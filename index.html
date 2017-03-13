@@ -30,12 +30,13 @@
 		<script>
 			initGlobalVars();
 			function initGlobalVars(){
+			    numberOfVideos=16;
 				imageCycle=0;
 				fadeCycle=false;
 				returnCycle=false;
 				videoElements=[];
 				videoTextures=[];
-				for(var x=1; x<17; x++){
+				for(var x=1; x<numberOfVideos+1; x++){
 					var vid = document.createElement('video');
 					vid.id="video+x"
 					vid.src="anim"+x+".mp4"
@@ -145,7 +146,7 @@
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Image", 0, 15, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Image", 0, numberOfVideos-1, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -467,7 +468,7 @@
 					LIGHTING.color.b=LIGHTING.color.b-.025
 					if (LIGHTING.color.r<=.2) {
 						for(var x=0; x<displayObjects.length; x++){
-							statesArray[x].Image=(statesArray[x].Image+1)%16
+							statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
 							displayObjects[x].setImage(statesArray[x].Image);
 						}
 						updateControlsView();
@@ -619,7 +620,7 @@
 					if (sensorData.bumpX==true) {
 						for(var x=0; x<displayObjects.length; x++){
 							if (statesArray[x].ImageRate == 0) {
-								statesArray[x].Image=(statesArray[x].Image+1)%16
+								statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
 							}
 						}
 						updateControlsView();
