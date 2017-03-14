@@ -30,7 +30,7 @@
 		<script>
 			initGlobalVars();
 			function initGlobalVars(){
-			    numberOfVideos=16;
+			    numberOfVideos=17;
 				imageCycle=0;
 				fadeCycle=false;
 				returnCycle=false;
@@ -211,7 +211,7 @@
 			  }
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
-				//var geometry=new THREE.BoxGeometry( 10, 10, 0 );
+				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
 				var material = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				var object = new THREE.Mesh( geometry, material);				
 				object.imageNum=0;
