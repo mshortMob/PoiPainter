@@ -119,7 +119,10 @@
 					 selectedFixture:0,
 					 mappingMode:0,
 					 volumeSensitivity:0.0,
-					 ImageRate:0.0
+					 ImageRate:0.0,
+					 Master:false,
+					 Slave:false,
+					 PresetName:"Preset_1"
 				}
 				mappingController  = {
 					 Visible:false,
@@ -152,8 +155,8 @@
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'Hide Handles':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } }},'Hide Handles');
 				utilsFolder.add({ 'Use Sensors':function(){ checkSensors() }},'Use Sensors');
-				utilsFolder.add({ 'Save State':function(){ saveState() }},'Save State');
-				utilsFolder.add({ 'Recall State':function(){ recallState() }},'Recall State');
+				utilsFolder.add( globalController, "Master", true ).onChange(function(){if(globalController.Master){globalController.MasterInterval=setInterval("saveState()",1000);}else{clearInterval(globalController.MasterInterval)};});
+				utilsFolder.add( globalController, "Slave", true ).onChange(function(){if(globalController.Slave){globalController.SlaveInterval=setInterval("recallState()",1000);}else{clearInterval(globalController.SlaveInterval)};});	
 			}
 									
 			function updateControlsView(){
@@ -518,7 +521,7 @@
 				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
 				if (window.location.hostname.indexOf("localhost")!=-1) {
-					xmlhttp.open("POST", "write.php?fn=stateStorage.txt", true);
+					xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
 				}else{
 					xmlhttp.open("POST", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
 				}
@@ -529,7 +532,7 @@
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
 				if (window.location.hostname.indexOf("localhost")!=-1) {
-					xmlhttp.open("GET", "read.php?fn=stateStorage.txt", true);
+					xmlhttp.open("GET", "read.php?fn="+globalController.PresetName+".txt", true);
 					xmlhttp.send();
 					xmlhttp.onload = function(e){
 						statesArray=JSON.parse(xmlhttp.response).storage
