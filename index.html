@@ -47,6 +47,17 @@
 					videoTexture1.minFilter=THREE.LinearFilter;
 					videoTextures.push(videoTexture1)					
 				}
+				for(var x=1; x<2; x++){
+					var vid = document.createElement('video');
+					vid.id="warn+x"
+					vid.src="warn"+x+".mp4"
+					vid.autoplay=true;
+					vid.loop=true;
+					videoElements.push(vid)
+					var videoTexture1 = new THREE.Texture( vid );
+					videoTexture1.minFilter=THREE.LinearFilter;
+					videoTextures.push(videoTexture1)					
+				}
 				initMicrophone();
 				PICKED=false;
 				addControls();			
@@ -122,7 +133,8 @@
 					 ImageRate:0.0,
 					 Master:false,
 					 Slave:false,
-					 PresetName:"Preset_1"
+					 PresetName:"Preset_1",
+					 Warning1: false
 				}
 				mappingController  = {
 					 Visible:false,
@@ -131,7 +143,7 @@
 				};
 				var count=0; 
 				for(var y=0; y<5;y++){
-					for(var x=0; x<5;x++){
+					for(var x=4; x>-1;x--){
 						mappingController["VerticeX"+count]=-200+100*x;
 						mappingController["VerticeY"+count]=-200+100*y;
 						count=count+1;
@@ -270,11 +282,19 @@
 				}
 				object.geometry.verticesNeedUpdate = true;
 				object.imageNum=parseInt(savedJSON.Image)
-				object.material.map=videoTextures[object.imageNum]
+			  	if(globalController.Warning1){
+			  		 object.material.map=videoTextures[numberOfVideos]
+			  	}else{
+					object.material.map=videoTextures[object.imageNum]
+				}
 			  }
 			  object.setImage=function(savedJSON){
-					object.imageNum=parseInt(savedJSON)
+			  	object.imageNum=parseInt(savedJSON)
+			  	if(globalController.Warning1){
+			  		 object.material.map=videoTextures[numberOfVideos]
+			  	}else{
 					object.material.map=videoTextures[object.imageNum]
+				}	
 			  }		  
 			  object.updateCorners=function(){
 					var cornerNum=[];
@@ -472,7 +492,11 @@
 					if (LIGHTING.color.r<=.2) {
 						for(var x=0; x<displayObjects.length; x++){
 							statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
-							displayObjects[x].setImage(statesArray[x].Image);
+							//if(!globalController.Warning1){
+								displayObjects[x].setImage(statesArray[x].Image);
+							//}else{
+							//	displayObjects[x].setImage("warn1");
+							//}
 						}
 						updateControlsView();
 						fadeCycle=false;
@@ -624,8 +648,18 @@
 						globalController.ImageRate=sensorData.ImageRate;
 						gui.__folders.Global.__controllers[3].updateDisplay();
 					}
-					if (sensorData.Warning1==true) {
-					
+					if (sensorData.Warning1 != globalController.Warning1) {
+						globalController.Warning1=sensorData.Warning1;
+						if(sensorData.Warning1){
+							for(var x=0; x<displayObjects.length; x++){
+								displayObjects[x].setImage(displayObjects[x].imageNum);
+							}
+						}
+						if(!sensorData.Warning1){
+							for(var x=0; x<displayObjects.length; x++){
+								displayObjects[x].setImage(displayObjects[x].imageNum);
+							}
+						}
 					}
 					if (sensorData.bumpY==true) {
 						//LIGHTING.color.r=Math.random();

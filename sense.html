@@ -14,7 +14,7 @@
 	    <input id="VolumeSensitivity" type="range" style="width: 96%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%;"></input>
 		<div style="color:white; margin:2% 2% 2% 2%;">ImageRate</div>
 	    <input id="ImageRate" type="range" style="width: 96%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%;"></input>
-		<button style="width: 96%; height: 10%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%; font-size:20;" id="Warning1" onclick="Warning1=!Warning1;">Warning1</button>
+		<button style="width: 96%; height: 10%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%; font-size:20;" id="Warning1" onclick="Warning1=!Warning1;if(Warning1){document.getElementById('Warning1').style.backgroundColor='red';}else{document.getElementById('Warning1').style.backgroundColor='grey';}">Warning1</button>
 		<script>		 
 	   		document.getElementById("VolumeSensitivity").min=0.0;
 			document.getElementById("VolumeSensitivity").max=40;
@@ -51,6 +51,14 @@
 					sensorData=JSON.parse(xmlhttp.response)
 					document.getElementById("ImageRate").value=sensorData.ImageRate;
 					document.getElementById("VolumeSensitivity").value=sensorData.VolumeSensitivity;
+					if(sensorData.Warning1){
+						document.getElementById("Warning1").style.backgroundColor="red";
+						Warning1=true;
+					}else{
+						document.getElementById("Warning1").style.backgroundColor="grey";
+						Warning1=false;
+					}
+					
 					setInterval(function(){saveState();},1000)
 				}
 			}
