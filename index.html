@@ -668,13 +668,13 @@
 						//LIGHTING.color.b=Math.random();
 					}
 					if (sensorData.bumpX==true) {
-						for(var x=0; x<displayObjects.length; x++){
-							if (statesArray[x].ImageRate == 0) {
-								statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
-							}
-						}
-						updateControlsView();
-						syncObjectsToJson();
+//						for(var x=0; x<displayObjects.length; x++){
+//							if (statesArray[x].ImageRate == 0) {
+//								statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
+//							}
+//						}
+//						updateControlsView();
+//						syncObjectsToJson();
 					}
 					if (sensorData.bumpX==true || sensorData.bumpY==true) {
 						var requestBody=JSON.stringify({"bumpX" : false, "bumpY" : false})
