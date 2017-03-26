@@ -10,11 +10,25 @@
 		</style>
 	</head>
 	<body>
-		<script>
+		<div style="color:white; margin:2% 2% 2% 2%;">Volume Sensitivity</div>
+	    <input id="VolumeSensitivity" type="range" style="width: 96%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%;"></input>
+		<div style="color:white; margin:2% 2% 2% 2%;">ImageRate</div>
+	    <input id="ImageRate" type="range" style="width: 96%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%;"></input>
+		<button style="width: 96%; height: 10%; display:block; margin:2% 2% 2% 2%; padding:0% 0% 0% 0%; font-size:20;" id="Warning1" onclick="Warning1=!Warning1;">Warning1</button>
+		<script>		 
+	   		document.getElementById("VolumeSensitivity").min=0.0;
+			document.getElementById("VolumeSensitivity").max=40;
+			document.getElementById("VolumeSensitivity").step=.001;
+			document.getElementById("VolumeSensitivity").defaultValue=0.0;   
+			document.getElementById("ImageRate").min=0.0;
+			document.getElementById("ImageRate").max=.15;
+			document.getElementById("ImageRate").step=.0001;
+			document.getElementById("ImageRate").defaultValue=0.0;		
+			Warning1=false;
 			PENDING=false
+			bumpX=false;
+			bumpY=false;
 			window.addEventListener('devicemotion', function(event) {
-				bumpX=false;
-				bumpY=false;
 				if (Math.abs(event.acceleration.x) > 10.0 && PENDING==false) {
 					bumpX=true;
 				}
@@ -23,19 +37,33 @@
 				}
 				if (Math.abs(event.acceleration.y) > 10.0 && PENDING==false) {
 					PENDING=true;
-					saveState();
+					//saveState();
 				}
 			  });
 			
+			
+			recallState();
+			function recallState(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn=senseState.txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					sensorData=JSON.parse(xmlhttp.response)
+					document.getElementById("ImageRate").value=sensorData.ImageRate;
+					document.getElementById("VolumeSensitivity").value=sensorData.VolumeSensitivity;
+					setInterval(function(){saveState();},1000)
+				}
+			}
+			
 			function saveState(){
-				document.body.style.backgroundColor='green';
-				var requestBody=JSON.stringify({"bumpX" : bumpX, "bumpY" : bumpY})
+				//document.body.style.backgroundColor='green';
+				var requestBody=JSON.stringify({"bumpX" : bumpX, "bumpY" : bumpY, "Warning1": Warning1, "VolumeSensitivity": parseFloat(document.getElementById("VolumeSensitivity").value), "ImageRate": parseFloat(document.getElementById("ImageRate").value)})
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){
 					PENDING=false;
-					document.body.style.backgroundColor='black';
+					//document.body.style.backgroundColor='black';
                 }
 			}
 		</script>

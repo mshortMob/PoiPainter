@@ -1,1 +1,1 @@
-{"bump":false}
+{"bumpX":false,"bumpY":false,"Warning1":false,"VolumeSensitivity":7.132,"ImageRate":0.0328}

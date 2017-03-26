@@ -615,6 +615,18 @@
 				xmlhttp1.send();
 				xmlhttp1.onload = function(e){
 					sensorData=JSON.parse(xmlhttp1.response)
+					if (sensorData.VolumeSensitivity != globalController.volumeSensitivity ) {
+						console.log(sensorData)
+						globalController.volumeSensitivity=sensorData.VolumeSensitivity;
+						gui.__folders.Global.__controllers[2].updateDisplay();
+					}					
+					if (sensorData.ImageRate != globalController.ImageRate ) {
+						globalController.ImageRate=sensorData.ImageRate;
+						gui.__folders.Global.__controllers[3].updateDisplay();
+					}
+					if (sensorData.Warning1==true) {
+					
+					}
 					if (sensorData.bumpY==true) {
 						//LIGHTING.color.r=Math.random();
 						//LIGHTING.color.g=Math.random();
