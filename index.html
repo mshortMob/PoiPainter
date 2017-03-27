@@ -47,7 +47,7 @@
 					videoTexture1.minFilter=THREE.LinearFilter;
 					videoTextures.push(videoTexture1)					
 				}
-				for(var x=1; x<2; x++){
+				for(var x=1; x<3; x++){
 					var vid = document.createElement('video');
 					vid.id="warn+x"
 					vid.src="warn"+x+".mp4"
@@ -134,7 +134,7 @@
 					 Master:false,
 					 Slave:false,
 					 PresetName:"Preset_1",
-					 Warning1: false
+					 Warning: "none"
 				}
 				mappingController  = {
 					 Visible:false,
@@ -166,7 +166,7 @@
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
-				utilsFolder.add({ 'Use Sensors':function(){ checkSensors() }},'Use Sensors');
+				utilsFolder.add({ 'Use Sensors':function(){ setInterval(function(){checkSensors();},1000) }},'Use Sensors');
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
@@ -291,9 +291,11 @@
 			  }
 			  object.setImage=function(savedJSON){
 			  	object.imageNum=parseInt(savedJSON)
-			  	if(globalController.Warning1){
+			  	if(globalController.Warning=="warn1"){
 			  		 object.material.map=videoTextures[numberOfVideos]
-			  	}else{
+			  	}else if (globalController.Warning=="warn2"){
+			  		 object.material.map=videoTextures[numberOfVideos+1]					
+				}else{
 					object.material.map=videoTextures[object.imageNum]
 				}	
 			  }		  
@@ -478,6 +480,11 @@
 			}
 			
 			function animate() {
+			    if(globalController.ImageRate == 0){
+			    	LIGHTING.color.r=1;
+					LIGHTING.color.g=1;
+					LIGHTING.color.b=1;
+			    }
 				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==false) {
 					imageCycle=imageCycle+globalController.ImageRate;
 					if (imageCycle>=10) {
@@ -649,44 +656,26 @@
 						globalController.ImageRate=sensorData.ImageRate;
 						gui.__folders.Global.__controllers[3].updateDisplay();
 					}
-					if (sensorData.Warning1 != globalController.Warning1) {
-						globalController.Warning1=sensorData.Warning1;
-						if(sensorData.Warning1){
+					if (sensorData.Warning != globalController.Warning) {
+						globalController.Warning=sensorData.Warning;
+						if(sensorData.Warning=="warn1"){
 							for(var x=0; x<displayObjects.length; x++){
 								displayObjects[x].setImage(displayObjects[x].imageNum);
 							}
 						}
-						if(!sensorData.Warning1){
+						if(sensorData.Warning=="warn2"){
+							for(var x=0; x<displayObjects.length; x++){
+								displayObjects[x].setImage(displayObjects[x].imageNum);
+							}
+						}
+						if(sensorData.Warning=="none"){
 							for(var x=0; x<displayObjects.length; x++){
 								displayObjects[x].setImage(displayObjects[x].imageNum);
 							}
 						}
 					}
-					if (sensorData.bumpY==true) {
-						//LIGHTING.color.r=Math.random();
-						//LIGHTING.color.g=Math.random();
-						//LIGHTING.color.b=Math.random();
-					}
-					if (sensorData.bumpX==true) {
-//						for(var x=0; x<displayObjects.length; x++){
-//							if (statesArray[x].ImageRate == 0) {
-//								statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
-//							}
-//						}
-//						updateControlsView();
-//						syncObjectsToJson();
-					}
-					if (sensorData.bumpX==true || sensorData.bumpY==true) {
-						var requestBody=JSON.stringify({"bumpX" : false, "bumpY" : false})
-						var xmlhttp=new XMLHttpRequest();
-						xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
-						xmlhttp.send(requestBody);
-						xmlhttp.onload = function(e){
-							setTimeout(function(){checkSensors();},500)
-						}
-					}else{setTimeout(function(){checkSensors();},500)}
 				}
-			}
+			}			
 		</script>
 	</body>
 </html>

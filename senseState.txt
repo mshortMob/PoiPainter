@@ -1,1 +1,1 @@
-{"bumpX":false,"bumpY":false,"Warning1":true,"VolumeSensitivity":37.322,"ImageRate":0}
+{"Warning":"warn1","VolumeSensitivity":0,"ImageRate":0.0326}

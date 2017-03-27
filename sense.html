@@ -14,7 +14,8 @@
 	    <input id="VolumeSensitivity" type="range" style="width: 80%; height:10%; display:block; margin:2% 10% 2% 10%; padding:0% 0% 0% 0%;"></input>
 		<div style="color:white; margin:2% 2% 2% 2%;">ImageRate</div>
 	    <input id="ImageRate" type="range" style="width: 80%; height:10%; display:block; margin:2% 10% 2% 10%; padding:0% 0% 0% 0%;"></input>
-		<button style="width: 80%; height: 10%; display:block; margin:5% 10% 2% 10%; padding:0% 0% 0% 0%; font-size:20;" id="Warning1" onclick="Warning1=!Warning1;if(Warning1){document.getElementById('Warning1').style.backgroundColor='red';}else{document.getElementById('Warning1').style.backgroundColor='grey';}">Warning1</button>
+		<button style="width: 80%; height: 10%; display:block; margin:5% 10% 2% 10%; padding:0% 0% 0% 0%; font-size:20;" id="Warning1" onclick="buttonHandler(this.id)">Warning1</button>
+		<button style="width: 80%; height: 10%; display:block; margin:5% 10% 2% 10%; padding:0% 0% 0% 0%; font-size:20;" id="Warning2" onclick="buttonHandler(this.id)">Warning2</button>		
 		<script>		 
 	   		document.getElementById("VolumeSensitivity").min=0.0;
 			document.getElementById("VolumeSensitivity").max=40;
@@ -24,23 +25,31 @@
 			document.getElementById("ImageRate").max=.15;
 			document.getElementById("ImageRate").step=.0001;
 			document.getElementById("ImageRate").defaultValue=0.0;		
-			Warning1=false;
-			PENDING=false
-			bumpX=false;
-			bumpY=false;
-			window.addEventListener('devicemotion', function(event) {
-				if (Math.abs(event.acceleration.x) > 10.0 && PENDING==false) {
-					bumpX=true;
+			Warning="none"	
+			function buttonHandler(buttonId){
+				if(buttonId=="Warning1"){
+					if(Warning=="warn1"){
+						document.getElementById('Warning1').style.backgroundColor='grey'
+						document.getElementById('Warning2').style.backgroundColor='grey'
+						Warning="none";
+					}else{
+						document.getElementById('Warning1').style.backgroundColor='red'
+						document.getElementById('Warning2').style.backgroundColor='grey'
+						Warning="warn1";					
+					}
 				}
-				if (Math.abs(event.acceleration.y) > 10.0 && PENDING==false) {
-					bumpY=true;
+				if(buttonId=="Warning2"){
+					if(Warning=="warn2"){
+						document.getElementById('Warning1').style.backgroundColor='grey'
+						document.getElementById('Warning2').style.backgroundColor='grey'
+						Warning="none";
+					}else{
+						document.getElementById('Warning1').style.backgroundColor='grey'
+						document.getElementById('Warning2').style.backgroundColor='red'
+						Warning="warn2";					
+					}
 				}
-				if (Math.abs(event.acceleration.y) > 10.0 && PENDING==false) {
-					PENDING=true;
-					//saveState();
-				}
-			  });
-						
+			}	
 			recallState();
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
@@ -50,21 +59,27 @@
 					sensorData=JSON.parse(xmlhttp.response)
 					document.getElementById("ImageRate").value=sensorData.ImageRate;
 					document.getElementById("VolumeSensitivity").value=sensorData.VolumeSensitivity;
-					if(sensorData.Warning1){
+					if(sensorData.Warning=="warn1"){
 						document.getElementById("Warning1").style.backgroundColor="red";
-						Warning1=true;
-					}else{
-						document.getElementById("Warning1").style.backgroundColor="grey";
-						Warning1=false;
+						document.getElementById("Warning2").style.backgroundColor="grey";
+						Warning="warn1";
 					}
-					
+					if(sensorData.Warning=="warn2"){
+						document.getElementById("Warning1").style.backgroundColor="grey";
+						document.getElementById("Warning2").style.backgroundColor="red";
+						Warning="warn2";
+					}
+					if(sensorData.Warning=="none"){
+						document.getElementById("Warning1").style.backgroundColor="grey";
+						document.getElementById("Warning2").style.backgroundColor="grey";
+						Warning="none";
+					}
 					setInterval(function(){saveState();},1000)
 				}
 			}
-			
 			function saveState(){
 				//document.body.style.backgroundColor='green';
-				var requestBody=JSON.stringify({"bumpX" : bumpX, "bumpY" : bumpY, "Warning1": Warning1, "VolumeSensitivity": parseFloat(document.getElementById("VolumeSensitivity").value), "ImageRate": parseFloat(document.getElementById("ImageRate").value)})
+				var requestBody=JSON.stringify({"Warning": Warning, "VolumeSensitivity": parseFloat(document.getElementById("VolumeSensitivity").value), "ImageRate": parseFloat(document.getElementById("ImageRate").value)})
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn=senseState.txt", true);
 				xmlhttp.send(requestBody);
