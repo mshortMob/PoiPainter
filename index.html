@@ -36,6 +36,7 @@
 				returnCycle=false;
 				videoElements=[];
 				videoTextures=[];
+				sensorsEnabled=false;
 				for(var x=1; x<numberOfVideos+1; x++){
 					var vid = document.createElement('video');
 					vid.id="video+x"
@@ -166,7 +167,7 @@
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
-				utilsFolder.add({ 'Use Sensors':function(){ setInterval(function(){checkSensors();},1000) }},'Use Sensors');
+				utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},1000)}}},'Use Sensors');
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
