@@ -32,6 +32,8 @@
 			function initGlobalVars(){
 				bufferScene = new THREE.Scene();
 				bufferTexture = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { side:THREE.DoubleSide, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});						    
+			    bufferScene.scale.x=1.2;
+			    bufferScene.scale.y=1.2;
 			    numberOfVideos=10;
 				imageCycle=0;
 				fadeCycle=false;
@@ -129,6 +131,12 @@
 				tempElem.style.zIndex='10000000'
 				tempElem.style.position='fixed'
 				tempElem.style.right='0px';
+				boxGeometry=new THREE.BoxGeometry( 2000, 2000, 2000 );
+				boxMaterial = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				boxObject = new THREE.Mesh( boxGeometry, boxMaterial);	
+				bufferScene.add(boxObject)
+				matNumGlobal=0;
+				setInterval(function(){matNumGlobal=(matNumGlobal+1)%videoTextures.length; boxMaterial.map=videoTextures[matNumGlobal]},15000)
 			}
 				
 			function addControls(){
@@ -140,7 +148,10 @@
 					 Master:false,
 					 Slave:false,
 					 PresetName:"Preset_1",
-					 Warning: "none"
+					 Warning: "none",
+					 Rotate:0,
+					 Zoom:1,
+					 Playback:1
 				}
 				mappingController  = {
 					 Visible:false,
@@ -158,6 +169,9 @@
 				gui = new dat.GUI();
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
+				globalFolder.add(globalController, "Rotate", 0, 1, .01 ).onChange(function(){});
+				//globalFolder.add(globalController, "Zoom", 1, 10, .01 ).onChange(function(){});
+				globalFolder.add(globalController, "Playback", .1, 5, .01 ).onChange(function(){});
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
 				globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
@@ -232,11 +246,7 @@
 					 return nurbsSurface.getPoint(u, v);		
 			  }
 			  function createObject(){
-				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
-				var boxGeometry=new THREE.BoxGeometry( 2000, 1000, 2000 );
-				var boxMaterial = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
-				var boxObject = new THREE.Mesh( boxGeometry, boxMaterial);				
-				bufferScene.add(boxObject)
+				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  			
 				var material = new THREE.MeshLambertMaterial({map : bufferTexture.texture , morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				var object = new THREE.Mesh( geometry, material);				
 				object.imageNum=0;
@@ -530,6 +540,16 @@
 						returnCycle=false;						
 					}
 				}
+				
+				
+				for(var x=0; x<videoElements.length;x++){
+					videoElements[x].playbackRate=globalController.Playback;
+				}
+				bufferScene.rotation.z=bufferScene.rotation.z=bufferScene.rotation.z+globalController.Rotate;
+				//bufferScene.scale.x=globalController.Zoom;
+				//bufferScene.scale.y=globalController.Zoom;
+				
+				
 				requestAnimationFrame( animate );
 				render();
 			}
@@ -654,39 +674,14 @@
 			
 			function checkSensors() {
 				var xmlhttp1=new XMLHttpRequest();
-				xmlhttp1.open("GET", "read.php?fn="+"senseState.txt", true);
+				xmlhttp1.open("GET", "read.php?fn="+"accell.txt", true);
 				xmlhttp1.send();
 				xmlhttp1.onload = function(e){
-					sensorData=JSON.parse(xmlhttp1.response)
-					if (sensorData.VolumeSensitivity != globalController.volumeSensitivity ) {
-						console.log(sensorData)
-						globalController.volumeSensitivity=sensorData.VolumeSensitivity;
-						gui.__folders.Global.__controllers[2].updateDisplay();
-					}					
-					if (sensorData.ImageRate != globalController.ImageRate ) {
-						globalController.ImageRate=sensorData.ImageRate;
-						gui.__folders.Global.__controllers[3].updateDisplay();
-					}
-					if (sensorData.Warning != globalController.Warning) {
-						globalController.Warning=sensorData.Warning;
-						if(sensorData.Warning=="warn1"){
-							for(var x=0; x<displayObjects.length; x++){
-								displayObjects[x].setImage(displayObjects[x].imageNum);
-							}
-						}
-						if(sensorData.Warning=="warn2"){
-							for(var x=0; x<displayObjects.length; x++){
-								displayObjects[x].setImage(displayObjects[x].imageNum);
-							}
-						}
-						if(sensorData.Warning=="none"){
-							for(var x=0; x<displayObjects.length; x++){
-								displayObjects[x].setImage(displayObjects[x].imageNum);
-							}
-						}
-					}
+					accellData=JSON.parse(xmlhttp1.response)
+					globalController.Playback=accellData.x/10;
+					globalController.Rotate=accellData.y/10
 				}
-			}			
+			}					
 		</script>
 	</body>
 </html>
