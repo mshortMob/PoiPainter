@@ -30,6 +30,8 @@
 		<script>
 			initGlobalVars();
 			function initGlobalVars(){
+				bufferScene = new THREE.Scene();
+				bufferTexture = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { side:THREE.DoubleSide, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});						    
 			    numberOfVideos=10;
 				imageCycle=0;
 				fadeCycle=false;
@@ -98,12 +100,15 @@
 				frustumSize = 1000;
 				var aspect = window.innerWidth / window.innerHeight;
 				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10000 );
+				camera3 = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10000 );
 				camera.position.z = -1000;
 				controls = new THREE.TrackballControls( camera , container);
 				controls.enabled=false;
 				scene = new THREE.Scene();
 				LIGHTING=new THREE.AmbientLight( 0xffffff ) 
 				scene.add( LIGHTING );
+				LIGHTING3=new THREE.AmbientLight( 0xffffff ) 
+				bufferScene.add( LIGHTING3 );
 				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
 				renderer.setClearColor( 0x000000 , 1);
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -228,10 +233,14 @@
 			  }
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
-				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
-				var material = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				var boxGeometry=new THREE.BoxGeometry( 2000, 1000, 2000 );
+				var boxMaterial = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				var boxObject = new THREE.Mesh( boxGeometry, boxMaterial);				
+				bufferScene.add(boxObject)
+				var material = new THREE.MeshLambertMaterial({map : bufferTexture.texture , morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				var object = new THREE.Mesh( geometry, material);				
 				object.imageNum=0;
+				object.bo=boxObject;
 				return object;
 			  }
 			  var object = createObject();
@@ -285,19 +294,19 @@
 				object.geometry.verticesNeedUpdate = true;
 				object.imageNum=parseInt(savedJSON.Image)
 			  	if(globalController.Warning1){
-			  		 object.material.map=videoTextures[numberOfVideos]
+			  		 //object.material.map=videoTextures[numberOfVideos]
 			  	}else{
-					object.material.map=videoTextures[object.imageNum]
+					//object.material.map=videoTextures[object.imageNum]
 				}
 			  }
 			  object.setImage=function(savedJSON){
 			  	object.imageNum=parseInt(savedJSON)
 			  	if(globalController.Warning=="warn1"){
-			  		 object.material.map=videoTextures[numberOfVideos]
+			  		 //object.material.map=videoTextures[numberOfVideos]
 			  	}else if (globalController.Warning=="warn2"){
-			  		 object.material.map=videoTextures[numberOfVideos+1]					
+			  		 //object.material.map=videoTextures[numberOfVideos+1]					
 				}else{
-					object.material.map=videoTextures[object.imageNum]
+					//object.material.map=videoTextures[object.imageNum]
 				}	
 			  }		  
 			  object.updateCorners=function(){
@@ -532,6 +541,7 @@
 					}
 				}
 				//controls.update();
+				renderer.render(bufferScene,camera3,bufferTexture);
 				renderer.render( scene, camera );
 			}
 			
