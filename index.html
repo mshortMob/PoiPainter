@@ -170,19 +170,19 @@
 				gui = new dat.GUI();
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
-				globalFolder.add(globalController, "Rotate", 0, 1, .01 ).onChange(function(){});
+				//globalFolder.add(globalController, "Rotate", 0, 1, .01 ).onChange(function(){});
 				//globalFolder.add(globalController, "Zoom", 1, 10, .01 ).onChange(function(){});
-				globalFolder.add(globalController, "Playback", .1, 5, .01 ).onChange(function(){});
+				//globalFolder.add(globalController, "Playback", .1, 5, .01 ).onChange(function(){});
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
-				globalFolder.add( globalController, "ImageRate", 0, .15, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
+				//globalFolder.add( globalController, "ImageRate", 0, .15, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Image", 0, numberOfVideos-1, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//controlsFolder.add( mappingController, "Image", 0, numberOfVideos-1, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -407,6 +407,8 @@
 			}
 			
 			function onDocumentMouseMove( event ) {
+			            mouseX = event.clientX - windowHalfX;
+            			mouseY = event.clientY - windowHalfY;
 			//    onDocumentMouseDown( event )
 				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
