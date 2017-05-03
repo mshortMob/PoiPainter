@@ -218,7 +218,7 @@
 				utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},100)}}},'Use Sensors');
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
-				//utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 			}
 									
 			function updateControlsView(){
