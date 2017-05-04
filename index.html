@@ -70,12 +70,12 @@
 				VISUALS_VISIBLE = true;
 				SCALE_FACTOR = 800;
 				camera3_BOUND = 200;
-				NUM_POINTS_SUBSET = 16000;
+				NUM_POINTS_SUBSET = 2000;
 				NUM_SUBSETS       = 7;
 				NUM_POINTS = NUM_POINTS_SUBSET * NUM_SUBSETS;
 				NUM_LEVELS = 7;
-				LEVEL_DEPTH = 600;
-				DEF_BRIGHTNESS = .02;
+				LEVEL_DEPTH = 300;
+				DEF_BRIGHTNESS = .07;
 				DEF_SATURATION = 0.999;
 				SPRITE_SIZE = 20;
 				// Orbit parameters constraints
@@ -214,7 +214,7 @@
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				//utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
+				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},100)}}},'Use Sensors');
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
