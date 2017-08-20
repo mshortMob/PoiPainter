@@ -29,6 +29,23 @@
 		<script src="TrackballControls.js"></script>
 		<script>
 			initGlobalVars();
+			
+			function initializeVideo() {
+				window.addEventListener("DOMContentLoaded", function() {
+				video = document.getElementById("video"),
+				videoObj = { "video": true },
+				errBack = function(error) {
+					console.log("Video capture error: ", error.code); 
+				};
+				if(navigator.webkitGetUserMedia) {
+					navigator.webkitGetUserMedia(videoObj, function(stream){
+						video.src = window.URL.createObjectURL(stream);
+						video.play();
+					}, errBack);
+				}
+				}, false);
+			}
+			
 			function initGlobalVars(){
 			    numberOfVideos=10;
 				imageCycle=0;
