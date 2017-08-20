@@ -4,7 +4,7 @@ License: The MIT License (MIT)
 */
 
 function pixel8(image, x, y, w, h) {
-	"use strict";
+	//"use strict";
 
 	// Image must be an image, canvas, or video
 	// For videos: Pixel data of the currently displayed frame will be extracted
@@ -21,11 +21,12 @@ function pixel8(image, x, y, w, h) {
 
 	// For our friend Internet Explorer, FlashCanvas is supported
 	// ExplorerCanvas does not support the getImageData function
-	var canvas = document.createElement('canvas');
-	canvas.width=w;
-	canvas.height=h;
-	if (window.FlashCanvas) FlashCanvas.initElement(canvas);
-	if (canvas.getContext) var ctx = canvas.getContext('2d');
+	canvasp8 = document.createElement('canvas');
+	tt=canvasp8
+	canvasp8.id="canvasp8"
+	canvasp8.width=w;
+	canvasp8.height=h;
+	if (canvasp8.getContext) var ctx = canvasp8.getContext('2d');
 	else return;
 
 	// Draw the image/canvas/video and return a CanvasPixelArray of pixel data

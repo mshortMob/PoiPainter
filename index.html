@@ -18,10 +18,22 @@
 				float:left;
 				object-fit:fill;
 			}
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:10;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
 		</style>
 	</head>
 	<body>
-		<video id="video" autoplay width='400' height='400' style="display:none;"></video>
+		<video id="video" autoplay width='400' height='300' style="display:none;"></video>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
 		<script src='dat.gui.min.js'></script>
@@ -99,7 +111,8 @@
 			    width=document.getElementById('video').width;
 				height=document.getElementById('video').height;
 				materialArray=new Uint8Array(width * height * 4);
-				previousData=[];
+				previousData=new Uint8Array(width * height * 4);
+				data=new Uint8Array(width * height * 4);
 				isFirstCycle=true;
 				presetCounter=0.0;
 				colorCounter=0.0;
@@ -107,7 +120,7 @@
 				addControls();	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
-				material = new THREE.MeshBasicMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				container=null;
 				camera=null;
 				controls=null;
@@ -199,7 +212,8 @@
 					 FadeTime:.6,
 					 ColorMix:.5,
 					 ColorRate:.05,
-					 ColorHop:1
+					 ColorHop:1,
+					 Resolution:400
 				};
 				var count=0; 
 				for(var y=4; y>=0;y--){
@@ -228,7 +242,8 @@
 				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();});
 				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();});
 				painterFolder.add( painterController, "ColorRate", 0, .7, .001 ).onChange(function(){painterController.ColorRate=parseFloat(painterController.ColorRate);updateControlsValues();});
-				painterFolder.add( painterController, "ColorHop", 0, 10, 1 ).onChange(function(){painterController.ColorHop=parseFloat(painterController.ColorHop);updateControlsValues();});
+				painterFolder.add( painterController, "ColorHop", 0, 10, 1 ).onChange(function(){painterController.ColorHop=parseFloat(painterController.ColorHop);updateControlsValues();});				
+				//painterFolder.add( painterController, "Resolution", 100, 800, 1 ).onChange(function(){painterController.Resolution=parseFloat(painterController.Resolution);updateControlsValues();});				
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -249,6 +264,7 @@
 				  gui.__folders.PainterControls.__controllers[i].updateDisplay();
 				}
 				gui.__folders.Global.__controllers[1].updateDisplay();
+				//setPPResolution()
 			}
 			
 			function updateControlsValues(){  
@@ -258,6 +274,7 @@
 				for (var i in gui.__folders.PainterControls.__controllers) {
 				  presetsArray[parseInt(globalController.selectedPreset)][gui.__folders.PainterControls.__controllers[i].property]=painterController[gui.__folders.PainterControls.__controllers[i].property];
 				}
+				//setPPResolution()
 			}
 			
 			function syncObjectsToJson(){
@@ -543,7 +560,7 @@
 				data=pixel8(video,0,0,width,height)
 				var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
 				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
-				var delVal=100-parseFloat(painterController.FadeTime)*100;
+				var delVal=20-parseFloat(painterController.FadeTime)*20;
 				var mixVal=1-parseFloat(painterController.ColorMix)
 				for (x=0; x < ((width * height) * 4); x=x+4) {
 						if (materialArray[x+3] > 0) {
@@ -618,6 +635,17 @@
 					syncObjectsToJson();
 				}
 			}	
+			
+			function setPPResolution(){
+				if(parseInt(painterController.Resolution) != parseInt(document.getElementById('video').width)){
+					document.getElementById('video').width=parseInt(painterController.Resolution)
+					document.getElementById('video').height=parseInt(painterController.Resolution*4/3)
+			   		width=document.getElementById('video').width;
+					height=document.getElementById('video').height;			
+					dataTexture.image.width=width;
+					dataTexture.image.width=height;
+				}
+			}
 		</script>
 	</body>
 </html>
