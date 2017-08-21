@@ -21,11 +21,10 @@ function pixel8(image, x, y, w, h) {
 
 	// For our friend Internet Explorer, FlashCanvas is supported
 	// ExplorerCanvas does not support the getImageData function
-	canvasp8 = document.createElement('canvas');
-	tt=canvasp8
-	canvasp8.id="canvasp8"
-	canvasp8.width=w;
-	canvasp8.height=h;
+	//canvasp8 = document.createElement('canvas');
+	canvasp8=document.getElementById('canvasp8')
+	canvasp8.width=w
+	canvasp8.height=h
 	if (canvasp8.getContext) var ctx = canvasp8.getContext('2d');
 	else return;
 
@@ -35,7 +34,7 @@ function pixel8(image, x, y, w, h) {
 	// See https://developer.mozilla.org/en-US/docs/HTML/Canvas/Pixel_manipulation_with_canvas
 	// to find out how to get specific data from the array
 	// Or just use the pixel8-provided methods below
-	ctx.drawImage(image, x, y);
+	ctx.drawImage(image, x, y, w, h);
 	var _data = ctx.getImageData(0, 0, w, h)
 	var data = _data.data;
 	data.width = _data.width;
@@ -61,7 +60,7 @@ function pixel8(image, x, y, w, h) {
 
 	// Draws the pixel data into a canvas
 	data.draw = function(ctx, x, y) {
-		//ctx.putImageData(_data, x, y);
+		ctx.putImageData(_data, x, y);
 	};
 
 	return data;
