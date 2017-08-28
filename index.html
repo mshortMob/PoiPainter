@@ -105,10 +105,25 @@
 						}
 					  }
 					  gui.__folders.Utils.__controllers[gui.__folders.Utils.__controllers.length-1].__max=numOfCameras;
-					  action="select"
-					}).catch(function(error){
-					  console.log('navigator.getUserMedia error: ', error);
-					});
+					  selectedCamera=camNum;
+					  if (window.stream) {
+						window.stream.getTracks().forEach(function(track) {
+						  track.stop();
+						});
+					  }
+					  console.log(cameraIds[selectedCamera])
+					  var videoSource = cameraIds[selectedCamera];
+					  var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+					  navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+						  window.stream = stream; 
+						  document.getElementById(videoElem).srcObject = stream;
+						  return navigator.mediaDevices.enumerateDevices();
+					  }).catch(function(error){
+						  console.log('navigator.getUserMedia error: ', error);
+					  });
+					  }).catch(function(error){
+						console.log('navigator.getUserMedia error: ', error);
+					  });
 				}
 				if(action == "select"){
 					selectedCamera=camNum;
@@ -117,6 +132,7 @@
 						track.stop();
 					  });
 					}
+					console.log(cameraIds[selectedCamera])
 					var videoSource = cameraIds[selectedCamera];
 					var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
 					navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
