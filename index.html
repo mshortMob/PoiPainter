@@ -90,21 +90,43 @@
 			
 			initGlobalVars();
 						
-			function initializeVideo() {
-				window.addEventListener("DOMContentLoaded", function() {
-				video = document.getElementById("video"),
-				videoObj = { "video": true },
-				errBack = function(error) {
-					console.log("Video capture error: ", error.code); 
-				};
-				if(navigator.webkitGetUserMedia) {
-					navigator.webkitGetUserMedia(videoObj, function(stream){
-						aa=stream
-						video.src = URL.createObjectURL(stream);
-						video.play();
-					}, errBack);
+			function getVideo(action,camNum) {
+				if(action == "init"){
+					numOfCameras=0
+					cameraIds=[]
+					selectedCamera=0;
+					videoElem='video'
+					navigator.mediaDevices.enumerateDevices().then(function(deviceInfos){
+					  for (var i = 0; i !== deviceInfos.length; ++i) {
+						var deviceInfo = deviceInfos[i];
+						if (deviceInfo.kind === 'videoinput') {
+						  numOfCameras=numOfCameras + 1
+						  cameraIds.push(deviceInfo.deviceId);
+						}
+					  }
+					  gui.__folders.Utils.__controllers[gui.__folders.Utils.__controllers.length-1].__max=numOfCameras;
+					  action="select"
+					}).catch(function(error){
+					  console.log('navigator.getUserMedia error: ', error);
+					});
 				}
-				}, false);
+				if(action == "select"){
+					selectedCamera=camNum;
+					if (window.stream) {
+					  window.stream.getTracks().forEach(function(track) {
+						track.stop();
+					  });
+					}
+					var videoSource = cameraIds[selectedCamera];
+					var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+					navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+						window.stream = stream; 
+						document.getElementById(videoElem).srcObject = stream;
+						return navigator.mediaDevices.enumerateDevices();
+					}).catch(function(error){
+						console.log('navigator.getUserMedia error: ', error);
+					});
+				}
 			}
 			
 			function initGlobalVars(){
@@ -117,7 +139,7 @@
 				isFirstCycle=true;
 				presetCounter=0.0;
 				colorCounter=0.0;
-				initializeVideo()
+				getVideo("init",0)
 				addControls();	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
@@ -201,7 +223,8 @@
 					 PresetRate:0.0,
 					 Master:false,
 					 Slave:false,
-					 PresetName:"Preset_1"
+					 PresetName:"Preset_1",
+					 selectedCamera:0
 				}
 				mappingController  = {
 					 Visible:false,
@@ -254,6 +277,8 @@
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				utilsFolder.add(globalController, "selectedCamera", 0, 1, 1 ).onChange(function(){globalController.selectedCamera=parseInt(globalController.selectedCamera);getVideo("select",globalController.selectedCamera);});
+
 			}
 									
 			function updateControlsView(){
