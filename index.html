@@ -104,7 +104,7 @@
 						  cameraIds.push(deviceInfo.deviceId);
 						}
 					  }
-					  gui.__folders.Utils.__controllers[gui.__folders.Utils.__controllers.length-1].__max=numOfCameras;
+					  gui.__folders.Utils.__controllers[gui.__folders.Utils.__controllers.length-1].__max=numOfCameras-1;
 					  selectedCamera=camNum;
 					  if (window.stream) {
 						window.stream.getTracks().forEach(function(track) {
