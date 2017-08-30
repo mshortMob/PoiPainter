@@ -22,7 +22,7 @@ function pixel8(image, x, y, w, h) {
 	// For our friend Internet Explorer, FlashCanvas is supported
 	// ExplorerCanvas does not support the getImageData function
 	//canvasp8 = document.createElement('canvas');
-	canvasp8=document.getElementById('canvasp8')
+	var canvasp8=document.getElementById('canvasp8')
 	canvasp8.width=w
 	canvasp8.height=h
 	if (canvasp8.getContext) var ctx = canvasp8.getContext('2d');
