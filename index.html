@@ -21,6 +21,12 @@
 		</style>
 	</head>
 	<body>
+		<script src="ffmpegserver/ffmpegserver.min..js"></script>
+		<script src="CCapture.js"></script>
+		<script src="Whammy.js"></script>
+		<script src="gif.js"></script>
+		<script src="tar.js"></script>
+		<script src="download.js"></script>
 		<script src="three.js"></script>
 		<script src='dat.gui.min.js'></script>
 		<script src="Detector.js"></script>
@@ -47,6 +53,7 @@
 			}
 			
 			function initGlobalVars(){
+				capturer = new CCapture( { format: 'ffmpegserver', framerate: 15 } );
 			    numberOfVideos=10;
 				imageCycle=0;
 				fadeCycle=false;
@@ -152,7 +159,8 @@
 					 Master:false,
 					 Slave:false,
 					 PresetName:"Preset_1",
-					 Warning: "none"
+					 Warning: "none",
+					 Record: false
 				}
 				mappingController  = {
 					 Visible:false,
@@ -172,7 +180,7 @@
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
+				//globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
 				globalFolder.add( globalController, "ImageRate", 0, .15, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
@@ -184,10 +192,11 @@
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
-				utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},1000)}}},'Use Sensors');
+				//utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},1000)}}},'Use Sensors');
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				utilsFolder.add( globalController, "Record", true ).onChange(function(){recordControls();});	
 			}
 									
 			function updateControlsView(){
@@ -498,6 +507,7 @@
 			}
 			
 			function animate() {
+				
 			    if(globalController.ImageRate == 0){
 			    	LIGHTING.color.r=1;
 					LIGHTING.color.g=1;
@@ -550,6 +560,7 @@
 				}
 				//controls.update();
 				renderer.render( scene, camera );
+				capturer.capture( container.children[0] );
 			}
 			
 			function requestFullScreen() {
@@ -693,7 +704,21 @@
 						}
 					}
 				}
-			}			
+			}
+
+			function recordControls(){
+				if(globalController.Record == true){
+					for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ 
+						displayObjects[globalController.selectedFixture].children[x].visible=false; 
+					}; 
+					//requestFullScreen(); 
+					capturer.start()
+				}else if(globalController.Record == false){
+					capturer.stop()
+					capturer.save()
+				}
+			}
+
 		</script>
 	</body>
 </html>
