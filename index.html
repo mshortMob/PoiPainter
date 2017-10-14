@@ -21,7 +21,6 @@
 		</style>
 	</head>
 	<body>
-		<script src="ffmpegserver/ffmpegserver.min..js"></script>
 		<script src="CCapture.js"></script>
 		<script src="Whammy.js"></script>
 		<script src="gif.js"></script>
@@ -53,7 +52,7 @@
 			}
 			
 			function initGlobalVars(){
-				capturer = new CCapture( { format: 'ffmpegserver', framerate: 15 } );
+				capturer = new CCapture( { format: 'webm', framerate: 15 } );
 			    numberOfVideos=10;
 				imageCycle=0;
 				fadeCycle=false;
@@ -712,10 +711,12 @@
 						displayObjects[globalController.selectedFixture].children[x].visible=false; 
 					}; 
 					//requestFullScreen(); 
-					capturer.start()
+					capturer.start();
+					//recInt=setInterval(function(){capturer.capture( container.children[0] );} ,100)
 				}else if(globalController.Record == false){
 					capturer.stop()
 					capturer.save()
+					//clearInterval(recInt)
 				}
 			}
 
