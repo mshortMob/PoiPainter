@@ -531,7 +531,7 @@
 						returnCycle=false;						
 					}
 				}
-				requestAnimationFrame( animate );
+				setTimeout(function(){requestAnimationFrame( animate );},1000/20);
 				render();
 			}
 			
@@ -724,7 +724,7 @@
 					mediaRecorder.start();
 				}else if(globalController.Record == false){
 					mediaRecorder.stop();
-					setTimeout(function(){downloadRecording();},3000)
+					setTimeout(function(){downloadRecording();},100)
 				}
 			}
 
