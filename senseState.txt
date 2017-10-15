@@ -1,1 +1,0 @@
-{"Warning":"none","VolumeSensitivity":173.283,"ImageRate":0.0326}
