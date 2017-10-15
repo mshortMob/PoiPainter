@@ -21,11 +21,6 @@
 		</style>
 	</head>
 	<body>
-		<script src="CCapture.js"></script>
-		<script src="Whammy.js"></script>
-		<script src="gif.js"></script>
-		<script src="tar.js"></script>
-		<script src="download.js"></script>
 		<script src="three.js"></script>
 		<script src='dat.gui.min.js'></script>
 		<script src="Detector.js"></script>
@@ -52,8 +47,8 @@
 			}
 			
 			function initGlobalVars(){
-				capturer = new CCapture( { format: 'webm', framerate: 15 } );
-			    numberOfVideos=10;
+				//capturer = new CCapture( { format: 'webm', framerate: 14 } );
+			    numberOfVideos=4;
 				imageCycle=0;
 				fadeCycle=false;
 				returnCycle=false;
@@ -64,17 +59,6 @@
 					var vid = document.createElement('video');
 					vid.id="video+x"
 					vid.src="anim"+x+".mp4"
-					vid.autoplay=true;
-					vid.loop=true;
-					videoElements.push(vid)
-					var videoTexture1 = new THREE.Texture( vid );
-					videoTexture1.minFilter=THREE.LinearFilter;
-					videoTextures.push(videoTexture1)					
-				}
-				for(var x=1; x<3; x++){
-					var vid = document.createElement('video');
-					vid.id="warn+x"
-					vid.src="warn"+x+".mp4"
 					vid.autoplay=true;
 					vid.loop=true;
 					videoElements.push(vid)
@@ -559,7 +543,7 @@
 				}
 				//controls.update();
 				renderer.render( scene, camera );
-				capturer.capture( container.children[0] );
+				//capturer.capture( container.children[0] );
 			}
 			
 			function requestFullScreen() {
@@ -614,41 +598,41 @@
 			}
 
 			function initMicrophone() {
-				navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-				if (navigator.getUserMedia) {
-				   navigator.getUserMedia({ audio: true, video: { width: 80, height: 80 } },
-					  function(stream) {
-						 console.log("Accessed the Microphone");
-					audioContext = new AudioContext();
-					analyser = audioContext.createAnalyser();
-					microphone = audioContext.createMediaStreamSource(stream);
-					//javascriptNode = audioContext.createScriptProcessor(16384, 1, 1);
-					javascriptNode = audioContext.createScriptProcessor(8192, 1, 1);
-					analyser.smoothingTimeConstant = 0.3;
-					//analyser.fftSize = 1024;
-					microphone.connect(analyser);
-					analyser.connect(javascriptNode);
-					javascriptNode.connect(audioContext.destination);
-					javascriptNode.onaudioprocess = function() {
-						var array =  new Uint8Array(analyser.frequencyBinCount);
-						analyser.getByteFrequencyData(array);
-						var values = 0;
-						var length = array.length;
-						for (var i = 0; i < length; i++) {
-							values += array[i];
-						}
-						volumeLevel = values / length;
-						soundToVideoRate();
-						//console.log(volumeLevel)
-					}
-					  },
-					  function(err) {
-						 console.log("The following error occured: " + err.name);
-					  }
-					);
-				} else {
-				   console.log("getUserMedia not supported");
-				}
+				// navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+				// if (navigator.getUserMedia) {
+				//    navigator.getUserMedia({ audio: true, video: { width: 80, height: 80 } },
+				// 	  function(stream) {
+				// 		 console.log("Accessed the Microphone");
+				// 	audioContext = new AudioContext();
+				// 	analyser = audioContext.createAnalyser();
+				// 	microphone = audioContext.createMediaStreamSource(stream);
+				// 	//javascriptNode = audioContext.createScriptProcessor(16384, 1, 1);
+				// 	javascriptNode = audioContext.createScriptProcessor(8192, 1, 1);
+				// 	analyser.smoothingTimeConstant = 0.3;
+				// 	//analyser.fftSize = 1024;
+				// 	microphone.connect(analyser);
+				// 	analyser.connect(javascriptNode);
+				// 	javascriptNode.connect(audioContext.destination);
+				// 	javascriptNode.onaudioprocess = function() {
+				// 		var array =  new Uint8Array(analyser.frequencyBinCount);
+				// 		analyser.getByteFrequencyData(array);
+				// 		var values = 0;
+				// 		var length = array.length;
+				// 		for (var i = 0; i < length; i++) {
+				// 			values += array[i];
+				// 		}
+				// 		volumeLevel = values / length;
+				// 		soundToVideoRate();
+				// 		//console.log(volumeLevel)
+				// 	}
+				// 	  },
+				// 	  function(err) {
+				// 		 console.log("The following error occured: " + err.name);
+				// 	  }
+				// 	);
+				// } else {
+				//    console.log("getUserMedia not supported");
+				// }
 			}
 			
 			function soundToVideoRate() {
@@ -705,18 +689,42 @@
 				}
 			}
 
+			function downloadRecording() {
+				var blob = new Blob(recordedChunks, {
+					type: 'video/webm'
+				});
+				var url = URL.createObjectURL(blob);
+				var a = document.createElement('a');
+				document.body.appendChild(a);
+				a.style = 'display: none';
+				a.href = url;
+				a.download = 'test.webm';
+				a.click();
+				window.URL.revokeObjectURL(url);
+				recordedChunks = [];
+				mediaRecorder=null;
+				stream=null;
+			}
+
 			function recordControls(){
 				if(globalController.Record == true){
 					for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ 
 						displayObjects[globalController.selectedFixture].children[x].visible=false; 
 					}; 
 					//requestFullScreen(); 
-					capturer.start();
-					//recInt=setInterval(function(){capturer.capture( container.children[0] );} ,100)
+					recordedChunks = [];
+					stream=container.children[0].captureStream()
+					options = {mimeType: 'video/webm; codecs=vp9'};
+					mediaRecorder = new MediaRecorder(stream, options);
+					mediaRecorder.ondataavailable = function(event){
+						if (event.data.size > 0) {
+						recordedChunks.push(event.data);
+						}
+					};
+					mediaRecorder.start();
 				}else if(globalController.Record == false){
-					capturer.stop()
-					capturer.save()
-					//clearInterval(recInt)
+					mediaRecorder.stop();
+					setTimeout(function(){downloadRecording();},3000)
 				}
 			}
 
