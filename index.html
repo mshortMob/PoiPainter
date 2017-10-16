@@ -180,7 +180,10 @@
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
-				utilsFolder.add( globalController, "Record", true ).onChange(function(){recordControls();});	
+				utilsFolder.add( globalController, "Record", true ).onChange(function(){recordControls();});
+				utilsFolder.add({ 'Download Webm':function(){ downloadRecording();}},'Download Webm');
+				utilsFolder.add({ 'Download Mp4':function(){ convertStreams(blob);}},'Download Mp4');
+					
 			}
 									
 			function updateControlsView(){
@@ -499,7 +502,7 @@
 			    }
 				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==false) {
 					imageCycle=imageCycle+globalController.ImageRate;
-					if (imageCycle>=10) {
+					if (imageCycle>=2) {
 						imageCycle=0;
 						fadeCycle=true;
 						returnCycle=false;
@@ -691,9 +694,6 @@
 			}
 
 			function downloadRecording() {
-				blob = new Blob(recordedChunks, {
-					type: 'video/webm'
-				});
 				var url = URL.createObjectURL(blob);
 				var a = document.createElement('a');
 				document.body.appendChild(a);
@@ -702,16 +702,6 @@
 				a.download = 'test.webm';
 				a.click();
 				window.URL.revokeObjectURL(url);
-				recordedChunks = [];
-				mediaRecorder=null;
-				stream=null;
-			}
-
-			function downloadRecordingMp4() {
-				blob = new Blob(recordedChunks, {
-					type: 'video/webm'
-				});
-				convertStreams(blob)
 			}
 
 			function recordControls(){
@@ -721,6 +711,8 @@
 					}; 
 					//requestFullScreen(); 
 					recordedChunks = [];
+					mediaRecorder=null;
+					stream=null;
 					stream=container.children[0].captureStream()
 					options = {mimeType: 'video/webm; codecs=vp9'};
 					mediaRecorder = new MediaRecorder(stream, options);
@@ -732,8 +724,13 @@
 					mediaRecorder.start();
 				}else if(globalController.Record == false){
 					mediaRecorder.stop();
+					setTimeout(function(){
+							blob = new Blob(recordedChunks, {
+							type: 'video/webm'
+						});
+					},100);
 					//setTimeout(function(){downloadRecording();},100)
-					setTimeout(function(){downloadRecordingMp4();},100)
+					//setTimeout(function(){downloadRecordingMp4();},100)
 				}
 			}
 
