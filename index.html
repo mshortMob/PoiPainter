@@ -21,12 +21,12 @@
 		</style>
 	</head>
 	<body>
-		<script src="three.js"></script>
-		<script src='dat.gui.min.js'></script>
-		<script src="Detector.js"></script>
-		<script src="NURBSSurface.js"></script>
-		<script src="NURBSUtils.js"></script>
-		<script src="TrackballControls.js"></script>
+		<script src="packages/three.js"></script>
+		<script src='packages/dat.gui.min.js'></script>
+		<script src="packages/Detector.js"></script>
+		<script src="packages/NURBSSurface.js"></script>
+		<script src="packages/NURBSUtils.js"></script>
+		<script src="packages/TrackballControls.js"></script>
 		<script>
 			initGlobalVars();
 			
@@ -57,18 +57,7 @@
 				for(var x=1; x<numberOfVideos+1; x++){
 					var vid = document.createElement('video');
 					vid.id="video+x"
-					vid.src="anim"+x+".mp4"
-					vid.autoplay=true;
-					vid.loop=true;
-					videoElements.push(vid)
-					var videoTexture1 = new THREE.Texture( vid );
-					videoTexture1.minFilter=THREE.LinearFilter;
-					videoTextures.push(videoTexture1)					
-				}
-				for(var x=1; x<3; x++){
-					var vid = document.createElement('video');
-					vid.id="warn+x"
-					vid.src="warn"+x+".mp4"
+					vid.src="media/anim"+x+".mp4"
 					vid.autoplay=true;
 					vid.loop=true;
 					videoElements.push(vid)
@@ -172,8 +161,8 @@
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
-				globalFolder.add( globalController, "ImageRate", 0, .15, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				//globalFolder.add(globalController, "volumeSensitivity", 0.0, 200.0, .001 ).onChange(function(){});					
+				//globalFolder.add( globalController, "ImageRate", 0, .15, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -184,7 +173,7 @@
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
-				utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},1000)}}},'Use Sensors');
+				//utilsFolder.add({ 'Use Sensors':function(){if(!sensorsEnabled){setInterval(function(){checkSensors();sensorsEnabled=true;},1000)}}},'Use Sensors');
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
@@ -404,10 +393,8 @@
 			}
 			
 			function onDocumentMouseMove( event ) {
-			//    onDocumentMouseDown( event )
 				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
-			//	////event.preventDefault();
 				raycaster.setFromCamera( mouse, camera );
 				if ( SELECTED ) {
 					
@@ -498,46 +485,6 @@
 			}
 			
 			function animate() {
-			    if(globalController.ImageRate == 0){
-			    	LIGHTING.color.r=1;
-					LIGHTING.color.g=1;
-					LIGHTING.color.b=1;
-			    }
-				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==false) {
-					imageCycle=imageCycle+globalController.ImageRate;
-					if (imageCycle>=10) {
-						imageCycle=0;
-						fadeCycle=true;
-						returnCycle=false;
-					}
-				}
-				if (globalController.ImageRate != 0 && fadeCycle==true && returnCycle==false) {
-					LIGHTING.color.r=LIGHTING.color.r-.025
-					LIGHTING.color.g=LIGHTING.color.g-.025
-					LIGHTING.color.b=LIGHTING.color.b-.025
-					if (LIGHTING.color.r<=.2) {
-						for(var x=0; x<displayObjects.length; x++){
-							statesArray[x].Image=(statesArray[x].Image+1)%numberOfVideos
-							//if(!globalController.Warning1){
-								displayObjects[x].setImage(statesArray[x].Image);
-							//}else{
-							//	displayObjects[x].setImage("warn1");
-							//}
-						}
-						updateControlsView();
-						fadeCycle=false;
-						returnCycle=true;
-					}
-				}
-				if (globalController.ImageRate != 0 && fadeCycle==false && returnCycle==true) {
-					LIGHTING.color.r=LIGHTING.color.r+.025
-					LIGHTING.color.g=LIGHTING.color.g+.025
-					LIGHTING.color.b=LIGHTING.color.b+.025
-					if (LIGHTING.color.r>=1) {
-						fadeCycle=false;
-						returnCycle=false;						
-					}
-				}
 				requestAnimationFrame( animate );
 				render();
 			}
@@ -571,7 +518,7 @@
 				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
 				if (window.location.hostname.indexOf("localhost")!=-1) {
-					xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
+					xmlhttp.open("POST", "php/write.php?fn=/data/"+globalController.PresetName+".txt", true);
 				}else{
 					xmlhttp.open("POST", "https://5oa8elkgyj.execute-api.us-east-1.amazonaws.com/dev/writeppd", true);
 				}
@@ -582,7 +529,7 @@
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
 				if (window.location.hostname.indexOf("localhost")!=-1) {
-					xmlhttp.open("GET", "read.php?fn="+globalController.PresetName+".txt", true);
+					xmlhttp.open("GET", "php/read.php?fn=/data/"+globalController.PresetName+".txt", true);
 					xmlhttp.send();
 					xmlhttp.onload = function(e){
 						statesArray=JSON.parse(xmlhttp.response).storage
