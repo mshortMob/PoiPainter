@@ -1,6 +1,8 @@
-rm Archive.zip
-git add -A
-#git commit -a -m "$1"
-#git push
-zip Archive.zip *
-aws --profile poipainter s3 sync '/Users/mshort/desktop/PoiPainter' s3://animmappertests
+# rm Archive.zip
+# git add -A
+# #git commit -a -m "$1"
+# #git push
+# zip Archive.zip *
+# aws --profile poipainter s3 sync '/Users/mshort/desktop/PoiPainter' s3://animmappertests
+
+aws --profile poipainter s3 sync '/Users/mshort/desktop/PoiPainter' s3://poipainter.com --exclude ".git/*" --exclude ".DS_Store"
