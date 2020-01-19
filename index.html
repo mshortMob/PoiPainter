@@ -57,6 +57,28 @@
 
 			}
 		</script>
+
+		<script id="fragmentShader3" type="x-shader/x-fragment">
+
+			uniform float time;
+
+			varying vec2 vUv;
+
+			void main( void ) {
+
+				vec2 position = vUv;
+
+				float color = 0.0;
+				color += sin( position.x * cos( time / 15.0 ) * 80.0 ) + cos( position.y * cos( time / 15.0 ) * 10.0 );
+				color += sin( position.y * sin( time / 10.0 ) * 40.0 ) + cos( position.x * sin( time / 25.0 ) * 40.0 );
+				color += sin( position.x * sin( time / 5.0 ) * 10.0 ) + sin( position.y * sin( time / 35.0 ) * 80.0 );
+				color *= sin( time / 10.0 ) * 0.5;
+
+				gl_FragColor = vec4( vec3( color, color * 0.5, sin( color + time / 3.0 ) * 0.75 ), 1.0 );
+
+			}
+
+		</script>
 		
 		<script>		
 			initGlobalVars();
@@ -68,20 +90,17 @@
 					fragmentShader: document.getElementById( 'fragmentShader' ).textContent
 
 				} );
-				return material;
+				var material2 = new THREE.ShaderMaterial( {
+					uniforms: uniforms1,
+					vertexShader: document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader3' ).textContent
+
+				} );
+				return [material, material2];
 			}
 
 			function initGlobalVars(){
-				width=100;
-				height=100;
-				materialArray=new Uint8Array(width * height * 4);
-				previousData=new Uint8Array(width * height * 4);
-				data=new Uint8Array(width * height * 4);
-				isFirstCycle=true;
 				addControls();	
-				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
-				dataTexture.needsUpdate = true;
-				material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				container=null;
 				camera=null;
 				controls=null;
@@ -115,7 +134,7 @@
 				uniforms1 = {
 					"time": { value: 1.0 }
 				};
-				smaterial=initShaderMaterial(uniforms1);
+				materialsList=initShaderMaterial(uniforms1);
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 				frustumSize = 1000;
@@ -152,7 +171,8 @@
 				}
 				mappingController  = {
 					 Visible:false,
-					 ZValue:0
+					 ZValue:0,
+					 Shader:0
 				};
 				var count=0; 
 				for(var y=4; y>=0;y--){
@@ -173,6 +193,7 @@
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Shader", 0, 1, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -181,7 +202,6 @@
 									
 			function updateControlsView(){
 				for (var i in gui.__folders.MappingControls.__controllers) {
-					//mappingController[i]=statesArray[globalController.selectedScene].objects[globalController.selectedFixture]
 				  	mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
 					gui.__folders.MappingControls.__controllers[i].updateDisplay();
 				}
@@ -234,7 +254,7 @@
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
-				var object = new THREE.Mesh( geometry, smaterial);				
+				var object = new THREE.Mesh( geometry, materialsList[0]);				
 				return object;
 			  }
 			  var object = createObject();
@@ -279,6 +299,7 @@
 			  object.setState=function(savedJSON){
 				object.visible=savedJSON.Visible;
 				object.position.z= savedJSON.ZValue
+				object.material=materialsList[parseInt(savedJSON.Shader)]
 				for(var x=0;x<object.geometry.vertices.length;x++){
 					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
 					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
