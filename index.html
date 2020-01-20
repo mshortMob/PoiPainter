@@ -18,9 +18,26 @@
 				float:left;
 				object-fit:fill;
 			}
+			textarea{
+				z-index:100;
+				position:fixed;
+				height:42.5%;
+				width:40%;
+			}
+			button{
+				z-index:100;
+				position:fixed;
+				left:0px;
+				bottom:0px;
+				height:15%;
+				width:40%;
+			}
 		</style>
 	</head>
 	<body>
+		<textarea id="textb"></textarea>
+		<textarea id="textb2" style="top:42.5%;"></textarea>
+		<button onclick="updateShader();">Update</button>
 		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
@@ -31,39 +48,59 @@
 		<script src="TrackballControls.js"></script>
 
 		<script id="vertexShader" type="x-shader/x-vertex">
-			varying vec2 vUv;
+precision mediump float;
+precision mediump int;
 
-			void main()
-			{
-				vUv = uv;
-				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-				gl_Position = projectionMatrix * mvPosition;
-			}
+uniform mat4 modelViewMatrix; // optional
+uniform mat4 projectionMatrix; // optional
+
+attribute vec3 position;
+attribute vec4 color;
+attribute vec2 uv;
+
+varying vec3 vPosition;
+varying vec4 vColor;
+varying vec2 vUv;
+
+void main()	{
+	vUv = uv;
+	vPosition = position;
+	vColor = color;
+
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+}
 		</script>
 
 		<script id="fragmentShader1" type="x-shader/x-fragment">
-			uniform float time;
+precision mediump float;
+precision mediump int;
 
-			varying vec2 vUv;
+uniform float time;
 
-			void main( void ) {
+varying vec3 vPosition;
+varying vec4 vColor;
+varying vec2 vUv;
 
-				vec2 position = - 1.0 + 2.0 * vUv;
-
-				float red = abs( sin( position.x * position.y + time / 5.0 ) );
-				float green = abs( sin( position.x * position.y + time / 4.0 ) );
-				float blue = abs( sin( position.x * position.y + time / 3.0 ) );
-				gl_FragColor = vec4( red, green, blue, 1.0 );
-
-			}
+void main()	{
+	vec2 position = - 1.0 + 2.0 * vUv;
+	float red = abs( sin( position.x * position.y + time / 5.0 ) );
+	float green = abs( sin( position.x * position.y + time / 4.0 ) );
+	float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+	gl_FragColor = vec4( red, green, blue, 1.0 );
+}
 		</script>
 
 		<script id="fragmentShader2" type="x-shader/x-fragment">
-
+			precision mediump float;
+			precision mediump int;
+			
 			uniform float time;
-
+			
+			varying vec3 vPosition;
+			varying vec4 vColor;
 			varying vec2 vUv;
-
+			
 			void main( void ) {
 
 				vec2 position = vUv;
@@ -77,15 +114,18 @@
 				gl_FragColor = vec4( vec3( color, color * 0.5, sin( color + time / 3.0 ) * 0.75 ), 1.0 );
 
 			}
-
 		</script>
 
 		<script id="fragmentShader3" type="x-shader/x-fragment">
-
+			precision mediump float;
+			precision mediump int;
+			
 			uniform float time;
-
+			
+			varying vec3 vPosition;
+			varying vec4 vColor;
 			varying vec2 vUv;
-
+			
 			void main(void) {
 
 				vec2 p = - 1.0 + 2.0 * vUv;
@@ -117,33 +157,75 @@
 			}
 
 		</script>
+
+		<script id="fragmentShader4" type="x-shader/x-fragment">
+			precision mediump float;
+			precision mediump int;
+			
+			uniform float time;
+			
+			varying vec3 vPosition;
+			varying vec4 vColor;
+			varying vec2 vUv;
+			
+			void main()	{
+				vec2 p = - 1.0 + 2.0 * vUv;
+			
+				for(int i=1;i<100;i++)
+				{
+					vec2 newp=p;
+					float speed = 155.0; // speed control
+					newp.x+=0.8/float(i)*sin(float(i)*p.y+time/(100.0/speed)+0.8*float(i))+1.0;
+					newp.y+=0.8/float(i)*sin(float(i)*p.x+time/(100.0/speed)+0.3*float(i+10))-11.4;
+					p=newp;
+				}
+				vec3 col=vec3(sin(p.x*1.+p.y), 0.2*sin(12.0*p.y), 0.);
+				gl_FragColor=vec4(col, 1.0);
+			}	
+		</script>
 		
 		<script>		
 			initGlobalVars();
 			
+			function updateShader(){
+				document.getElementById( 'fragmentShader1' ).textContent=document.getElementById('textb').value
+				document.getElementById( 'vertexShader' ).textContent=document.getElementById('textb2').value
+				materialsList=initShaderMaterial(uniforms1);
+				displayObjects[parseInt(globalController.selectedFixture)].material=materialsList[0]
+			}
+
 			function initShaderMaterial(uniforms1){
-				var material = new THREE.ShaderMaterial( {
+				document.getElementById('textb').value=document.getElementById( 'fragmentShader1' ).textContent
+				document.getElementById('textb2').value=document.getElementById( 'vertexShader' ).textContent
+				var material = new THREE.RawShaderMaterial( {
 					uniforms: uniforms1,
 					vertexShader: document.getElementById( 'vertexShader' ).textContent,
 					fragmentShader: document.getElementById( 'fragmentShader1' ).textContent
 
 				} );
 				material.side=THREE.DoubleSide;
-				var material2 = new THREE.ShaderMaterial( {
+				var material2 = new THREE.RawShaderMaterial( {
 					uniforms: uniforms1,
 					vertexShader: document.getElementById( 'vertexShader' ).textContent,
 					fragmentShader: document.getElementById( 'fragmentShader2' ).textContent
 
 				} );
 				material2.side=THREE.DoubleSide;
-				var material3 = new THREE.ShaderMaterial( {
+				var material3 = new THREE.RawShaderMaterial( {
 					uniforms: uniforms1,
 					vertexShader: document.getElementById( 'vertexShader' ).textContent,
 					fragmentShader: document.getElementById( 'fragmentShader3' ).textContent
 
 				} );
 				material3.side=THREE.DoubleSide;
-				return [material, material2, material3];
+				var material4 = new THREE.RawShaderMaterial( {
+					uniforms: uniforms1,
+					vertexShader: document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader4' ).textContent
+
+				} );
+				material4.side=THREE.DoubleSide;
+				return [material, material2, material3, material4];
 			}
 
 			function initGlobalVars(){
@@ -179,7 +261,9 @@
 			
 			function initScene() {
 				uniforms1 = {
-					"time": { value: 1.0 }
+					"time": { value: 1.0 },
+					"resolution": [0,0],
+					"mouse": [0,0]
 				};
 				materialsList=initShaderMaterial(uniforms1);
 				container = document.createElement( 'div' );
@@ -213,7 +297,6 @@
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
-					 selectedPreset:0,
 					 mappingMode:0
 				}
 				mappingController  = {
@@ -233,14 +316,13 @@
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
-				globalFolder.add(globalController, "selectedPreset", 0, 3, 1 ).onChange(function(){globalController.selectedPreset=parseInt(globalController.selectedPreset);updateControlsView();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Shader", 0, 2, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Shader", 0, 3, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
