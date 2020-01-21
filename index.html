@@ -24,26 +24,64 @@
 				height:42.5%;
 				width:40%;
 				background-color: grey;
-				border-color: black;
+				border-color: #515151;
 				border-width:4;
+				border-top-width:0;
+				border-left-width:0;
+				border-right-width:8;
+				font-size: 14px;
 			}
-			button{
+			#show_shader_editor{
+				z-index:100;
+				position:fixed;
+				left:0px;
+				top:0px;
+				height:6%;
+				width:100px;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-top-width:0;
+				border-left-width:0;
+				font-size: 14px;
+			}
+			#hide_shader_editor{
 				z-index:100;
 				position:fixed;
 				left:0px;
 				bottom:0px;
 				height:15%;
-				width:40%;
+				width:10%;
 				background-color: darkgrey;
-				border-color: black;
+				border-color: #515151;
 				border-width:4;
+				border-left-width:0;
+				font-size: 18px;
+			}
+			#update_shader_button{
+				z-index:100;
+				position:fixed;
+				left:10%;
+				bottom:0px;
+				height:15%;
+				width:30%;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-right-width:8;
+				font-size: 24px;
+			}
+			#update_shader_button:active{
+				background-color: grey;			
 			}
 		</style>
 	</head>
 	<body>
-		<textarea id="textb"></textarea>
-		<textarea id="textb2" style="top:42.5%;"></textarea>
-		<button onclick="updateShader();">Update</button>
+		<textarea id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
+		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>
+		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
+		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='inline';">Hide Editor</button>
+		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
 		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
@@ -84,8 +122,6 @@ precision mediump int;
 
 uniform float time;
 
-varying vec3 vPosition;
-varying vec4 vColor;
 varying vec2 vUv;
 
 void main()	{
@@ -102,9 +138,7 @@ void main()	{
 			precision mediump int;
 			
 			uniform float time;
-			
-			varying vec3 vPosition;
-			varying vec4 vColor;
+
 			varying vec2 vUv;
 			
 			void main( void ) {
@@ -127,9 +161,7 @@ void main()	{
 			precision mediump int;
 			
 			uniform float time;
-			
-			varying vec3 vPosition;
-			varying vec4 vColor;
+
 			varying vec2 vUv;
 			
 			void main(void) {
@@ -169,9 +201,7 @@ void main()	{
 			precision mediump int;
 			
 			uniform float time;
-			
-			varying vec3 vPosition;
-			varying vec4 vColor;
+
 			varying vec2 vUv;
 			
 			void main()	{
@@ -194,44 +224,30 @@ void main()	{
 			initGlobalVars();
 			
 			function updateShader(){
-				document.getElementById( 'fragmentShader1' ).textContent=document.getElementById('textb').value
-				document.getElementById( 'vertexShader' ).textContent=document.getElementById('textb2').value
+				document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent=document.getElementById('frag_shader_text_box').value
+				document.getElementById( 'vertexShader' ).textContent=document.getElementById('vertex_shader_text_box').value
 				materialsList=initShaderMaterial(uniforms1);
-				displayObjects[parseInt(globalController.selectedFixture)].material=materialsList[0]
+				for(var i=0;i<displayObjects.length;i++){
+					if(statesArray[i].Visible==true){
+						displayObjects[i].material=materialsList[statesArray[i].Shader]
+					}
+				}
+				syncObjectsToJson();
 			}
 			
 			function initShaderMaterial(uniforms1){
-				document.getElementById('textb').value=document.getElementById( 'fragmentShader1' ).textContent
-				document.getElementById('textb2').value=document.getElementById( 'vertexShader' ).textContent
-				var material = new THREE.RawShaderMaterial( {
-					uniforms: uniforms1,
-					vertexShader: document.getElementById( 'vertexShader' ).textContent,
-					fragmentShader: document.getElementById( 'fragmentShader1' ).textContent
 
-				} );
-				material.side=THREE.DoubleSide;
-				var material2 = new THREE.RawShaderMaterial( {
-					uniforms: uniforms1,
-					vertexShader: document.getElementById( 'vertexShader' ).textContent,
-					fragmentShader: document.getElementById( 'fragmentShader2' ).textContent
-
-				} );
-				material2.side=THREE.DoubleSide;
-				var material3 = new THREE.RawShaderMaterial( {
-					uniforms: uniforms1,
-					vertexShader: document.getElementById( 'vertexShader' ).textContent,
-					fragmentShader: document.getElementById( 'fragmentShader3' ).textContent
-
-				} );
-				material3.side=THREE.DoubleSide;
-				var material4 = new THREE.RawShaderMaterial( {
-					uniforms: uniforms1,
-					vertexShader: document.getElementById( 'vertexShader' ).textContent,
-					fragmentShader: document.getElementById( 'fragmentShader4' ).textContent
-
-				} );
-				material4.side=THREE.DoubleSide;
-				return [material, material2, material3, material4];
+				matList=[];
+				for(var x=1;x<=4;x++){
+					var material = new THREE.RawShaderMaterial( {
+						uniforms: uniforms1,
+						vertexShader: document.getElementById( 'vertexShader' ).textContent,
+						fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
+					} );			
+					material.side=THREE.DoubleSide;
+					matList.push(material)		
+				}
+				return matList;
 			}
 
 			function initGlobalVars(){
@@ -272,6 +288,8 @@ void main()	{
 					"mouse": [0,0]
 				};
 				materialsList=initShaderMaterial(uniforms1);
+				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader1' ).textContent
+				document.getElementById('vertex_shader_text_box').value=document.getElementById( 'vertexShader' ).textContent
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 				frustumSize = 1000;
@@ -303,7 +321,8 @@ void main()	{
 			function addControls(){
 				globalController  = {
 					 selectedFixture:0,
-					 mappingMode:0
+					 mappingMode:0,
+					 shaderToEdit:1
 				}
 				mappingController  = {
 					 Visible:false,
@@ -323,6 +342,7 @@ void main()	{
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
+				globalFolder.add(globalController, "shaderToEdit", 1, 4, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
