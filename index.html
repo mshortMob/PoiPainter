@@ -337,27 +337,15 @@ varying vec2 vUv;
 
 void main( void ) {
 
-				vec2 p = -5.+10.*vUv;
-			p=p*p*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
-			p.y*= .02;
-			p.x*= .02;
+	vec2 p =  vUv;
 
-	for(int i=1;i<5;i++)
-	{
-		vec2 newp=p;
-		float speed = 5.0; // speed control
-		newp.x+=sin(float(i)*p.y+time/(100.0/speed));
-		newp.y+=sin(float(i)*p.x+time/(100.0/speed));
-		p=newp;
-	}
-
-	//vec3 color = texture2D( colorTexture, p ).rgb;
-	vec3 color = texture2D( colorTexture, vUv ).rgb;
-
+	vec3 color = texture2D( colorTexture, p ).rgb;
+		color.r=color.r-p.x;
+		color.g=color.g-p.y;
 
 	gl_FragColor = vec4( color * 1., 1.0 );
 
-}
+}		
 		</script>
 
 		<script>		
