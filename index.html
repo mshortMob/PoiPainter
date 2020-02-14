@@ -78,9 +78,22 @@
 			#update_shader_button:active{
 				background-color: grey;			
 			}
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
 		</style>
 	</head>
 	<body>
+		<video id="video" autoplay width='512' height='256' style="display:none;"></video>
 		<textarea wrap="soft" id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
 		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>
 		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
@@ -318,24 +331,32 @@ precision mediump int;
 
 uniform float time;
 
+uniform sampler2D colorTexture;
+
 varying vec2 vUv;
 
-void main()	{
-	vec2 p = - 2.0 + 4.0 * vUv;
-		p=p*p*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
+void main( void ) {
 
+				vec2 p = -5.+10.*vUv;
+			p=p*p*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
+			p.y*= .02;
+			p.x*= .02;
 
-	for(int i=1;i<100;i++)
+	for(int i=1;i<5;i++)
 	{
 		vec2 newp=p;
-		float speed = 6.0; // speed control
-		newp.x+=2.9/float(i)*sin(float(i)*p.y+time/speed);
-		newp.y+=2.9/float(i)*sin(float(i)*p.x+time/speed);
+		float speed = 5.0; // speed control
+		newp.x+=sin(float(i)*p.y+time/(100.0/speed));
+		newp.y+=sin(float(i)*p.x+time/(100.0/speed));
 		p=newp;
 	}
-	vec3 col=vec3(0., sin(p.x), sin(p.y));
-	gl_FragColor=vec4(col*7.4, 1.0);
-}	
+
+	vec3 color = texture2D( colorTexture, p ).rgb;
+
+
+	gl_FragColor = vec4( color * 1.5, 1.0 );
+
+}
 		</script>
 
 		<script>		
@@ -356,7 +377,7 @@ void main()	{
 			function initShaderMaterial(uniforms1){
 
 				matList=[];
-				for(var x=1;x<=8;x++){
+				for(var x=1;x<=7;x++){
 					var material = new THREE.RawShaderMaterial( {
 						uniforms: uniforms1,
 						vertexShader: document.getElementById( 'vertexShader' ).textContent,
@@ -365,10 +386,38 @@ void main()	{
 					material.side=THREE.DoubleSide;
 					matList.push(material)		
 				}
+
+
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;	
+				dataTexture=[]	
+				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				dataTexture.needsUpdate = true;
+				// uniforms2 = {
+				// 	"time": { value: 1.0 },
+				// 	"colorTexture": { value: new THREE.TextureLoader().load( 'disturb.jpg' ) }
+				// };
+				uniforms2 = {
+					"time": { value: 1.0 },
+					"colorTexture": { value: dataTexture }
+				};
+				uniforms2[ "colorTexture" ].value.wrapS = uniforms2[ "colorTexture" ].value.wrapT = THREE.RepeatWrapping;
+				var material = new THREE.RawShaderMaterial( {
+						uniforms: uniforms2,
+						vertexShader: document.getElementById( 'vertexShader' ).textContent,
+						fragmentShader: document.getElementById( 'fragmentShader'+8 ).textContent
+					} );			
+					material.side=THREE.DoubleSide;
+					matList.push(material)	
+
 				return matList;
 			}
 
 			function initGlobalVars(){
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;	
+				materialArray=new Uint8Array(width * height * 4);
+				getVideo("init",0)
 				addControls();	
 				container=null;
 				camera=null;
@@ -731,6 +780,8 @@ void main()	{
 			
 			function render() {
 				uniforms1[ "time" ].value += .01 * 5;
+				uniforms2[ "time" ].value += .01 * 5;
+				computeTraces();
 				renderer.render( scene, camera );
 			}
 			
@@ -749,6 +800,72 @@ void main()	{
 				}
 			}
 
+			function getVideo(action,camNum) {
+				if(action == "init"){
+					numOfCameras=0
+					cameraIds=[]
+					selectedCamera=0;
+					videoElem='video'
+					navigator.mediaDevices.enumerateDevices().then(function(deviceInfos){
+					  for (var i = 0; i !== deviceInfos.length; ++i) {
+						var deviceInfo = deviceInfos[i];
+						if (deviceInfo.kind === 'videoinput') {
+						  numOfCameras=numOfCameras + 1
+						  cameraIds.push(deviceInfo.deviceId);
+						}
+					  }
+					  selectedCamera=camNum;
+					  if (window.stream) {
+						window.stream.getTracks().forEach(function(track) {
+						  track.stop();
+						});
+					  }
+					  console.log(cameraIds[selectedCamera])
+					  var videoSource = cameraIds[selectedCamera];
+					  var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+					  navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+						  window.stream = stream; 
+						  document.getElementById(videoElem).srcObject = stream;
+						  return navigator.mediaDevices.enumerateDevices();
+					  }).catch(function(error){
+						  console.log('navigator.getUserMedia error: ', error);
+					  });
+					  }).catch(function(error){
+						console.log('navigator.getUserMedia error: ', error);
+					  });
+				}
+				if(action == "select"){
+					selectedCamera=camNum;
+					if (window.stream) {
+					  window.stream.getTracks().forEach(function(track) {
+						track.stop();
+					  });
+					}
+					console.log(cameraIds[selectedCamera])
+					var videoSource = cameraIds[selectedCamera];
+					var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+					navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+						window.stream = stream; 
+						document.getElementById(videoElem).srcObject = stream;
+						return navigator.mediaDevices.enumerateDevices();
+					}).catch(function(error){
+						console.log('navigator.getUserMedia error: ', error);
+					});
+				}
+			}
+
+			function computeTraces(){
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;	
+				data=pixel8(video,0,0,width,height)
+				for (x=0; x < ((width * height) * 4); x=x+4) {
+					materialArray[x]=data[x]
+					materialArray[x+1]=data[x+1]
+					materialArray[x+2]=data[x+2]
+					materialArray[x+3]=data[x+3]
+				}
+				dataTexture.needsUpdate = true
+			}
 		</script>
 	</body>
 </html>
