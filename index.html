@@ -351,10 +351,11 @@ void main( void ) {
 		p=newp;
 	}
 
-	vec3 color = texture2D( colorTexture, p ).rgb;
+	//vec3 color = texture2D( colorTexture, p ).rgb;
+	vec3 color = texture2D( colorTexture, vUv ).rgb;
 
 
-	gl_FragColor = vec4( color * 1.5, 1.0 );
+	gl_FragColor = vec4( color * 1., 1.0 );
 
 }
 		</script>
@@ -781,7 +782,7 @@ void main( void ) {
 			function render() {
 				uniforms1[ "time" ].value += .01 * 5;
 				uniforms2[ "time" ].value += .01 * 5;
-				computeTraces();
+				computeTraces(.9,1.);
 				renderer.render( scene, camera );
 			}
 			
@@ -854,15 +855,36 @@ void main( void ) {
 				}
 			}
 
-			function computeTraces(){
+			function computeTraces(thresh, fade){
 				width=document.getElementById('video').width;
 				height=document.getElementById('video').height;	
 				data=pixel8(video,0,0,width,height)
 				for (x=0; x < ((width * height) * 4); x=x+4) {
-					materialArray[x]=data[x]
-					materialArray[x+1]=data[x+1]
-					materialArray[x+2]=data[x+2]
-					materialArray[x+3]=data[x+3]
+					if( (data[x]+data[x+1]+data[x+2])/3/255 > thresh){
+						materialArray[x]=data[x]
+						materialArray[x+1]=data[x+1]
+						materialArray[x+2]=data[x+2]
+						materialArray[x+3]=data[x+3]
+					} else {
+						if( materialArray[x] > 0){
+							materialArray[x]=materialArray[x]-fade;
+						}
+						if( materialArray[x+1] > 0){
+							materialArray[x+1]=materialArray[x+1]-fade;
+						}
+						if( materialArray[x+2] > 0){
+							materialArray[x+2]=materialArray[x+2]-fade;
+						}
+						if( materialArray[x] < 0){
+							materialArray[x]=0
+						}
+						if( materialArray[x+1] < 0){
+							materialArray[x+1]=0
+						}
+						if( materialArray[x+2] < 0){
+							materialArray[x+2]=0
+						}
+					}
 				}
 				dataTexture.needsUpdate = true
 			}
