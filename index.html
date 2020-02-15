@@ -413,7 +413,7 @@ void main( void ) {
 			function initShaderMaterial(uniforms1){
 
 				matList=[];
-				for(var x=1;x<=7;x++){
+				for(var x=1;x<=8;x++){
 					var material = new THREE.RawShaderMaterial( {
 						uniforms: uniforms1,
 						vertexShader: document.getElementById( 'vertexShader' ).textContent,
@@ -422,32 +422,6 @@ void main( void ) {
 					material.side=THREE.DoubleSide;
 					matList.push(material)		
 				}
-
-
-				width=document.getElementById('video').width;
-				height=document.getElementById('video').height;	
-				dataTexture=[]	
-				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
-				dataTexture.needsUpdate = true;
-				// uniforms2 = {
-				// 	"time": { value: 1.0 },
-				// 	"colorTexture": { value: new THREE.TextureLoader().load( 'disturb.jpg' ) }
-				// };
-				uniforms2 = {
-					"time": { value: 1.0 },
-					"resolution": [width,height],
-					"mouse": [0,0],
-					"colorTexture": { value: dataTexture }
-				};
-				uniforms2[ "colorTexture" ].value.wrapS = uniforms2[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
-				var material = new THREE.RawShaderMaterial( {
-						uniforms: uniforms2,
-						vertexShader: document.getElementById( 'vertexShader' ).textContent,
-						fragmentShader: document.getElementById( 'fragmentShader'+8 ).textContent
-					} );			
-					material.side=THREE.DoubleSide;
-					matList.push(material)	
-
 				return matList;
 			}
 
@@ -495,11 +469,16 @@ void main( void ) {
 				width=document.getElementById('video').width;
 				height=document.getElementById('video').height;	
 				prevData=pixel8(video,0,0,width,height)
+				dataTexture=[]	
+				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				dataTexture.needsUpdate = true;
 				uniforms1 = {
 					"time": { value: 1.0 },
 					"resolution": [width,height],
-					"mouse": [0,0]
+					"mouse": [0,0],
+					"colorTexture": { value: dataTexture }
 				};
+				uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
 				materialsList=initShaderMaterial(uniforms1);
 				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader1' ).textContent
 				document.getElementById('vertex_shader_text_box').value=document.getElementById( 'vertexShader' ).textContent
@@ -853,7 +832,6 @@ void main( void ) {
 			
 			function render() {
 				uniforms1[ "time" ].value += .01 * 5;
-				uniforms2[ "time" ].value += .01 * 5;
 				computeTraces();
 				renderer.render( scene, camera );
 			}
