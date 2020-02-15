@@ -335,17 +335,35 @@ uniform sampler2D colorTexture;
 
 varying vec2 vUv;
 
+vec2 rotate2D (vec2 _st, float _angle) {
+	_st -= 0.5;
+	_st =  mat2(cos(_angle),-sin(_angle),
+				sin(_angle),cos(_angle)) * _st;
+	_st += 0.5;
+	return _st;
+}
+
 void main( void ) {
-
 	vec2 p =  vUv;
+		vec2 p1=rotate2D(p, 0. * 3.14/2.);
+	vec2 p2=rotate2D(p, 1. * 3.14/2.);
+	vec2 p3=rotate2D(p, 2. * 3.14/2.);
+	vec2 p4=rotate2D(p, 3. * 3.14/2.);
 
-	vec3 color = texture2D( colorTexture, p ).rgb;
-		color.r=color.r-p.x;
-		color.g=color.g-p.y;
+	vec3 color1 = texture2D( colorTexture, p ).rgb;
+	vec3 color2 = texture2D( colorTexture, p2 ).rgb;
+	vec3 color3 = texture2D( colorTexture, p3 ).rgb;
+	vec3 color4 = texture2D( colorTexture, p4 ).rgb;
 
-	gl_FragColor = vec4( color * 1., 1.0 );
+	vec3 cc1= mix(color1,color2,.5);
+	vec3 cc2 = mix(color3,color4,.5);
+	vec3 cc3 = mix(cc1,cc2,.5)*1.3;
 
-}		
+		vec3 ccs =step( vec3(0.9, 0.9, 0.9), cc3);
+		cc3=cc3*ccs;
+
+	gl_FragColor = vec4( cc3 * 1., 1.0 );
+}						
 		</script>
 
 		<script>		
@@ -388,6 +406,8 @@ void main( void ) {
 				// };
 				uniforms2 = {
 					"time": { value: 1.0 },
+					"resolution": [width,height],
+					"mouse": [0,0],
 					"colorTexture": { value: dataTexture }
 				};
 				uniforms2[ "colorTexture" ].value.wrapS = uniforms2[ "colorTexture" ].value.wrapT = THREE.RepeatWrapping;
@@ -438,9 +458,11 @@ void main( void ) {
 			}
 			
 			function initScene() {
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;	
 				uniforms1 = {
 					"time": { value: 1.0 },
-					"resolution": [0,0],
+					"resolution": [width,height],
 					"mouse": [0,0]
 				};
 				materialsList=initShaderMaterial(uniforms1);
@@ -848,31 +870,31 @@ void main( void ) {
 				height=document.getElementById('video').height;	
 				data=pixel8(video,0,0,width,height)
 				for (x=0; x < ((width * height) * 4); x=x+4) {
-					if( (data[x]+data[x+1]+data[x+2])/3/255 > thresh){
+					// if( (data[x]+data[x+1]+data[x+2])/3/255 > thresh){
 						materialArray[x]=data[x]
 						materialArray[x+1]=data[x+1]
 						materialArray[x+2]=data[x+2]
 						materialArray[x+3]=data[x+3]
-					} else {
-						if( materialArray[x] > 0){
-							materialArray[x]=materialArray[x]-fade;
-						}
-						if( materialArray[x+1] > 0){
-							materialArray[x+1]=materialArray[x+1]-fade;
-						}
-						if( materialArray[x+2] > 0){
-							materialArray[x+2]=materialArray[x+2]-fade;
-						}
-						if( materialArray[x] < 0){
-							materialArray[x]=0
-						}
-						if( materialArray[x+1] < 0){
-							materialArray[x+1]=0
-						}
-						if( materialArray[x+2] < 0){
-							materialArray[x+2]=0
-						}
-					}
+					// } else {
+					// 	if( materialArray[x] > 0){
+					// 		materialArray[x]=materialArray[x]-fade;
+					// 	}
+					// 	if( materialArray[x+1] > 0){
+					// 		materialArray[x+1]=materialArray[x+1]-fade;
+					// 	}
+					// 	if( materialArray[x+2] > 0){
+					// 		materialArray[x+2]=materialArray[x+2]-fade;
+					// 	}
+					// 	if( materialArray[x] < 0){
+					// 		materialArray[x]=0
+					// 	}
+					// 	if( materialArray[x+1] < 0){
+					// 		materialArray[x+1]=0
+					// 	}
+					// 	if( materialArray[x+2] < 0){
+					// 		materialArray[x+2]=0
+					// 	}
+					// }
 				}
 				dataTexture.needsUpdate = true
 			}
