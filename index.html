@@ -344,60 +344,58 @@ vec2 rotate2D (vec2 _st, float _angle) {
 }
 
 void main( void ) {
-	vec2 p =  2.*vUv;
+	vec2 p =  vUv;
 	vec3 color = texture2D( colorTexture, p ).rgb;
-	vec3 ccs =smoothstep( vec3(0.9, 0.9, 0.9), vec3(0.5, 0.5, 0.5), color);
-	float y = step(0.5,vUv.x);
-	float x = step(0.5,vUv.y);
-	vec3 qq1=vec3(y);
-	vec3 qq2=vec3(x);
-	vec3 qq3=qq1-qq2;
-	color=color*ccs;
-	vec3 quad1=qq3*color;
-
-	p =  2.*vUv;
-	p.x*=-1.;
-	color = texture2D( colorTexture, p ).rgb;
-	ccs =smoothstep( vec3(0.9, 0.9, 0.9), vec3(0.5, 0.5, 0.5), color);
-	y = 1.-step(0.5,vUv.x);
-	x = step(0.5,vUv.y);
-	qq1=vec3(y);
-	qq2=vec3(x);
-	qq3=qq1-qq2;
-	color=color*ccs;
-	vec3 quad2=qq3*color;
-
-	p =  -2.*vUv;
-	color = texture2D( colorTexture, p ).rgb;
-	ccs =smoothstep( vec3(0.9, 0.9, 0.9), vec3(0.5, 0.5, 0.5), color);
-	y = 1.-step(0.5,vUv.x);
-	x = 1.-step(0.5,vUv.y);
-	qq1=vec3(y);
-	qq2=vec3(x);
-	qq3=qq1-qq2;
-	color=color*ccs;
-	vec3 quad3=qq3*color;
-
-	p =  2.*vUv;
-	p.y*=-1.;
-	color = texture2D( colorTexture, p ).rgb;
-	ccs =smoothstep( vec3(0.9, 0.9, 0.9), vec3(0.5, 0.5, 0.5), color);
-	y = step(0.5,vUv.x);
-	x = 1.-step(0.5,vUv.y);
-	qq1=vec3(y);
-	qq2=vec3(x);
-	qq3=qq1-qq2;
-	color=color*ccs;
-	vec3 quad4=qq3*color;
-
-	vec3 quads = quad1 + quad2 + quad3 + quad4;
-
-
-	gl_FragColor = vec4( 2.0*quads , 1.0 );
-}														
+	gl_FragColor = vec4( color , 1.0 );
+}												
 		</script>
 
-		<script>		
+		<script>
+			var colorObject = function() {
+				this.currentColHex="ff00ff";
+				this.currentColRGB={};
+				this.currentColRGB.r=255;
+				this.currentColRGB.g=0;
+				this.currentColRGB.b=255;
+				this.timeElapsed=0;
+				this.ci=0;
+				//this.rList=[255,255,255,255,200,100,000,000,000,000,000,000,000,100,200,255,255,255];
+				//this.gList=[000,100,200,255,255,255,255,255,255,255,200,100,000,000,000,000,000,000];
+				//this.bList=[000,000,000,000,000,000,000,100,200,255,255,255,255,255,255,255,200,100];
+				this.rList=[255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255];
+				this.gList=[000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000];
+				this.bList=[000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050];
+				ci=this.ci;
+				this.rgbToHex=function(r, g, b) {
+					return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+				}
+				this.hexToRgb=function(hex) {
+					var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+					return result ? {
+						r: parseInt(result[1], 16),
+						g: parseInt(result[2], 16),
+						b: parseInt(result[3], 16)
+					} : null;
+				}
+				this.addHexColor=function() {
+					var hexStr = (parseInt(this.currentColHex, 16) + parseInt("F1010f", 16)).toString(16);
+					while (hexStr.length < 5) { hexStr = '0' + hexStr; } // Zero pad.
+					return hexStr;
+				}
+				//this.change= function(){
+				//	this.currentColHex=this.addHexColor()
+				//	this.currentColRGB=this.hexToRgb("#"+this.currentColHex.substring(1,this.currentColHex.length))
+				//
+				//}	
+				//this.requestR= function(){return this.currentColRGB.r;}
+				//this.requestG= function(){return this.currentColRGB.g;}
+				//this.requestB= function(){return this.currentColRGB.b;}
+				this.change= function(){ci=(ci+parseInt(painterController.ColorHop)) % 30;}	
+				this.requestR= function(){return this.rList[ci];}
+				this.requestG= function(){return this.gList[ci];}
+				this.requestB= function(){return this.bList[ci];}		
+			}
+					
 			initGlobalVars();
 			
 			function updateShader(){
@@ -454,9 +452,14 @@ void main( void ) {
 			}
 
 			function initGlobalVars(){
+				clr=new colorObject();
 				width=document.getElementById('video').width;
 				height=document.getElementById('video').height;	
 				materialArray=new Uint8Array(width * height * 4);
+				previousData=new Uint8Array(width * height * 4);
+				data=new Uint8Array(width * height * 4);
+				isFirstCycle=true;
+				colorCounter=0.0;
 				getVideo("init",0)
 				addControls();	
 				container=null;
@@ -491,6 +494,7 @@ void main( void ) {
 			function initScene() {
 				width=document.getElementById('video').width;
 				height=document.getElementById('video').height;	
+				prevData=pixel8(video,0,0,width,height)
 				uniforms1 = {
 					"time": { value: 1.0 },
 					"resolution": [width,height],
@@ -538,6 +542,16 @@ void main( void ) {
 					 ZValue:0,
 					 Shader:1
 				};
+				painterController  = {
+					 KaleidoScope:1,
+					 BrightnessSensitivity:.99,
+					 VelocitySensitivity:0.99,
+					 FadeTime:.6,
+					 ColorMix:.5,
+					 ColorRate:.05,
+					 ColorHop:1,
+					 Resolution:256
+				};
 				var count=0; 
 				for(var y=4; y>=0;y--){
 					for(var x=0; x<5;x++){
@@ -558,6 +572,16 @@ void main( void ) {
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Shader", 1, 8, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
+				painterFolder=gui.addFolder( "PainterControls" )
+				painterFolder.open();
+				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();});
+				painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();});
+				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();});
+				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();});
+				painterFolder.add( painterController, "ColorRate", 0, .7, .001 ).onChange(function(){painterController.ColorRate=parseFloat(painterController.ColorRate);updateControlsValues();});
+				painterFolder.add( painterController, "ColorHop", 0, 10, 1 ).onChange(function(){painterController.ColorHop=parseFloat(painterController.ColorHop);updateControlsValues();});				
+				//painterFolder.add( painterController, "Resolution", 100, 600, 1 ).onChange(function(){painterController.Resolution=parseFloat(painterController.Resolution);updateControlsValues();});				
+				painterFolder.add( painterController, "KaleidoScope", 1, 4, 1 ).onChange(function(){painterController.KaleidoScope=parseInt(painterController.KaleidoScope);updateControlsValues();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -816,6 +840,13 @@ void main( void ) {
 			}
 				
 			function animate() {
+			    if(painterController.ColorMix != 0){
+					colorCounter=colorCounter+painterController.ColorRate
+					if(colorCounter > 1){
+						colorCounter=0;
+						clr.change();
+					}
+			    }
 				requestAnimationFrame( animate );
 				render();
 			}
@@ -823,7 +854,7 @@ void main( void ) {
 			function render() {
 				uniforms1[ "time" ].value += .01 * 5;
 				uniforms2[ "time" ].value += .01 * 5;
-				computeTraces(.9,1.);
+				computeTraces();
 				renderer.render( scene, camera );
 			}
 			
@@ -896,36 +927,42 @@ void main( void ) {
 				}
 			}
 
-			function computeTraces(thresh, fade){
-				width=document.getElementById('video').width;
-				height=document.getElementById('video').height;	
+			function computeTraces(){
+				if(isFirstCycle){
+					isFirstCycle=false;
+				}else{
+					previousData=data;
+				}
 				data=pixel8(video,0,0,width,height)
+				var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
+				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
+				var delVal=4-parseFloat(painterController.FadeTime)*4;
+				var mixVal=1-parseFloat(painterController.ColorMix)
 				for (x=0; x < ((width * height) * 4); x=x+4) {
-					// if( (data[x]+data[x+1]+data[x+2])/3/255 > thresh){
-						materialArray[x]=data[x]
-						materialArray[x+1]=data[x+1]
-						materialArray[x+2]=data[x+2]
-						materialArray[x+3]=data[x+3]
-					// } else {
-					// 	if( materialArray[x] > 0){
-					// 		materialArray[x]=materialArray[x]-fade;
-					// 	}
-					// 	if( materialArray[x+1] > 0){
-					// 		materialArray[x+1]=materialArray[x+1]-fade;
-					// 	}
-					// 	if( materialArray[x+2] > 0){
-					// 		materialArray[x+2]=materialArray[x+2]-fade;
-					// 	}
-					// 	if( materialArray[x] < 0){
-					// 		materialArray[x]=0
-					// 	}
-					// 	if( materialArray[x+1] < 0){
-					// 		materialArray[x+1]=0
-					// 	}
-					// 	if( materialArray[x+2] < 0){
-					// 		materialArray[x+2]=0
-					// 	}
-					// }
+						if (Math.abs((data[x]+data[x+1]+data[x+2])-(previousData[x]+previousData[x+1]+previousData[x+2])) > (velVal) && (data[x]+data[x+1]+data[x+2] > briVal)) {
+							materialArray[x]=clr.requestR()*(1-(mixVal))+data[x]*((mixVal));
+							materialArray[x+1]=clr.requestG()*(1-(mixVal))+data[x+1]*((mixVal));
+							materialArray[x+2]=clr.requestB()*(1-(mixVal))+data[x+2]*((mixVal));
+							materialArray[x+3]=255;
+						}
+						if(materialArray[x+0] > 0 ){
+							materialArray[x+0]=materialArray[x+0]-(delVal);
+						}
+						if( materialArray[x+0] < 0 ){
+							materialArray[x+0]=0;
+						}
+						if(materialArray[x+1] > 0 ){
+							materialArray[x+1]=materialArray[x+1]-(delVal);
+						}
+						if( materialArray[x+1] < 0 ){
+							materialArray[x+1]=0;
+						}
+						if(materialArray[x+2] > 0 ){
+							materialArray[x+2]=materialArray[x+2]-(delVal);
+						}
+						if( materialArray[x+2] < 0 ){
+							materialArray[x+2]=0;
+						}
 				}
 				dataTexture.needsUpdate = true
 			}
