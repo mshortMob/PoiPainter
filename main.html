@@ -1,0 +1,995 @@
+<html>
+	<head>
+		<title>FlowMapper</title>
+		<style>
+			body{
+			    margin:0px;
+				background-color:black;
+			}	
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:10;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+			textarea{
+				z-index:100;
+				position:fixed;
+				height:42.5%;
+				width:35%;
+				background-color: grey;
+				border-color: #515151;
+				border-width:4;
+				border-top-width:8;
+				border-left-width:8;
+				border-right-width:8;
+				font-size: 14px;
+				wrap: off;
+				white-space: nowrap;
+			}
+			#show_shader_editor{
+				z-index:100;
+				position:fixed;
+				left:0px;
+				top:0px;
+				height:6%;
+				width:100px;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-top-width:0;
+				border-left-width:0;
+				font-size: 14px;
+			}
+			#hide_shader_editor{
+				z-index:100;
+				position:fixed;
+				left:0px;
+				bottom:0px;
+				height:15%;
+				width:10%;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-left-width:8;
+				border-bottom-width:8;
+				font-size: 18px;
+			}
+			#update_shader_button{
+				z-index:100;
+				position:fixed;
+				left:10%;
+				bottom:0px;
+				height:15%;
+				width:25%;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-right-width:8;
+				border-bottom-width:8;
+				font-size: 24px;
+			}
+			#update_shader_button:active{
+				background-color: grey;			
+			}
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+		</style>
+	</head>
+	<body>
+		<video id="video" autoplay width='512' height='256' style="display:none;"></video>
+		<textarea wrap="soft" id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
+		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>
+		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
+		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='inline';">Hide Editor</button>
+		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
+		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
+		<script src="three.js"></script>
+		<script src="pixel8.js"></script>
+		<script src='dat.gui.min.js'></script>
+		<script src="Detector.js"></script>
+		<script src="NURBSSurface.js"></script>
+		<script src="NURBSUtils.js"></script>
+		<script src="TrackballControls.js"></script>
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+precision mediump float;
+precision mediump int;
+
+uniform mat4 modelViewMatrix; // optional
+uniform mat4 projectionMatrix; // optional
+
+attribute vec3 position;
+attribute vec4 color;
+attribute vec2 uv;
+
+varying vec3 vPosition;
+varying vec4 vColor;
+varying vec2 vUv;
+
+void main()	{
+	vUv = uv;
+	vPosition = position;
+	vColor = color;
+
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+}
+		</script>
+
+		<script id="fragmentShader1" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+uniform float time;
+uniform vec2 resolution;
+varying vec2 vUv;
+
+float distanceToMandelbrot( in vec2 c )
+{
+    #if 1
+    {
+        float c2 = dot(c, c);
+        // skip computation inside M1 - http://iquilezles.org/www/articles/mset_1bulb/mset1bulb.htm
+        if( 256.0*c2*c2 - 96.0*c2 + 32.0*c.x - 3.0 < 0.0 ) return 0.0;
+        // skip computation inside M2 - http://iquilezles.org/www/articles/mset_2bulb/mset2bulb.htm
+        if( 16.0*(c2+2.0*c.x+1.0) - 1.0 < 0.0 ) return 0.0;
+    }
+    #endif
+
+    // iterate
+    float di =  1.0;
+    vec2 z  = vec2(0.0);
+    float m2 = 0.0;
+    vec2 dz = vec2(0.0);
+    for( int i=0; i<300; i++ )
+    {
+        if( m2>1024.0 ) { di=0.0; break; }
+
+		// Z' -> 2·Z·Z' + 1
+        dz = 2.0*vec2(z.x*dz.x-z.y*dz.y, z.x*dz.y + z.y*dz.x) + vec2(1.0,0.0);
+			
+        // Z -> Z² + c			
+        z = vec2( z.x*z.x - z.y*z.y, 2.0*z.x*z.y ) + c;
+			
+        m2 = dot(z,z);
+    }
+
+    // distance	
+	// d(c) = |Z|·log|Z|/|Z'|
+	float d = 0.5*sqrt(dot(z,z)/dot(dz,dz))*log(dot(z,z));
+    if( di>0.5 ) d=0.0;
+	
+    return d;
+}
+
+void main()	{
+
+    vec2 p = -1.0+2.0*vUv;
+
+    // animation	
+	float tz = 0.8 - 0.25*cos(0.1*time);
+    float zoo = pow( 0.5, 13.0*tz );
+	vec2 c = vec2(-0.05,.6805) + p*zoo;
+
+    // distance to Mandelbrot
+    float d = distanceToMandelbrot(c);
+    
+    // do some soft coloring based on distance
+	d = clamp( pow(4.0*d/zoo,0.2), 0.0, 1.0 );
+    
+    vec3 col = vec3(d);
+    
+    gl_FragColor = vec4( col, 1.0 );
+}
+		</script>
+
+		<script id="fragmentShader2" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+varying vec2 vUv;
+
+void main()	{
+	vec2 position = - 1.0 + 2.0 * vUv;
+	float red = abs( sin( position.x * position.y + time / 5.0 ) );
+	float green = abs( sin( position.x * position.y + time / 4.0 ) );
+	float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+	gl_FragColor = vec4( red, green, blue, 1.0 );
+}
+		</script>
+
+		<script id="fragmentShader3" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+varying vec2 vUv;
+
+void main(void) {
+
+	vec2 p = - 1.0 + 2.0 * vUv;
+	float a = time * 40.0;
+	float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
+
+	e = 400.0 * ( p.x * 0.5 + 0.5 );
+	f = 400.0 * ( p.y * 0.5 + 0.5 );
+	i = 200.0 + sin( e * g + a / 150.0 ) * 20.0;
+	d = 200.0 + cos( f * g / 2.0 ) * 18.0 + cos( e * g ) * 7.0;
+	r = sqrt( pow( abs( i - e ), 2.0 ) + pow( abs( d - f ), 2.0 ) );
+	q = f / r;
+	e = ( r * cos( q ) ) - a / 2.0;
+	f = ( r * sin( q ) ) - a / 2.0;
+	d = sin( e * g ) * 176.0 + sin( e * g ) * 164.0 + r;
+	h = ( ( f + d ) + a / 2.0 ) * g;
+	i = cos( h + r * p.x / 1.3 ) * ( e + e + a ) + cos( q * g * 6.0 ) * ( r + h / 3.0 );
+	h = sin( f * g ) * 144.0 - sin( e * g ) * 212.0 * p.x;
+	h = ( h + ( f - e ) * q + sin( r - ( a + h ) / 7.0 ) * 10.0 + i / 4.0 ) * g;
+	i += cos( h * 2.3 * sin( a / 350.0 - q ) ) * 184.0 * sin( q - ( r * 4.3 + a / 12.0 ) * g ) + tan( r * g + h ) * 184.0 * cos( r * g + h );
+	i = mod( i / 5.6, 256.0 ) / 64.0;
+	if ( i < 0.0 ) i += 4.0;
+	if ( i >= 2.0 ) i = 4.0 - i;
+	d = r / 350.0;
+	d += sin( d * d * 8.0 ) * 0.52;
+	f = ( sin( a * g ) + 1.0 ) / 2.0;
+	gl_FragColor = vec4( vec3( f * i / 1.6, i / 2.0 + d / 13.0, i ) * d * p.x + vec3( i / 1.3 + d / 8.0, i / 2.0 + d / 18.0, i ) * d * ( 1.0 - p.x ), 1.0 );
+
+}
+		</script>
+
+		<script id="fragmentShader4" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+varying vec2 vUv;
+
+void main()	{
+	vec2 p = - 1.0 + 2.0 * vUv;
+
+	for(int i=1;i<100;i++)
+	{
+		vec2 newp=p;
+		float speed = 45.0; // speed control
+		newp.x+=0.8/float(i)*sin(float(i)*p.y+time/(100.0/speed)+0.8*float(i))+1.0;
+		newp.y+=0.8/float(i)*sin(float(i)*p.x+time/(100.0/speed)+0.3*float(i+10))-11.4;
+		p=newp;
+	}
+	vec3 col=vec3(sin(p.x*1.+p.y), 0.2*sin(12.0*p.y), 0.);
+	gl_FragColor=vec4(col, 1.0);
+}	
+		</script>
+		
+		<script id="fragmentShader5" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+varying vec2 vUv;
+
+void main()	{
+	vec2 position = -5.+10.*vUv;
+		position=position*position*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
+		position.y*= .02;
+		position.x*= .02;
+	float red = sin(position.x/.1+time/18. )+cos(time/8.)-position.y*4.;
+	float green = cos(position.x/.1+time )+sin(time/14. )+position.y*8.;
+	float blue =tan(position.x/.3+time/4. )+sin(time/3.5 )+position.y*4.;
+	gl_FragColor = vec4( red-green-blue, green-red-blue, blue, 1.0 );
+}
+		</script>
+
+		<script id="fragmentShader6" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+varying vec2 vUv;
+
+void main( void ) {
+
+	vec2 position = -1.+2.*vUv;
+		position=position*position*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
+
+	float color = 0.0;
+	color += sin( position.x * cos( time / 55.0 ) * 80.0 ) + cos( position.y * cos( time / 45.0 ) * 10.0 );
+	color += sin( position.y * sin( time / 100.0 ) * 40.0 ) + cos( position.x * sin( time / 425.0 ) * 40.0 );
+	color += sin( position.x * sin( time / 25.0 ) * 10.0 ) + sin( position.y * sin( time / 325.0 ) * 80.0 );
+	color *= sin( time / 500.0 ) * 0.5;
+
+	gl_FragColor = vec4( vec3( color, color * 1.2, sin( color + time / 400.0 ) * 0.95 ), 1.0 );
+
+}
+		</script>
+
+		<script id="fragmentShader7" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+varying vec2 vUv;
+
+void main(void) {
+		float zzz = sin(time/10.)/8.+.1*vUv.y/4.;
+	vec2 p = -1.0 * zzz + 2.0 * zzz * vUv;
+		// p=p*p*vec2(-1.0, sin(time/10.));
+		p=p*vec2(sin(time/820.), sin(time/299.))*6.;
+		p=p*p*vec2(-1.0, 1.);
+	float a = time * 45.0;
+	float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
+
+	e = 400.0 * ( p.x * 0.5 + 0.5 );
+	f = 400.0 * ( p.y * 0.5 + 0.5 );
+	i = 200.0 + sin( e * g + a / 150.0 ) * 20.0;
+	d = 200.0 + cos( f * g / 2.0 ) * 18.0 + cos( e * g ) * 7.0;
+	r = sqrt( pow( abs( i - e ), 2.0 ) + pow( abs( d - f ), 2.0 ) );
+	q = f / r;
+	e = ( r * cos( q ) ) - a / 2.0;
+	f = ( r * sin( q ) ) - a / 2.0;
+	d = sin( e * g ) * 176.0 + sin( e * g ) * 164.0 + r;
+	h = ( ( f + d ) + a / 2.0 ) * g;
+	i = cos( h + r * p.x / 1.3 ) * ( e + e + a ) + cos( q * g * 6.0 ) * ( r + h / 3.0 );
+	h = sin( f * g ) * 144.0 - sin( e * g ) * 212.0 * p.x;
+	h = ( h + ( f - e ) * q + sin( r - ( a + h ) / 7.0 ) * 10.0 + i / 4.0 ) * g;
+	i += cos( h * 2.3 * sin( a / 350.0 - q ) ) * 184.0 * sin( q - ( r * 4.3 + a / 12.0 ) * g ) + tan( r * g + h ) * 184.0 * cos( r * g + h );
+	i = mod( i / 5.6, 256.0 ) / 64.0;
+	if ( i < 0.0 ) i += 4.0;
+	if ( i >= 8.0 ) i = 3.0 - i;
+	d = r / 350.0;
+	d += sin( d * d * 8.0 ) * 0.92;
+	f = ( sin( a * g ) + 1.0 ) / 2.0;
+	vec4 aa = vec4( .1*vec3( f * i / 1.6, i / 2.0 + d / 13.0, i ) * d * 5. *p.x + vec3( i / 1.3 + d / 8.0, i / 2.0 + d / 18.0, i ) * d * 5. * ( 1.0 - p.x ), 1.0 );
+		vec4 bb = cos(aa*1.1/sin(p.x*p.x*1.*time/100.)*sin(time/40.)*p.y*36.);
+		bb.g = bb.r*bb.g;
+		bb.b= bb.r*bb.b;
+		gl_FragColor = vec4( 0, bb.b/bb.g, bb.g, bb.a );
+}
+		</script>
+
+		<script id="fragmentShader8" type="x-shader/x-fragment">
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+
+uniform sampler2D colorTexture;
+
+varying vec2 vUv;
+
+vec2 rotate2D (vec2 _st, float _angle) {
+	_st -= 0.5;
+	_st =  mat2(cos(_angle),-sin(_angle),
+				sin(_angle),cos(_angle)) * _st;
+	_st += 0.5;
+	return _st;
+}
+
+void main( void ) {
+	vec2 p =  vUv;
+	vec3 color = texture2D( colorTexture, p ).rgb;
+	gl_FragColor = vec4( color , 1.0 );
+}												
+		</script>
+
+		<script>
+			var colorObject = function() {
+				this.currentColHex="ff00ff";
+				this.currentColRGB={};
+				this.currentColRGB.r=255;
+				this.currentColRGB.g=0;
+				this.currentColRGB.b=255;
+				this.timeElapsed=0;
+				this.ci=0;
+				//this.rList=[255,255,255,255,200,100,000,000,000,000,000,000,000,100,200,255,255,255];
+				//this.gList=[000,100,200,255,255,255,255,255,255,255,200,100,000,000,000,000,000,000];
+				//this.bList=[000,000,000,000,000,000,000,100,200,255,255,255,255,255,255,255,200,100];
+				this.rList=[255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255];
+				this.gList=[000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000];
+				this.bList=[000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050];
+				ci=this.ci;
+				this.rgbToHex=function(r, g, b) {
+					return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+				}
+				this.hexToRgb=function(hex) {
+					var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+					return result ? {
+						r: parseInt(result[1], 16),
+						g: parseInt(result[2], 16),
+						b: parseInt(result[3], 16)
+					} : null;
+				}
+				this.addHexColor=function() {
+					var hexStr = (parseInt(this.currentColHex, 16) + parseInt("F1010f", 16)).toString(16);
+					while (hexStr.length < 5) { hexStr = '0' + hexStr; } // Zero pad.
+					return hexStr;
+				}
+				//this.change= function(){
+				//	this.currentColHex=this.addHexColor()
+				//	this.currentColRGB=this.hexToRgb("#"+this.currentColHex.substring(1,this.currentColHex.length))
+				//
+				//}	
+				//this.requestR= function(){return this.currentColRGB.r;}
+				//this.requestG= function(){return this.currentColRGB.g;}
+				//this.requestB= function(){return this.currentColRGB.b;}
+				this.change= function(){ci=(ci+parseInt(painterController.ColorHop)) % 30;}	
+				this.requestR= function(){return this.rList[ci];}
+				this.requestG= function(){return this.gList[ci];}
+				this.requestB= function(){return this.bList[ci];}		
+			}
+					
+			initGlobalVars();
+			
+			function updateShader(){
+				document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent=document.getElementById('frag_shader_text_box').value
+				document.getElementById( 'vertexShader' ).textContent=document.getElementById('vertex_shader_text_box').value
+				materialsList=initShaderMaterial(uniforms1);
+				for(var i=0;i<displayObjects.length;i++){
+					if(statesArray[i].Visible==true){
+						displayObjects[i].material=materialsList[statesArray[i].Shader-1]
+					}
+				}
+				syncObjectsToJson();
+			}
+			
+			function initShaderMaterial(uniforms1){
+
+				matList=[];
+				for(var x=1;x<=8;x++){
+					var material = new THREE.RawShaderMaterial( {
+						uniforms: uniforms1,
+						vertexShader: document.getElementById( 'vertexShader' ).textContent,
+						fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
+					} );			
+					material.side=THREE.DoubleSide;
+					matList.push(material)		
+				}
+				return matList;
+			}
+
+			function initGlobalVars(){
+				clr=new colorObject();
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;	
+				materialArray=new Uint8Array(width * height * 4);
+				previousData=new Uint8Array(width * height * 4);
+				data=new Uint8Array(width * height * 4);
+				isFirstCycle=true;
+				colorCounter=0.0;
+				getVideo("init",0)
+				addControls();	
+				container=null;
+				camera=null;
+				controls=null;
+				scene=null;
+				renderer=null;
+				objects = [];
+				displayObjects=[];
+				plane = new THREE.Plane();
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				offset = new THREE.Vector3();
+				intersection = new THREE.Vector3();
+				INTERSECTED=null;
+				SELECTED=null;
+				initScene();
+				animate();
+				statesArray=[];
+				for(var x=0;x<4;x++){
+					var objectJSON ={}
+					for (var key in mappingController) {
+						objectJSON[key]=mappingController[key]
+					}
+					statesArray.push(objectJSON)
+				}
+				for(var y=0;y<4;y++){
+					addPlane();
+				}
+				statesArray[0].Visible=true;
+				syncObjectsToJson()
+			}
+			
+			function initScene() {
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;	
+				prevData=pixel8(video,0,0,width,height)
+				dataTexture=[]	
+				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				dataTexture.needsUpdate = true;
+				uniforms1 = {
+					"time": { value: 1.0 },
+					"resolution": [width,height],
+					"mouse": [0,0],
+					"colorTexture": { value: dataTexture }
+				};
+				uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
+				materialsList=initShaderMaterial(uniforms1);
+				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader1' ).textContent
+				document.getElementById('vertex_shader_text_box').value=document.getElementById( 'vertexShader' ).textContent
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				frustumSize = 1000;
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10000 );
+				camera.position.z = -1000;
+				controls = new THREE.TrackballControls( camera , container);
+				controls.enabled=false;
+				scene = new THREE.Scene();
+				LIGHTING=new THREE.AmbientLight( 0xffffff ) 
+				scene.add( LIGHTING );
+				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
+				renderer.setClearColor( 0x000000 , 1);
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = false;
+				container.appendChild( renderer.domElement );
+				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+				tempElem=document.body.getElementsByClassName('ac')[0];
+				tempElem.className="";
+				tempElem.style.zIndex='10000000'
+				tempElem.style.position='fixed'
+				tempElem.style.right='0px';
+			}
+				
+			function addControls(){
+				globalController  = {
+					 selectedFixture:0,
+					 mappingMode:0,
+					 shaderToEdit:1
+				}
+				mappingController  = {
+					 Visible:false,
+					 ZValue:0,
+					 Shader:1
+				};
+				painterController  = {
+					 KaleidoScope:1,
+					 BrightnessSensitivity:.99,
+					 VelocitySensitivity:0.99,
+					 FadeTime:.6,
+					 ColorMix:.5,
+					 ColorRate:.05,
+					 ColorHop:1,
+					 Resolution:256
+				};
+				var count=0; 
+				for(var y=4; y>=0;y--){
+					for(var x=0; x<5;x++){
+						mappingController["VerticeX"+count]=-200+100*x;
+						mappingController["VerticeY"+count]=-200+100*y;
+						count=count+1;
+					}
+				}
+				gui = new dat.GUI();
+				globalFolder=gui.addFolder( "Global" )
+				globalFolder.open();
+				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
+				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
+				globalFolder.add(globalController, "shaderToEdit", 1, 8, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
+				gui.width=260;
+				controlsFolder=gui.addFolder( "MappingControls" )
+				controlsFolder.open();
+				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Shader", 1, 8, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
+				painterFolder=gui.addFolder( "PainterControls" )
+				painterFolder.open();
+				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();});
+				painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();});
+				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();});
+				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();});
+				painterFolder.add( painterController, "ColorRate", 0, .7, .001 ).onChange(function(){painterController.ColorRate=parseFloat(painterController.ColorRate);updateControlsValues();});
+				painterFolder.add( painterController, "ColorHop", 0, 10, 1 ).onChange(function(){painterController.ColorHop=parseFloat(painterController.ColorHop);updateControlsValues();});				
+				//painterFolder.add( painterController, "Resolution", 100, 600, 1 ).onChange(function(){painterController.Resolution=parseFloat(painterController.Resolution);updateControlsValues();});				
+				painterFolder.add( painterController, "KaleidoScope", 1, 4, 1 ).onChange(function(){painterController.KaleidoScope=parseInt(painterController.KaleidoScope);updateControlsValues();});
+				utilsFolder=gui.addFolder( "Utils" )
+				utilsFolder.open();
+				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
+			}
+									
+			function updateControlsView(){
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				  	mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
+					gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				}
+				gui.__folders.Global.__controllers[1].updateDisplay();
+			}
+			
+			function updateControlsValues(){  
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				}
+			}
+			
+			function syncObjectsToJson(){
+				for(var x=0;x<displayObjects.length;x++){
+					displayObjects[x].setState(statesArray[x])
+					displayObjects[x].hideChildren();
+				}
+				displayObjects[globalController.selectedFixture].showChildren();
+			}
+			
+			function addPlane(){
+			  function createGeometry(u,v){
+					nsControlPoints = [
+						 [
+							 new THREE.Vector4 ( -200, -200, 0, 1 ),
+							 new THREE.Vector4 ( -200, -100, 0, 1 ),
+							 new THREE.Vector4 ( -200, 100, 0, 1 ),
+							 new THREE.Vector4 ( -200, 200, 0, 1 )
+						 ],
+						 [
+							 new THREE.Vector4 ( 0, -200, 0, 1 ),
+							 new THREE.Vector4 ( 0, -100, 0, 1 ),
+							 new THREE.Vector4 ( 0, 100, 0, 1 ),
+							 new THREE.Vector4 ( 0, 200, 0, 1 )
+						 ],
+						 [
+							 new THREE.Vector4 ( 200, -200, 0, 1 ),
+							 new THREE.Vector4 ( 200, -100, 0, 1 ),
+							 new THREE.Vector4 ( 200, 100, 0, 1 ),
+							 new THREE.Vector4 ( 200, 200, 0, 1 )
+						 ]
+					 ];
+					 degree1 = 2;
+					 degree2 = 3;
+					 knots1 = [0, 0, 0, 1, 1, 1];
+					 knots2 = [0, 0, 0, 0, 1, 1, 1, 1];
+					 nurbsSurface = new THREE.NURBSSurface(degree1, degree2, knots1, knots2, nsControlPoints);
+					 return nurbsSurface.getPoint(u, v);		
+			  }
+			  function createObject(){
+				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
+				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
+				var object = new THREE.Mesh( geometry, materialsList[0]);				
+				return object;
+			  }
+			  var object = createObject();
+			  object.showChildren=function(){
+			        if (globalController.mappingMode>.5) {
+						for(var x=0; x<object.children.length ;x++){
+								object.children[x].visible=true;							
+						}
+					}else{
+						for(var x=0; x<object.children.length ;x++){
+							if (object.children[x].isCorner==true) {
+								object.children[x].visible=true;
+								object.updatecorners;
+							}
+						}					
+					}
+			  }
+			  object.hideChildren=function(){
+				for(var x=object.children.length-1;x>=0 ;x--){
+						object.children[x].visible=false;			
+				}
+			  }
+			  object.drawV=function(){
+				for(var x=0; x<object.geometry.vertices.length ; x++ ){
+					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
+					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
+					//var mesh1 = new THREE.Mesh( geo, mat );
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(15, 15, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
+					mesh1.name="vertice"+x;
+					mesh1.isCorner=false;
+					if (x == 0 || x == 4 || x == 24 || x == 20) {
+						mesh1.isCorner=true;
+					}
+					mesh1.vertNum=x;
+					mesh1.position.x=object.geometry.vertices[x].x;
+					mesh1.position.y=object.geometry.vertices[x].y;
+					mesh1.position.z=-5;
+					object.add(mesh1)
+					objects.push(mesh1)
+				}
+			  }
+			  object.setState=function(savedJSON){
+				object.visible=savedJSON.Visible;
+				object.position.z= savedJSON.ZValue
+				object.material=materialsList[parseInt(savedJSON.Shader-1)]
+				for(var x=0;x<object.geometry.vertices.length;x++){
+					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
+					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
+					object.children[x].position.x=savedJSON["VerticeX"+x]
+					object.children[x].position.y=savedJSON["VerticeY"+x]
+				}
+				object.geometry.verticesNeedUpdate = true;
+			  }	  
+			  object.updateCorners=function(){
+					var cornerNum=[];
+					cornerNum[0]=0;
+					cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+					cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+					cornerNum[3]=object.geometry.vertices.length-1
+					var x1 = object.geometry.vertices[cornerNum[0]].x
+					var y1 = object.geometry.vertices[cornerNum[0]].y
+					var x2 = object.geometry.vertices[cornerNum[1]].x
+					var y2 = object.geometry.vertices[cornerNum[1]].y
+					var x3 = object.geometry.vertices[cornerNum[2]].x
+					var y3 = object.geometry.vertices[cornerNum[2]].y
+					var x4 = object.geometry.vertices[cornerNum[3]].x
+					var y4 = object.geometry.vertices[cornerNum[3]].y
+					var xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					var yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x3-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y3-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x4-x3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=object.geometry.vertices.length-1; x>object.geometry.vertices.length-Math.sqrt(object.geometry.vertices.length);x--){
+						 object.geometry.vertices[x].x=object.geometry.vertices[object.geometry.vertices.length-1].x+xDiff1*(x-(object.geometry.vertices.length-1));
+						 object.geometry.vertices[x].y=object.geometry.vertices[object.geometry.vertices.length-1].y+yDiff1*(x-(object.geometry.vertices.length-1));
+					}
+					xDiff1=(x4-x2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].x=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].x+xDiff1*(x);
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].y=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].y+yDiff1*(x);
+					}
+					var sqrt=(Math.sqrt(object.geometry.vertices.length))
+					var numOfMiddleRows=(Math.sqrt(object.geometry.vertices.length)-2)
+					for(var rowNum = 1; rowNum < (Math.sqrt(object.geometry.vertices.length)-1) ; rowNum ++){
+						 var x1 = object.geometry.vertices[rowNum*sqrt].x
+						 var y1 = object.geometry.vertices[rowNum*sqrt].y
+						 var x2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].x
+						 var y2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].y
+						 xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 for(var x=0; x<(Math.sqrt(object.geometry.vertices.length)-1) ; x++ ){
+							  object.geometry.vertices[rowNum*sqrt+x].x= x1+xDiff1*x;
+							  object.geometry.vertices[rowNum*sqrt+x].y= y1+yDiff1*x;
+						 }
+					}
+					
+					object.geometry.verticesNeedUpdate = true;
+					//object.drawV()
+					for(var x=0;x<object.geometry.vertices.length;x++){
+						mappingController["VerticeX"+x]=object.geometry.vertices[x].x;
+						mappingController["VerticeY"+x]=object.geometry.vertices[x].y;
+					}
+					for(var x=0;x<object.children.length;x++){
+						if(object.children[x].name.indexOf("vertice"!=0)){
+							object.children[x].position.x=object.geometry.vertices[x].x;
+							object.children[x].position.y=object.geometry.vertices[x].y;
+							statesArray[globalController.selectedFixture]["VerticeX"+x]=object.geometry.vertices[x].x;
+							statesArray[globalController.selectedFixture]["VerticeY"+x]=object.geometry.vertices[x].y;
+						}		
+					}
+					updateControlsValues();
+					//updateControlsView();
+			  }
+			  object.drawV();
+			  object.visible=false;
+			  scene.add(object);
+			  displayObjects.push(object);
+			}
+									
+			function onWindowResize() {
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.left   = - frustumSize * aspect / 2;
+				camera.right  =   frustumSize * aspect / 2;
+				camera.top    =   frustumSize / 2;
+				camera.bottom = - frustumSize / 2;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			
+			function onDocumentMouseMove( event ) {
+				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
+				raycaster.setFromCamera( mouse, camera );
+				if ( SELECTED ) {
+					
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
+						    console.log(SELECTED.name)
+							SELECTED.position.copy(intersection.sub( offset ));
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+							SELECTED.parent.geometry.verticesNeedUpdate = true;
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+						}
+					}
+					return;
+				}
+				var intersects = raycaster.intersectObjects( objects);
+				if ( intersects.length > 0 ) {
+					if ( INTERSECTED != intersects[ 0 ].object ) {
+						INTERSECTED = intersects[ 0 ].object;
+						plane.setFromNormalAndCoplanarPoint(
+							camera.getWorldDirection( plane.normal ),
+							INTERSECTED.position );
+					}
+					container.style.cursor = 'pointer';
+				} else {
+					INTERSECTED = null;
+					container.style.cursor = 'auto';
+				}
+			}
+			
+			function onDocumentMouseDown( event ) {
+					raycaster.setFromCamera( mouse, camera );
+					intersects = raycaster.intersectObjects( objects);
+					if ( intersects.length > 0 ) {
+						SELECTED = intersects[ 0 ].object;
+						if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+							offset.copy( intersection ).sub( SELECTED.position );
+						}
+						container.style.cursor = 'move';
+					}
+			}
+			
+			function onDocumentMouseUp( event ) {
+				//event.preventDefault();
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						SELECTED.parent.updateCorners();
+					}
+				}
+				SELECTED = null;
+				container.style.cursor = 'auto';
+			}
+				
+			function animate() {
+			    if(painterController.ColorMix != 0){
+					colorCounter=colorCounter+painterController.ColorRate
+					if(colorCounter > 1){
+						colorCounter=0;
+						clr.change();
+					}
+			    }
+				requestAnimationFrame( animate );
+				render();
+			}
+			
+			function render() {
+				uniforms1[ "time" ].value += .01 * 5;
+				computeTraces();
+				renderer.render( scene, camera );
+			}
+			
+			function requestFullScreen() {
+				// Supports most browsers and their versions.
+				var element = document.body; // Make the body go full screen.
+				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+			
+				if (requestMethod) { // Native full screen.
+					requestMethod.call(element);
+				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+					var wscript = new ActiveXObject("WScript.Shell");
+					if (wscript !== null) {
+						wscript.SendKeys("{F11}");
+					}
+				}
+			}
+
+			function getVideo(action,camNum) {
+				if(action == "init"){
+					numOfCameras=0
+					cameraIds=[]
+					selectedCamera=0;
+					videoElem='video'
+					navigator.mediaDevices.enumerateDevices().then(function(deviceInfos){
+					  for (var i = 0; i !== deviceInfos.length; ++i) {
+						var deviceInfo = deviceInfos[i];
+						if (deviceInfo.kind === 'videoinput') {
+						  numOfCameras=numOfCameras + 1
+						  cameraIds.push(deviceInfo.deviceId);
+						}
+					  }
+					  selectedCamera=camNum;
+					  if (window.stream) {
+						window.stream.getTracks().forEach(function(track) {
+						  track.stop();
+						});
+					  }
+					  console.log(cameraIds[selectedCamera])
+					  var videoSource = cameraIds[selectedCamera];
+					  var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+					  navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+						  window.stream = stream; 
+						  document.getElementById(videoElem).srcObject = stream;
+						  return navigator.mediaDevices.enumerateDevices();
+					  }).catch(function(error){
+						  console.log('navigator.getUserMedia error: ', error);
+					  });
+					  }).catch(function(error){
+						console.log('navigator.getUserMedia error: ', error);
+					  });
+				}
+				if(action == "select"){
+					selectedCamera=camNum;
+					if (window.stream) {
+					  window.stream.getTracks().forEach(function(track) {
+						track.stop();
+					  });
+					}
+					console.log(cameraIds[selectedCamera])
+					var videoSource = cameraIds[selectedCamera];
+					var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+					navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+						window.stream = stream; 
+						document.getElementById(videoElem).srcObject = stream;
+						return navigator.mediaDevices.enumerateDevices();
+					}).catch(function(error){
+						console.log('navigator.getUserMedia error: ', error);
+					});
+				}
+			}
+
+			function computeTraces(){
+				if(isFirstCycle){
+					isFirstCycle=false;
+				}else{
+					previousData=data;
+				}
+				data=pixel8(video,0,0,width,height)
+				var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
+				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
+				var delVal=4-parseFloat(painterController.FadeTime)*4;
+				var mixVal=1-parseFloat(painterController.ColorMix)
+				for (x=0; x < ((width * height) * 4); x=x+4) {
+						if (Math.abs((data[x]+data[x+1]+data[x+2])-(previousData[x]+previousData[x+1]+previousData[x+2])) > (velVal) && (data[x]+data[x+1]+data[x+2] > briVal)) {
+							materialArray[x]=clr.requestR()*(1-(mixVal))+data[x]*((mixVal));
+							materialArray[x+1]=clr.requestG()*(1-(mixVal))+data[x+1]*((mixVal));
+							materialArray[x+2]=clr.requestB()*(1-(mixVal))+data[x+2]*((mixVal));
+							materialArray[x+3]=255;
+						}
+						if(materialArray[x+0] > 0 ){
+							materialArray[x+0]=materialArray[x+0]-(delVal);
+						}
+						if( materialArray[x+0] < 0 ){
+							materialArray[x+0]=0;
+						}
+						if(materialArray[x+1] > 0 ){
+							materialArray[x+1]=materialArray[x+1]-(delVal);
+						}
+						if( materialArray[x+1] < 0 ){
+							materialArray[x+1]=0;
+						}
+						if(materialArray[x+2] > 0 ){
+							materialArray[x+2]=materialArray[x+2]-(delVal);
+						}
+						if( materialArray[x+2] < 0 ){
+							materialArray[x+2]=0;
+						}
+				}
+				dataTexture.needsUpdate = true
+			}
+		</script>
+	</body>
+</html>
+
