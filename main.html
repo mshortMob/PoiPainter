@@ -196,7 +196,7 @@ void main()	{
 	
 	vec3 poiPainterInput = texture2D( colorTexture, p ).rgb; 
 
-    vec3 col = vec3(d);
+    vec3 col = vec3(d)*poiPainterInput;
     
     gl_FragColor = vec4( col, 1.0 );
 }
