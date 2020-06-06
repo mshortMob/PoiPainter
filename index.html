@@ -33,8 +33,10 @@
 		</style>
 	</head>
 	<body>
-		<video id="video" autoplay width='600' height='300' style="display:none;"></video>
-		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
+		<video id="video" autoplay width='256' height='256' style="display:none;"></video>
+		<canvas id="canvasp8" autoplay width='256' height='256' style=""></canvas>
+		<canvas id="canvasST" autoplay></canvas>
+		<script src="jsmpeg.min.js"></script>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
 		<script src='dat.gui.min.js'></script>
@@ -42,6 +44,11 @@
 		<script src="NURBSSurface.js"></script>
 		<script src="NURBSUtils.js"></script>
 		<script src="TrackballControls.js"></script>
+		<script>
+			player = new JSMpeg.Player('ws://192.168.0.86:9999', {
+		  		canvas: document.getElementById('canvasST'), disableGl: true
+ 		   	});
+		</script>
 		<script>
 			var colorObject = function() {
 				this.currentColHex="ff00ff";
@@ -157,7 +164,8 @@
 				colorCounter=0.0;
 				getVideo("init",0)
 				addControls();	
-				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				//dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				dataTexture = new THREE.CanvasTexture(document.getElementById('canvasST').getContext('2d').canvas);
 				dataTexture.needsUpdate = true;
 				material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				container=null;
@@ -616,7 +624,7 @@
 				}else{
 					previousData=data;
 				}
-				data=pixel8(video,0,0,width,height)
+				data=pixel8(canvasST,0,0,width,height)
 				var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
 				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
 				var delVal=4-parseFloat(painterController.FadeTime)*4;
