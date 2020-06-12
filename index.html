@@ -52,7 +52,7 @@
 					console.log("Send DMX"+this.responseText);
 				}
 			};
-			xhttp.open("GET","ola.html", true);
+			xhttp.open("POST","proxy/set_dmx?u=3&d=0,0,0,0,0,0", true);
 			xhttp.send();
 		}
 
