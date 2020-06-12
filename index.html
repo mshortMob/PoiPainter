@@ -46,13 +46,14 @@
 		}
 
 		function writeDMX() {
-			var xhttp = new XMLHttpRequest();
+			xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 				if (this.readyState == 4 && this.status == 200) {
-					Console.log("Send DMX"+this.responseText);
+					console.log("Send DMX"+this.responseText);
 				}
 			};
-			xhttp.open("GET", "http://"+location.host+":9090/", true);
+			var url="http://"+location.host+"/ola.html";
+			xhttp.open("GET",url, true);
 			xhttp.send();
 		}
 
