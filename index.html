@@ -35,6 +35,8 @@
 			ctx.fillStyle = "lightgrey";
 			ctx.rect(0, c.height-c.height*percentToFill, c.width, c.height*percentToFill);
 			ctx.fill();
+			sliderValues[sliderId]=parseInt(255*percentToFill);
+			writeDMX();
 		}
 
 		var mouseheight=0;
@@ -49,13 +51,18 @@
 			xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 				if (this.readyState == 4 && this.status == 200) {
-					console.log("Send DMX"+this.responseText);
+					console.log("Send DMX: "+this.responseText);
 				}
 			};
-			xhttp.open("POST","proxy/set_dmx?u=3&d=0,0,0,0,0,0", true);
-			xhttp.send();
+			xhttp.open("POST","proxy/set_dmx", true);
+            xhttp.setRequestHeader("accept", "*/*");
+            xhttp.setRequestHeader("accept-language", "en-US,en;q=0.9,und;q=0.8");
+            xhttp.setRequestHeader("cache-control", "no-cache");
+            xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+            xhttp.setRequestHeader("pragma", "no-cache" );
+			xhttp.send("u=3&d="+sliderValues["slider1"]+","+sliderValues["slider2"]+","+sliderValues["slider3"]+","+sliderValues["slider4"]);
 		}
-
+		setInterval(writeDMX,1000);
+		
 	</script>
 </html>
-
