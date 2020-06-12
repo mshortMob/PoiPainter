@@ -7,16 +7,44 @@
 				background-color:black;
 			}	
 			canvas{
-				width:24%;
+				width:23.3%;
 				height:100%;
+				border-color:grey;
+				border-width:thick;
+				border-style: solid;
+				margin-right:0px;
+				margin-left:0px;
+				position:relative;
 			}
 		</style>
 	</head>
 	<body>
-		<canvas id="slider1 style="background-color:'green';"></canvas>
-		<canvas id="slider2"></canvas>
-		<canvas id="slider3"></canvas>
-		<canvas id="slider4"></canvas>
+		<canvas id="slider1" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
+		<canvas id="slider2" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
+		<canvas id="slider3" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
+		<canvas id="slider4" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
 	</body>
+	<script>
+
+		var selectedSlider="";
+		function drawSliderPosition(sliderId, percentToFill){
+			var c = document.getElementById(sliderId);
+			var ctx = c.getContext("2d");
+			ctx.clearRect(0, 0, c.width, c.height);
+			ctx.beginPath();
+			ctx.fillStyle = "lightgrey";
+			ctx.rect(0, c.height-c.height*percentToFill, c.width, c.height*percentToFill);
+			ctx.fill();
+		}
+
+		var mouseheight=0;
+		document.onmousemove=function(mouseevent){
+			mouseheight=1-(mouseevent.clientY/window.innerHeight);
+			if(selectedSlider!=""){
+				drawSliderPosition(selectedSlider, mouseheight);
+			}
+		}
+
+	</script>
 </html>
 
