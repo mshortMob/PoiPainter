@@ -27,6 +27,7 @@
 	<script>
 
 		var selectedSlider="";
+		sliderValues={"slider1":0,"slider2":0,"slider3":0,"slider4":0}
 		function drawSliderPosition(sliderId, percentToFill){
 			var c = document.getElementById(sliderId);
 			var ctx = c.getContext("2d");
@@ -63,6 +64,6 @@
 			xhttp.send("u=3&d="+sliderValues["slider1"]+","+sliderValues["slider2"]+","+sliderValues["slider3"]+","+sliderValues["slider4"]);
 		}
 		setInterval(writeDMX,1000);
-		
+
 	</script>
 </html>
