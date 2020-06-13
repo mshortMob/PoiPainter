@@ -131,14 +131,14 @@
 				animate();
 				statesArray=[];
 				presetsArray=[];
-				for(var x=0;x<4;x++){
+				for(var x=0;x<2;x++){
 					var objectJSON ={}
 					for (var key in mappingController) {
 						objectJSON[key]=mappingController[key]
 					}
 					statesArray.push(objectJSON)
 				}
-				for(var y=0;y<4;y++){
+				for(var y=0;y<2;y++){
 					addPlane();
 				}
 			}
@@ -203,10 +203,8 @@
 				gui = new dat.GUI();
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
-				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
-				globalFolder.add(globalController, "selectedPreset", 0, 3, 1 ).onChange(function(){globalController.selectedPreset=parseInt(globalController.selectedPreset);updateControlsView();});
+				globalFolder.add(globalController, "selectedFixture", 0, 1, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add( globalController, "PresetRate", 0, .15, .0001 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
