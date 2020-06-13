@@ -26,6 +26,19 @@
 	</body>
 	<script>
 
+featherwingPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
+                     [100,000,000,100,000,000,100,000,000,100,000,000],
+                     [000,100,000,000,100,000,000,100,000,000,100,000],
+                     [100,000,100,000,000,100,000,000,100,100,000,100],
+                     [000,000,100,000,000,100,000,000,100,000,000,100],
+                     [000,000,100,000,100,000,000,100,000,000,000,100],
+                     [000,100,100,000,100,000,050,100,000,100,100,000],
+                     [100,000,000,000,000,100,000,000,100,100,000,000],
+                     [000,000,000,000,000,000,000,000,000,100,100,100],
+                     [000,000,000,000,000,000,100,100,100,000,000,000],
+                     [000,000,000,100,100,100,000,000,000,000,000,000],
+                     [100,100,100,000,000,000,000,000,000,000,000,000]];
+
 		var selectedSlider="";
 		sliderValues={"slider1":0,"slider2":0,"slider3":0,"slider4":0}
 		function drawSliderPosition(sliderId, percentToFill){
@@ -85,11 +98,7 @@
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
             xhttp.setRequestHeader("pragma", "no-cache" );
-			var featherwingColors="";
-			for(var x=1;x<5;x++){
-				featherwingColors=featherwingColors+sliderValues["slider1"]+","+sliderValues["slider2"]+","+sliderValues["slider3"]+",";
-			}
-			xhttp.send("u=2&d="+featherwingColors+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.send("u=2&d="+featherwingPatterns[parseInt((sliderValues["slider1"]/255)*12)].toString()+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}		
 
 		function initializeDMX() {
@@ -102,7 +111,7 @@
 			xhttp.open("GET","proxy/reload", true);
 			xhttp.send();
 		}
-		setTimeout(function(){initializeDMX();setInterval(writeDMX,1000);},10000);
+		// setTimeout(function(){initializeDMX();setInterval(writeDMX,1000);},10000);
 
 	</script>
 </html>
