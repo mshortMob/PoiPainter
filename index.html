@@ -37,6 +37,9 @@
 			ctx.rect(0, c.height-c.height*percentToFill, c.width, c.height*percentToFill);
 			ctx.fill();
 			sliderValues[sliderId]=parseInt(255*percentToFill);
+			if(sliderValues[sliderId]<30){
+				sliderValues[sliderId]=0;
+			}
 			writeDMX();
 		}
 
