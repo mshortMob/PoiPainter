@@ -33,7 +33,6 @@
 		</style>
 	</head>
 	<body>
-		<video id="video" autoplay width='256' height='256' style="display:none;"></video>
 		<canvas id="canvasp8" autoplay width='256' height='256' style=""></canvas>
 		<canvas id="canvasST" autoplay></canvas>
 		<script src="jsmpeg.min.js"></script>
@@ -99,8 +98,8 @@
 								
 			function initGlobalVars(){
 				clr=new colorObject();
-			    width=document.getElementById('video').width;
-				height=document.getElementById('video').height;
+			    width=document.getElementById('canvasp8').width;
+				height=document.getElementById('canvasp8').height;
 				materialArray=new Uint8Array(width * height * 4);
 				previousData=new Uint8Array(width * height * 4);
 				data=new Uint8Array(width * height * 4);
@@ -508,7 +507,8 @@
 			}
 			
 			function animate() {
-				requestAnimationFrame( animate );
+				// requestAnimationFrame( animate );
+				setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 20 );
 				render();
 			}
 			
