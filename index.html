@@ -63,7 +63,18 @@
             xhttp.setRequestHeader("pragma", "no-cache" );
 			xhttp.send("u=3&d="+sliderValues["slider1"]+","+sliderValues["slider2"]+","+sliderValues["slider3"]+","+sliderValues["slider4"]+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}
-		setInterval(writeDMX,1000);
+
+		function initializeDMX() {
+			xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					console.log("Initialize DMX: "+this.responseText);
+				}
+			};
+			xhttp.open("GET","proxy/reload", true);
+			xhttp.send();
+		}
+		setTimeout(function(){initializeDMX();setInterval(writeDMX,1000);},5000);
 
 	</script>
 </html>
