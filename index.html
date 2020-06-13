@@ -96,62 +96,7 @@
 			}
 			
 			initGlobalVars();
-						
-			function getVideo(action,camNum) {
-				if(action == "init"){
-					numOfCameras=0
-					cameraIds=[]
-					selectedCamera=0;
-					videoElem='video'
-					navigator.mediaDevices.enumerateDevices().then(function(deviceInfos){
-					  for (var i = 0; i !== deviceInfos.length; ++i) {
-						var deviceInfo = deviceInfos[i];
-						if (deviceInfo.kind === 'videoinput') {
-						  numOfCameras=numOfCameras + 1
-						  cameraIds.push(deviceInfo.deviceId);
-						}
-					  }
-					  gui.__folders.Utils.__controllers[gui.__folders.Utils.__controllers.length-1].__max=numOfCameras-1;
-					  selectedCamera=camNum;
-					  if (window.stream) {
-						window.stream.getTracks().forEach(function(track) {
-						  track.stop();
-						});
-					  }
-					  console.log(cameraIds[selectedCamera])
-					  var videoSource = cameraIds[selectedCamera];
-					  var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
-					  navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
-						  window.stream = stream; 
-						  document.getElementById(videoElem).srcObject = stream;
-						  return navigator.mediaDevices.enumerateDevices();
-					  }).catch(function(error){
-						  console.log('navigator.getUserMedia error: ', error);
-					  });
-					  }).catch(function(error){
-						console.log('navigator.getUserMedia error: ', error);
-					  });
-				}
-				if(action == "select"){
-					selectedCamera=camNum;
-					if (window.stream) {
-					  window.stream.getTracks().forEach(function(track) {
-						track.stop();
-					  });
-					}
-					console.log(cameraIds[selectedCamera])
-					var videoSource = cameraIds[selectedCamera];
-					var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
-					navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
-						window.stream = stream; 
-						document.getElementById(videoElem).srcObject = stream;
-						return navigator.mediaDevices.enumerateDevices();
-					}).catch(function(error){
-						console.log('navigator.getUserMedia error: ', error);
-					});
-				}
-			}
-			
+								
 			function initGlobalVars(){
 				clr=new colorObject();
 			    width=document.getElementById('video').width;
@@ -192,13 +137,6 @@
 						objectJSON[key]=mappingController[key]
 					}
 					statesArray.push(objectJSON)
-				}
-				for(var x=0;x<4;x++){
-					var objectJSON ={}
-					for (var key in painterController) {
-						objectJSON[key]=painterController[key]
-					}
-					presetsArray.push(objectJSON)
 				}
 				for(var y=0;y<4;y++){
 					addPlane();
@@ -254,16 +192,6 @@
 					 Visible:false,
 					 ZValue:0
 				};
-				painterController  = {
-					 KaleidoScope:1,
-					 BrightnessSensitivity:.99,
-					 VelocitySensitivity:0.99,
-					 FadeTime:.6,
-					 ColorMix:.5,
-					 ColorRate:.05,
-					 ColorHop:1,
-					 Resolution:256
-				};
 				var count=0; 
 				for(var y=4; y>=0;y--){
 					for(var x=0; x<5;x++){
@@ -284,16 +212,6 @@
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				painterFolder=gui.addFolder( "PainterControls" )
-				painterFolder.open();
-				painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();});
-				painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();});
-				painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();});
-				painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();});
-				painterFolder.add( painterController, "ColorRate", 0, .7, .001 ).onChange(function(){painterController.ColorRate=parseFloat(painterController.ColorRate);updateControlsValues();});
-				painterFolder.add( painterController, "ColorHop", 0, 10, 1 ).onChange(function(){painterController.ColorHop=parseFloat(painterController.ColorHop);updateControlsValues();});				
-				//painterFolder.add( painterController, "Resolution", 100, 600, 1 ).onChange(function(){painterController.Resolution=parseFloat(painterController.Resolution);updateControlsValues();});				
-				painterFolder.add( painterController, "KaleidoScope", 1, 4, 1 ).onChange(function(){painterController.KaleidoScope=parseInt(painterController.KaleidoScope);updateControlsValues();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -301,8 +219,6 @@
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
-				utilsFolder.add(globalController, "selectedCamera", 0, 1, 1 ).onChange(function(){globalController.selectedCamera=parseInt(globalController.selectedCamera);getVideo("select",globalController.selectedCamera);});
-
 			}
 									
 			function updateControlsView(){
@@ -311,24 +227,13 @@
 				  	mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
 					gui.__folders.MappingControls.__controllers[i].updateDisplay();
 				}
-				for (var i in gui.__folders.PainterControls.__controllers) {
-				  painterController[gui.__folders.PainterControls.__controllers[i].property]=presetsArray[parseInt(globalController.selectedPreset)][gui.__folders.PainterControls.__controllers[i].property];
-				  gui.__folders.PainterControls.__controllers[i].updateDisplay();
-				}
 				gui.__folders.Global.__controllers[1].updateDisplay();
-				setPPResolution();
-				setKalMode();
 			}
 			
 			function updateControlsValues(){  
 				for (var i in gui.__folders.MappingControls.__controllers) {
 				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
 				}
-				for (var i in gui.__folders.PainterControls.__controllers) {
-				  presetsArray[parseInt(globalController.selectedPreset)][gui.__folders.PainterControls.__controllers[i].property]=painterController[gui.__folders.PainterControls.__controllers[i].property];
-				}
-				setPPResolution()
-				setKalMode();
 			}
 			
 			function syncObjectsToJson(){
@@ -337,20 +242,6 @@
 					displayObjects[x].hideChildren();
 				}
 				displayObjects[globalController.selectedFixture].showChildren();
-				setKalMode()
-				//changeImageBank();
-			}
-			
-			function setKalMode(){
-				if( parseInt(painterController.KaleidoScope) != material.map.repeat.x){
-					if(parseInt(painterController.KaleidoScope) != 1){
-						material.map.wrapS = material.map.wrapT = THREE.MirroredRepeatWrapping;
-						material.map.repeat.set( parseInt(painterController.KaleidoScope), parseInt(painterController.KaleidoScope) );
-					}else{
-						material.map.wrapS = material.map.wrapT = THREE.ClampToEdgeWrapping;
-						material.map.repeat.set( 1, 1 );
-					}
-				}
 			}
 			
 			function addPlane(){
@@ -617,58 +508,16 @@
 				SELECTED = null;
 				container.style.cursor = 'auto';
 			}
-				
-			function computeTraces(){
-				if(isFirstCycle){
-					isFirstCycle=false;
-				}else{
-					previousData=data;
-				}
-				data=pixel8(canvasST,0,0,width,height)
-				var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
-				var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
-				var delVal=4-parseFloat(painterController.FadeTime)*4;
-				var mixVal=1-parseFloat(painterController.ColorMix)
-				for (x=0; x < ((width * height) * 4); x=x+4) {
-						if (Math.abs((data[x]+data[x+1]+data[x+2])-(previousData[x]+previousData[x+1]+previousData[x+2])) > (velVal) && (data[x]+data[x+1]+data[x+2] > briVal)) {
-							materialArray[x]=clr.requestR()*(1-(mixVal))+data[x]*((mixVal));
-							materialArray[x+1]=clr.requestG()*(1-(mixVal))+data[x+1]*((mixVal));
-							materialArray[x+2]=clr.requestB()*(1-(mixVal))+data[x+2]*((mixVal));
-							materialArray[x+3]=255;
-						}
-						if(materialArray[x+3] > 0 ){
-							materialArray[x+3]=materialArray[x+3]-(delVal);
-						}
-						if( materialArray[x+3] < 0 ){
-							materialArray[x+3]=0;
-						}
-				}
-				dataTexture.needsUpdate = true
-			}
 			
 			function animate() {
-				//computeTraces()
-			    if(globalController.PresetRate != 0){
-					presetCounter=presetCounter+globalController.PresetRate
-					if(presetCounter > 1){
-						presetCounter=0;
-						globalController.selectedPreset=(globalController.selectedPreset+1)%4;
-						updateControlsView();
-					}
-			    }
-			    if(painterController.ColorMix != 0){
-					colorCounter=colorCounter+painterController.ColorRate
-					if(colorCounter > 1){
-						colorCounter=0;
-						clr.change();
-					}
-			    }
 				requestAnimationFrame( animate );
 				render();
 			}
 			
 			function render() {
-				computeTraces()
+				data=pixel8(canvasST,0,0,width,height);
+				materialArray=data;
+				dataTexture.needsUpdate = true
 				renderer.render( scene, camera );
 			}
 			
@@ -707,20 +556,6 @@
 				}
 			}	
 			
-			function setPPResolution(){
-				if(parseInt(painterController.Resolution) != parseInt(document.getElementById('video').width)){
-					document.getElementById('video').width=parseInt(painterController.Resolution)
-					document.getElementById('video').height=parseInt(painterController.Resolution/2)
-					document.getElementById('canvasp8').width=parseInt(painterController.Resolution)
-					document.getElementById('canvasp8').height=parseInt(painterController.Resolution/2)
-			   		width=document.getElementById('video').width;
-					height=document.getElementById('video').height;	
-					dataTexture=[]	
-					dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
-					dataTexture.needsUpdate = true;
-					material.map=dataTexture;
-				}
-			}
 		</script>
 	</body>
 </html>
