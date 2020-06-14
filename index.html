@@ -196,11 +196,6 @@
 
 		document.onmouseup=function(mouseevent){
 			mouseButtonState=0;
-			if(mouseevent.target.id.indexOf("slider")!=-1){
-				drawSliderPosition(mouseevent.target.id, 1-(mouseevent.offsetY/document.getElementById(mouseevent.target.id).clientHeight) );
-			}
-			if(mouseevent.target.id.indexOf("xy")!=-1){
-				drawSliderPosition(mouseevent.target.id, 0, mouseevent.offsetX, mouseevent.offsetY);
 		}
 
 		function writeDMX() {
