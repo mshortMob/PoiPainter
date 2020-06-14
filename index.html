@@ -4,64 +4,192 @@
 		<style>
 			body{
 			    margin:0px;
+				padding:0px;
 				background-color:black;
 			}	
 			canvas{
-				width:22%;
-				height:100%;
+				width:15.5%;
+				height:98%;
 				border-color:grey;
 				border-width:thick;
 				border-style: solid;
-				margin-right:0px;
-				margin-left:0px;
-				position:relative;
+				margin:0px;
+				position:absolute;
+				top:0px;
+			}
+			#slider1{
+				left:0%;
+			}
+			#slider2{
+				left:16%;
+			}
+			#slider3{
+				left:32%;
+			}
+			#slider4{
+				left:48%;
+			}
+			#label1{
+				color:grey;
+				position:absolute;
+				z-index: 3;
+				user-select: none;
+				transform: rotate(-90deg);
+				font-size:2.5em;
+				left:0%;
+				bottom:21%;
+			}
+			#label2{
+				color:grey;
+				position:absolute;
+				z-index: 3;
+				user-select: none;
+				transform: rotate(-90deg);
+				font-size:2.5em;
+				left:11%;
+				bottom:27%;
+			}
+			#label3{
+				color:grey;
+				position:absolute;
+				z-index: 3;
+				user-select: none;
+				transform: rotate(-90deg);
+				font-size:2.5em;
+				left:30%;
+				bottom:23%;
+			}
+			#label4{
+				color:grey;
+				position:absolute;
+				z-index: 3;
+				user-select: none;
+				transform: rotate(-90deg);
+				font-size:2.5em;
+				left:41.5%;
+				bottom:29%;
+			}
+			#label5{
+				color:grey;
+				position:absolute;
+				z-index: 3;
+				user-select: none;
+				font-size:2.0em;
+				top:2.5%;
+				right:11%;
+			}
+			#label6{
+				color:grey;
+				position:absolute;
+				z-index: 3;
+				user-select: none;
+				font-size:2.0em;
+				top:52.5%;
+				right:11%;
+			}
+			#xy1{
+				width:35%;
+				height:49%;
+				border-color:grey;
+				border-width:thick;
+				border-style: solid;
+				margin:0px;
+				position:absolute;
+				top:0%;
+				left:64%;
+			}
+			#xy2{
+				width:35%;
+				height:49%;
+				border-color:grey;
+				border-width:thick;
+				border-style: solid;
+				margin:0px;
+				position:absolute;
+				top:49%;
+				left:64%;
 			}
 		</style>
 	</head>
 	<body>
-		<canvas id="slider1" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
-		<canvas id="slider2" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
-		<canvas id="slider3" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
-		<canvas id="slider4" onmousedown="selectedSlider=this.id;drawSliderPosition(this.id, mouseheight);" onmouseup="selectedSlider='';" ></canvas>
+		<div id="label1">Pixel Color</div>
+		<div id="label2">Pixel Brightness</div>
+		<div id="label3">Mover Color</div>
+		<div id="label4">Mover Brightness</div>
+		<div id="label5">Mover XY1</div>
+		<div id="label6">Mover XY2</div>
+		<canvas id="slider1" onmousedown="drawSliderPosition(this.id, 1-(this.offsetY/this.clientHeight) );"  ></canvas>
+		<canvas id="slider2" onmousedown="drawSliderPosition(this.id, 1-(this.offsetY/this.clientHeight) );"  ></canvas>
+		<canvas id="slider3" onmousedown="drawSliderPosition(this.id, 1-(this.offsetY/this.clientHeight) );"  ></canvas>
+		<canvas id="slider4" onmousedown="drawSliderPosition(this.id, 1-(this.offsetY/this.clientHeight) );"  ></canvas>
+		<canvas id="xy1" onmousedown="drawSliderPosition(this.id, 0, event.offsetX, event.offsetY);"  ></canvas>
+		<canvas id="xy2" onmousedown="drawSliderPosition(this.id, 0, event.offsetX, event.offsetY);"  ></canvas>
 	</body>
 	<script>
 
-featherwingPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
-                     [100,000,000,100,000,000,100,000,000,100,000,000],
-                     [000,100,000,000,100,000,000,100,000,000,100,000],
-                     [100,000,100,000,000,100,000,000,100,100,000,100],
-                     [000,000,100,000,000,100,000,000,100,000,000,100],
-                     [000,000,100,000,100,000,000,100,000,000,000,100],
-                     [000,100,100,000,100,000,050,100,000,100,100,000],
-                     [100,000,000,000,000,100,000,000,100,100,000,000],
-                     [000,000,000,000,000,000,000,000,000,100,100,100],
-                     [000,000,000,000,000,000,100,100,100,000,000,000],
-                     [000,000,000,100,100,100,000,000,000,000,000,000],
-                     [100,100,100,000,000,000,000,000,000,000,000,000]];
+		featherwingPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
+							[100,000,000,100,000,000,100,000,000,100,000,000],
+							[000,100,000,000,100,000,000,100,000,000,100,000],
+							[100,000,100,000,000,100,000,000,100,100,000,100],
+							[000,000,100,000,000,100,000,000,100,000,000,100],
+							[000,000,100,000,100,000,000,100,000,000,000,100],
+							[000,100,100,000,100,000,050,100,000,100,100,000],
+							[100,000,000,000,000,100,000,000,100,100,000,000],
+							[000,000,000,000,000,000,000,000,000,100,100,100],
+							[000,000,000,000,000,000,100,100,100,000,000,000],
+							[000,000,000,100,100,100,000,000,000,000,000,000],
+							[100,100,100,000,000,000,000,000,000,000,000,000]];
 
-		var selectedSlider="";
-		sliderValues={"slider1":0,"slider2":0,"slider3":0,"slider4":0}
-		function drawSliderPosition(sliderId, percentToFill){
-			var c = document.getElementById(sliderId);
-			var ctx = c.getContext("2d");
-			ctx.clearRect(0, 0, c.width, c.height);
-			ctx.beginPath();
-			ctx.fillStyle = "lightgrey";
-			ctx.rect(0, c.height-c.height*percentToFill, c.width, c.height*percentToFill);
-			ctx.fill();
-			sliderValues[sliderId]=parseInt(255*percentToFill);
-			if(sliderValues[sliderId]<30){
-				sliderValues[sliderId]=0;
+		sliderValues={"slider1":0,"slider2":0,"slider3":0,"slider4":0};
+		xyValues={"xy1":{"x":0,"y":0}, "xy2":{"x":0,"y":0} };
+		mouseButtonState=0;
+
+		function drawSliderPosition(sliderId, percentToFill, xyx, xyy){
+			if(mouseButtonState==1){
+				if(sliderId.indexOf("slider")!=-1){
+					var c = document.getElementById(sliderId);
+					var ctx = c.getContext("2d");
+					ctx.clearRect(0, 0, c.width, c.height);
+					ctx.beginPath();
+					ctx.fillStyle = "lightgrey";
+					ctx.rect(0, c.height-c.height*percentToFill, c.width, c.height*percentToFill);
+					ctx.fill();
+					sliderValues[sliderId]=parseInt(255*percentToFill);
+					if(sliderValues[sliderId]<30){
+						sliderValues[sliderId]=0;
+					}
+					writeDMX();
+				}
+				if(sliderId.indexOf("xy")!=-1){
+					var c = document.getElementById(sliderId);
+					var ctx = c.getContext("2d");
+					ctx.clearRect(0, 0, c.width, c.height);
+					ctx.beginPath();
+					ctx.fillStyle = "lightgrey";
+					ctx.arc(xyx/c.clientWidth*c.width, xyy/c.clientHeight*c.height, 10, 0, 2 * Math.PI);
+					ctx.fill();
+					xyValues[sliderId]["x"]=parseInt(xyx/c.clientWidth*255);
+					xyValues[sliderId]["y"]=parseInt(xyy/c.clientHeight*255);
+					writeDMX();
+				}
 			}
-			writeDMX();
 		}
 
-		var mouseheight=0;
 		document.onmousemove=function(mouseevent){
-			mouseheight=1-(mouseevent.clientY/window.innerHeight);
-			if(selectedSlider!=""){
-				drawSliderPosition(selectedSlider, mouseheight);
+			if(mouseevent.target.id.indexOf("slider")!=-1){
+				drawSliderPosition(mouseevent.target.id, 1-(mouseevent.offsetY/document.getElementById(mouseevent.target.id).clientHeight) );
 			}
+			if(mouseevent.target.id.indexOf("xy")!=-1){
+				drawSliderPosition(mouseevent.target.id, 0, mouseevent.offsetX, mouseevent.offsetY);
+			}
+		}
+
+		document.onmousedown=function(mouseevent){
+			mouseButtonState=1;
+		}
+
+		document.onmouseup=function(mouseevent){
+			mouseButtonState=0;
 		}
 
 		function writeDMX() {
@@ -82,7 +210,7 @@ featherwingPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
             xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=3&d="+sliderValues["slider1"]+","+sliderValues["slider2"]+","+sliderValues["slider3"]+","+sliderValues["slider4"]+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.send("u=3&d="+xyValues["xy1"]["x"]+",0,"+xyValues["xy1"]["y"]+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"+xyValues["xy2"]["x"]+",0,"+xyValues["xy2"]["y"]+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}
 
 		function writeFeatherwings() {
@@ -98,7 +226,7 @@ featherwingPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
             xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=2&d="+featherwingPatterns[parseInt((sliderValues["slider1"]/255)*12)].toString()+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.send("u=2&d="+featherwingPatterns[parseInt((sliderValues["slider1"]/255)*(featherwingPatterns.length-1))].toString()+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}		
 
 		function initializeDMX() {
