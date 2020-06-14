@@ -128,30 +128,30 @@
 	<script>
 
 		featherwingPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
-							[100,000,000,100,000,000,100,000,000,100,000,000],
-							[000,100,000,000,100,000,000,100,000,000,100,000],
-							[100,000,100,000,000,100,000,000,100,100,000,100],
-							[000,000,100,000,000,100,000,000,100,000,000,100],
-							[000,000,100,000,100,000,000,100,000,000,000,100],
-							[000,100,100,000,100,000,050,100,000,100,100,000],
-							[100,000,000,000,000,100,000,000,100,100,000,000],
-							[000,000,000,000,000,000,000,000,000,100,100,100],
-							[000,000,000,000,000,000,100,100,100,000,000,000],
-							[000,000,000,100,100,100,000,000,000,000,000,000],
-							[100,100,100,000,000,000,000,000,000,000,000,000]];
+							[255,000,000,255,000,000,255,000,000,255,000,000],
+							[000,255,000,000,255,000,000,255,000,000,255,000],
+							[255,000,255,000,000,255,000,000,255,255,000,255],
+							[000,000,255,000,000,255,000,000,255,000,000,255],
+							[000,000,255,000,255,000,000,255,000,000,000,255],
+							[000,255,255,000,255,000,050,255,000,255,255,000],
+							[255,000,000,000,000,255,000,000,255,255,000,000],
+							[000,000,000,000,000,000,000,000,000,255,255,255],
+							[000,000,000,000,000,000,255,255,255,000,000,000],
+							[000,000,000,255,255,255,000,000,000,000,000,000],
+							[255,255,255,000,000,000,000,000,000,000,000,000]];
 
 			moverPatterns=[[000,000,000,000,000,000,000,000,000,000,000,000],
-							[100,000,000,100,000,000,100,000,000,100,000,000],
-							[000,100,000,000,100,000,000,100,000,000,100,000],
-							[100,000,100,000,000,100,000,000,100,100,000,100],
-							[000,000,100,000,000,100,000,000,100,000,000,100],
-							[000,000,100,000,100,000,000,100,000,000,000,100],
-							[000,100,100,000,100,000,050,100,000,100,100,000],
-							[100,000,000,000,000,100,000,000,100,100,000,000],
-							[000,000,000,000,000,000,000,000,000,100,100,100],
-							[000,000,000,000,000,000,100,100,100,000,000,000],
-							[000,000,000,100,100,100,000,000,000,000,000,000],
-							[100,100,100,000,000,000,000,000,000,000,000,000]];
+							[255,000,000,255,000,000,255,000,000,255,000,000],
+							[000,255,000,000,255,000,000,255,000,000,255,000],
+							[255,000,255,000,000,255,000,000,255,255,000,255],
+							[000,000,255,000,000,255,000,000,255,000,000,255],
+							[000,000,255,000,255,000,000,255,000,000,000,255],
+							[000,255,255,000,255,000,050,255,000,255,255,000],
+							[255,000,000,000,000,255,000,000,255,255,000,000],
+							[000,000,000,000,000,000,000,000,000,255,255,255],
+							[000,000,000,000,000,000,255,255,255,000,000,000],
+							[000,000,000,255,255,255,000,000,000,000,000,000],
+							[255,255,255,000,000,000,000,000,000,000,000,000]];
 
 		sliderValues={"slider1":0,"slider2":0,"slider3":0,"slider4":0};
 		xyValues={"xy1":{"x":0,"y":0}, "xy2":{"x":0,"y":0} };
@@ -185,6 +185,12 @@
 					xyValues[sliderId]["y"]=parseInt(xyy/c.clientHeight*255);
 					writeDMX();
 				}
+			}
+			if(sliderValues["slider2"]>255){
+				sliderValues["slider2"]=255;
+			}
+			if(sliderValues["slider4"]>255){
+				sliderValues["slider4"]=255;
 			}
 		}
 
@@ -229,7 +235,7 @@
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
             xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=3&d="+xyValues["xy1"]["x"]+",0,"+xyValues["xy1"]["y"]+",0,0,0,255,0,"+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][0]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][1]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][2]+",0,"+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][3]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][4]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][5]+",0,0,0,0,0,0,"+xyValues["xy2"]["x"]+",0,"+xyValues["xy2"]["y"]+",0,0,0,255,0,"+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][6]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][7]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][8]+",0,"+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][9]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][10]+","+moverPatterns[parseInt((sliderValues["slider1"]/255)*(moverPatterns.length-1))][11]+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.send("u=3&d="+xyValues["xy1"]["x"]+",0,"+xyValues["xy1"]["y"]+",0,0,0,"+sliderValues["slider2"]+",0,"+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][0]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][1]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][2]+",0,"+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][3]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][4]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][5]+",0,0,0,0,0,0,"+xyValues["xy2"]["x"]+",0,"+xyValues["xy2"]["y"]+",0,0,0,"+sliderValues["slider2"]+",0,"+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][6]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][7]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][8]+",0,"+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][9]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][10]+","+moverPatterns[parseInt((sliderValues["slider3"]/255)*(moverPatterns.length-1))][11]+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}
 
 		function writeFeatherwings() {
@@ -244,8 +250,13 @@
             xhttp.setRequestHeader("accept-language", "en-US,en;q=0.9,und;q=0.8");
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-            xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=2&d="+featherwingPatterns[parseInt((sliderValues["slider1"]/255)*(featherwingPatterns.length-1))].toString()+",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.setRequestHeader("pragma", "no-cache" );
+			selectedScene=featherwingPatterns[parseInt((sliderValues["slider1"]/255)*(featherwingPatterns.length-1))];
+			featherWingString="";
+			for(i=0;i<selectedScene.length;i++){
+				featherWingString=featherWingString+parseInt(selectedScene[i]*(sliderValues["slider2"]/255))+",";
+			}
+			xhttp.send("u=2&d="+featherWingString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}		
 
 		function initializeDMX() {
