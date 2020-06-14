@@ -21,11 +21,11 @@
 		</style>
 	</head>
 	<body>
-		<canvas id="video-canvas"></canvas>
+		<canvas id="vcanvas"></canvas>
 		<script type="text/javascript" src="jsmpeg.min.js"></script>
 		<script src="pixel8.js"></script>
 		<script type="text/javascript">
-			var canvas = document.getElementById('video-canvas');
+			var canvas = document.getElementById('vcanvas');
 			var url = 'ws://'+document.location.hostname+':9999/';
 			var player = new JSMpeg.Player(url, {canvas: canvas});
 		</script>
