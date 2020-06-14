@@ -30,6 +30,14 @@
 			var url = 'ws://'+document.location.hostname+':9999/';
 			var player = new JSMpeg.Player(url, {canvas: canvas});
 		</script>
+		<script>
+
+			function getPixelData(){
+				var dada=pixel8(document.getElementById('vcanvas'));
+				temp=dada.pixelAt(10, 10);
+			}
+
+		</script>
 	</body>
 </html>
 
