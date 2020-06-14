@@ -24,7 +24,7 @@
 		<canvas id="canvaspST" autoplay width='256' height='256' style=""></canvas>
 		<script src="jsmpeg.min.js"></script>x
 		<script>
-			player = new JSMpeg.Player('ws://localhost:9999', {
+			player = new JSMpeg.Player('ws://'+location.host+':9999', {
 		  		canvas: document.getElementById('canvasST'), disableGl: true
  		   	});
 		</script>
