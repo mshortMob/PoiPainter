@@ -171,6 +171,15 @@
 					if(sliderValues[sliderId]<30){
 						sliderValues[sliderId]=0;
 					}
+					if(sliderId=="slider2"]){
+						if(sliderValues[sliderId]>240){
+							sliderValues["slider2"]=255;
+						}else if(sliderValues[sliderId]<30){
+							sliderValues["slider2"]=0;
+						}else{
+							sliderValues["slider2"]=.5*sliderValues["slider2"];
+						}
+					}
 					writeDMX();
 				}
 				if(sliderId.indexOf("xy")!=-1){
