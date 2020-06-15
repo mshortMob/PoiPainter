@@ -560,14 +560,14 @@
 					var rv=data.pixelAt(parseInt(width/10*i),height/2)["red"]
 					var gv=data.pixelAt(parseInt(width/10*i),height/2)["green"]
 					var bv=data.pixelAt(parseInt(width/10*i),height/2)["blue"]
-					if(rv<20){
-						rv=0;
+					if(rv<100){
+						rv=rv/3;
 					}
-					if(gv<20){
-						gv=0;
+					if(gv<100){
+						gv=gv/3;
 					}
-					if(bv<20){
-						bv=0;
+					if(bv<100){
+						bv=bv/3;
 					}
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
