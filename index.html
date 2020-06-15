@@ -36,7 +36,7 @@
 				dada=pixel8(canvas);
 				var pixelDataString="";
 				for(i=0;i<8;i++){
-					pixelDataString=pixelDataString+dada.pixelAt(canvas.width/10*(i+1),canvas.height)["red"]+","+dada.pixelAt(canvas.width/10*(i+1),canvas.height)["green"]+","+dada.pixelAt(canvas.width/10*(i+1),canvas.height)["blue"]+",";
+					pixelDataString=pixelDataString+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["red"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["green"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["blue"]+",";
 				}
 				return dada;
 			}
