@@ -21,21 +21,19 @@
 		</style>
 	</head>
 	<body>
-		<canvas id="vcanvas"></canvas>
 		<canvas id="canvasp8" style="display: none;"></canvas>
 		<script type="text/javascript" src="jsmpeg.min.js"></script>
 		<script src="pixel8.js"></script>
 		<script type="text/javascript">
-			var canvas = document.getElementById('vcanvas');
+
+			var canvas = document.createElement('vcanvas');
 			var url = 'ws://'+document.location.hostname+':9999/';
 			var player = new JSMpeg.Player(url, {canvas: canvas});
-		</script>
-		<script>
 
 			function getPixelData(){
 				var vc=document.getElementById('vcanvas');
 				var dada=pixel8(vc);
-				return dada.pixelAt(10,10);
+				return dada.pixelAt(10,10);ctx = vc.getContext('2d');
 			}
 
 			function writeDMXB() {
