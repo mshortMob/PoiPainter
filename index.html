@@ -553,7 +553,58 @@
 					syncObjectsToJson();
 				}
 			}	
-			
+
+			function getPixelData(){
+				pixelDataString="";
+				for(i=1;i<10;i++){
+					var rv=data.pixelAt(parseInt(width/10*i),height/2)["red"]
+					var gv=data.pixelAt(parseInt(width/10*i),height/2)["green"]
+					var bv=data.pixelAt(parseInt(width/10*i),height/2)["blue"]
+					if(rv<40){
+						rv=0;
+					}
+					if(gv<40){
+						gv=0;
+					}
+					if(bv<40){
+						bv=0;
+					}
+					// rv=rv/2;
+					// gv=gv/2;
+					// bv=bv/2;
+					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
+				}
+				return pixelDataString;
+			}
+
+			function writeDMX() {
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					console.log("Send DMX: "+this.responseText);
+				}
+			};
+			xhttp.open("POST","proxy/set_dmx", true);
+            xhttp.setRequestHeader("accept", "*/*");
+            xhttp.setRequestHeader("accept-language", "en-US,en;q=0.9,und;q=0.8");
+            xhttp.setRequestHeader("cache-control", "no-cache");
+            xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+            xhttp.setRequestHeader("pragma", "no-cache" );
+			xhttp.send("u=0&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+		}	
+
+			function initializeDMX() {
+				xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						console.log("Initialize DMX: "+this.responseText);
+					}
+				};
+				xhttp.open("GET","proxy/reload", true);
+				xhttp.send();
+			}
+			setTimeout(function(){initializeDMX();setInterval(writeDMX,100);},3000);
+
 		</script>
 	</body>
 </html>
