@@ -28,9 +28,9 @@
 
 			var canvas = document.createElement('canvas');
 			canvas.id='vcanvas'
-			//document.body.appendChild(canvas);
-			// var url = 'ws://'+document.location.hostname+':9999/';
-			// var player = new JSMpeg.Player(url, {canvas: canvas});
+			document.body.appendChild(canvas);
+			var url = 'ws://'+document.location.hostname+':9999/';
+			var player = new JSMpeg.Player(url, {canvas: canvas});
 
 			function getPixelData(){
 				var dada=pixel8(canvas);
