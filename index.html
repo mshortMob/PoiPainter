@@ -26,7 +26,8 @@
 		<script src="pixel8.js"></script>
 		<script type="text/javascript">
 
-			var canvas = document.createElement('vcanvas');
+			var canvas = document.createElement('canvas');
+			canvas.id='vcanvas'
 			var url = 'ws://'+document.location.hostname+':9999/';
 			var player = new JSMpeg.Player(url, {canvas: canvas});
 
