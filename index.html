@@ -38,7 +38,7 @@
 				for(i=0;i<8;i++){
 					pixelDataString=pixelDataString+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["red"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["green"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["blue"]+",";
 				}
-				return dada;
+				return pixelDataString;
 			}
 
 			function writeDMXB() {
