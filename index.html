@@ -33,8 +33,7 @@
 			var player = new JSMpeg.Player(url, {canvas: canvas});
 
 			function getPixelData(){
-				var vc=document.getElementById('vcanvas');
-				var dada=pixel8(vc);
+				var dada=pixel8(canvas);
 				return dada.pixelAt(10,10);ctx = vc.getContext('2d');
 			}
 
