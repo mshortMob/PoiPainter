@@ -35,8 +35,8 @@
 			function getPixelData(){
 				dada=pixel8(canvas);
 				var pixelDataString="";
-				for(i=0;i<8;i++){
-					pixelDataString=pixelDataString+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["red"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["green"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["blue"]+",";
+				for(i=1;i<9;i++){
+					pixelDataString=pixelDataString+dada.pixelAt(parseInt(canvas.width/10*(i),canvas.height/2)["red"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["green"]+","+dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["blue"]+",";
 				}
 				return pixelDataString;
 			}
@@ -54,7 +54,7 @@
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
             xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=0&d=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.send("u=0&d="+getPixelData()+"0,0,0,0");
 		}	
 
 		function initializeDMX() {
