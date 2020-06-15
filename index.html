@@ -39,13 +39,13 @@
 					var rv=dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["red"]
 					var gv=dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["green"]
 					var bv=dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["blue"]
-					if(rv<90){
+					if(rv<50){
 						rv=0;
 					}
-					if(gv<90){
+					if(gv<50){
 						gv=0;
 					}
-					if(bv<90){
+					if(bv<50){
 						bv=0;
 					}
 					// rv=rv/2;
@@ -82,7 +82,7 @@
 			xhttp.open("GET","proxy/reload", true);
 			xhttp.send();
 		}
-		setTimeout(function(){initializeDMX();setInterval(writeDMX,150);},3000);
+		setTimeout(function(){initializeDMX();setInterval(writeDMX,100);},3000);
 
 		</script>
 	</body>
