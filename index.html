@@ -30,7 +30,7 @@
 			canvas.id='vcanvas'
 			document.body.appendChild(canvas);
 			var url = 'ws://'+document.location.hostname+':9999/';
-			var player = new JSMpeg.Player(url, {canvas: canvas, disableGl:true, preserveDrawingBuffer:true});
+			var player = new JSMpeg.Player(url, {canvas: canvas, disableGl:true, preserveDrawingBuffer:false});
 
 			function getPixelData(){
 				var dada=pixel8(canvas);
