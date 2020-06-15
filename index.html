@@ -33,7 +33,7 @@
 			var player = new JSMpeg.Player(url, {canvas: canvas, disableGl:true, preserveDrawingBuffer:false});
 
 			function getPixelData(){
-				var dada=pixel8(canvas);
+				dada=pixel8(canvas);
 				var pixelDataString="";
 				for(i=0;i<8;i++){
 					pixelDataString=pixelDataString+dada.pixelAt(canvas.width/10*(i+1),canvas.height)["red"]+","+dada.pixelAt(canvas.width/10*(i+1),canvas.height)["green"]+","+dada.pixelAt(canvas.width/10*(i+1),canvas.height)["blue"]+",";
