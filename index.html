@@ -39,7 +39,7 @@
 					var rv=dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["red"]
 					var gv=dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["green"]
 					var bv=dada.pixelAt(parseInt(canvas.width/10*i),canvas.height/2)["blue"]
-					if(rv<75){
+					if(rv<90){
 						rv=0;
 					}
 					if(gv<75){
@@ -48,6 +48,9 @@
 					if(bv<75){
 						bv=0;
 					}
+					rv=rv*2;
+					gv=gv*2;
+					bv=bv*2;
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
 				return pixelDataString;
