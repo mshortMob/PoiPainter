@@ -558,9 +558,9 @@
 				pixelDataString="";
 				var numPixels=9
 				for(i=0;i<numPixels;i++){
-					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2),height/2)["red"]
-					var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"]
-					var bv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"]
+					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
+					var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
+					var bv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"];
 					pixelThreshold=70;
 					if( (rv+gv+bv)< pixelThreshold){
 						rv=0;
