@@ -560,22 +560,22 @@
 					var rv=data.pixelAt(parseInt(width/10*i),height/2)["red"]
 					var gv=data.pixelAt(parseInt(width/10*i),height/2)["green"]
 					var bv=data.pixelAt(parseInt(width/10*i),height/2)["blue"]
-					pixelThreshold=35;
-					if(rv<pixelThreshold){
+					pixelThreshold=70;
+					if( (rv+gv+bv)< pixelThreshold){
 						rv=0;
-					}else{
-						rv=-rv-pixelThreshold;
+						gv=0;
+						bv=0;
+					}
+					if(rv<pixelThreshold){
+						rv=rv/3.3;
 					}
 					if(gv<pixelThreshold){
-						gv=0;
-					}else{
-						gv=-gv-pixelThreshold;
+						gv=gv/3.3;
 					}
 					if(bv<pixelThreshold){
-						bv=0;
-					}else{
-						bv=-bv-pixelThreshold;
+						bv=bv/3.3;
 					}
+					if()
 
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
