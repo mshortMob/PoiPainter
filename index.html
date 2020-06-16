@@ -25,7 +25,7 @@
 				top:0px;
 				left:0px;
 				z-index:10;
-				transform:scale(1,1);
+				transform:scale(1,-1);
 				position:fixed;
 				float:left;
 				object-fit:fill;
@@ -301,7 +301,7 @@
 					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
 					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
 					//var mesh1 = new THREE.Mesh( geo, mat );
-					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(15, 15, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(35, 35, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
 					mesh1.name="vertice"+x;
 					mesh1.isCorner=false;
 					if (x == 0 || x == 4 || x == 24 || x == 20) {
@@ -507,8 +507,8 @@
 			}
 			
 			function animate() {
-				// requestAnimationFrame( animate );
-				setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 30 );
+				requestAnimationFrame( animate );
+				//setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 30 );
 				render();
 			}
 			
@@ -600,7 +600,7 @@
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
 			}
-			setTimeout(function(){initializeDMX();setInterval(writeDMX,25);},3000);
+			setTimeout(function(){initializeDMX();setInterval(writeDMX,75);},3000);
 
 		</script>
 	</body>
