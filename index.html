@@ -560,15 +560,23 @@
 					var rv=data.pixelAt(parseInt(width/10*i),height/2)["red"]
 					var gv=data.pixelAt(parseInt(width/10*i),height/2)["green"]
 					var bv=data.pixelAt(parseInt(width/10*i),height/2)["blue"]
-					if(rv<140){
-						rv=rv/2;
+					pixelThreshold=67;
+					if(rv<pixelThreshold){
+						rv=0;
+					}else{
+						rv=-rv-pixelThreshold;
 					}
-					if(gv<140){
-						gv=gv/1.5;
+					if(gv<pixelThreshold){
+						gv=0;
+					}else{
+						gv=-gv-pixelThreshold;
 					}
-					if(bv<180){
-						bv=bv/2;
+					if(bv<pixelThreshold){
+						bv=0;
+					}else{
+						bv=-bv-pixelThreshold;
 					}
+
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
 				return pixelDataString;
@@ -600,7 +608,7 @@
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
 			}
-			setTimeout(function(){initializeDMX();setInterval(writeDMX,75);},3000);
+			setTimeout(function(){initializeDMX();setInterval(writeDMX,50);},3000);
 
 		</script>
 	</body>
