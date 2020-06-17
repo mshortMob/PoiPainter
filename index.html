@@ -7,14 +7,12 @@
 	<script src="sketch.js"></script>
 </head>
 <body id="body">
-		<video id="video" autoplay="" width='160' height='120'></video>
 		<button id="showControlsButton" onclick="showControls()">Show Controls</button>
 		<span id="controls">
 				<button onclick="hideControls()">Hide Controls</button>
 				<button onclick="addObject()">Add Obj</button>
 				<button onclick="removeCurrentObject()">Remove Obj</button>
 				<button onclick="requestFullScreen();">Full Screen</button>
-				<button id="togglePresetsButton" onclick="togglePresets();">Use Presets</button>
 				<div class="label">Image</div>
 				<select id="imageSelector" onchange="changeCurrentImage()">
 						<option value='anim1.gif'>anim1.gif</option>
@@ -35,20 +33,9 @@
 						<option value='mask1.png'>mask1.png</option>
 						<option value='Gradient1'>Gradient1</option>
 				</select>
-				<div class="label">Preset</div>
-				<select id="presetSelector" onchange="changeCurrentPreset()">
-						<option value='1'>1</option>
-						<option value='2'>2</option>
-						<option value='3'>3</option>
-						<option value='4'>4</option>
-				</select>
-				<div class="label">Preset Cycle Freq</div>
-				<input id="presetFreqSlider" type="range" class="slider" onchange="cyclePresets()">
-				<div class="label">Preset Fade Time</div>
-				<input id="presetFadeSlider" type="range" class="slider" onchange="changePresetFadeTime()">
-				<div class="label">Dry/Wet</div>
-				<input id="dryWetSlider" type="range" class="slider" onchange="dryWetSliderUpdate()">
 		</span>
 		<script src="main.js"> </script>
+		<script src="numeric.min.js"> </script>
+		<script src="jquery-ui.min.js"> </script>
 </body>
 </html>

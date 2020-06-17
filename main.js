@@ -2,32 +2,15 @@ initGlobalVars()
 function initGlobalVars(){
      displayObjectsArray = [];
      currentObject = "";
-    presetFreqSlider=document.getElementById("presetFreqSlider");
-	presetFreqSlider.max=10000;
-	presetFreqSlider.min=500;
-	presetFreqSlider.step=1;
-	presetFreqSlider.defaultValue=1000;
-    presetFadeSlider=document.getElementById("presetFadeSlider");
-	presetFadeSlider.max=10;
-	presetFadeSlider.min=0;
-	presetFadeSlider.step=.01;
-	presetFadeSlider.defaultValue=.3;
-    dryWetSlider=document.getElementById("dryWetSlider");
-	dryWetSlider.max=1;
-	dryWetSlider.min=0;
-	dryWetSlider.step=.01;
-	dryWetSlider.defaultValue=0;
-    
 }
 
-var displayObject = function(id, classNumber, image, mask, zindex, preset, opacity,isCurrent){
+var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCurrent){
     this.id=id;
     this.classNumber =classNumber;
     this.image=document.getElementById('imageSelector').value;;
     this.mask=document.getElementById('maskSelector').value;
     this.zindex=zindex;
     this.opacity=opacity;
-    this.preset=document.getElementById('presetSelector').value;
     this.isCurrent=isCurrent;
     this.updateOpacity = function(opacity){
        document.getElementById(this.id).style.opacity=opacity;
@@ -36,9 +19,6 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     }
     this.getOpacity = function(opacity){
           return this.opacity;
-    }
-    this.updatePreset = function(){
-          this.preset=document.getElementById('presetSelector').value;
     }
     this.updateMask = function(){
           var canvas = document.getElementById(this.id);
@@ -85,7 +65,6 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
           this.isCurrent=true;
           document.getElementById("imageSelector").value=document.getElementById(currentObject).style.backgroundImage.substring(5,document.getElementById(currentObject).style.backgroundImage.length-2)
           document.getElementById("maskSelector").value=this.mask;
-          document.getElementById('presetSelector').value=this.preset;
     }
     this.setNotCurrent = function (){
           var handlesSet = document.getElementsByClassName(this.classNumber)
@@ -103,13 +82,17 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
                }
           }
           //addObject(this.id, this.image)
-          var node = document.createElement("CANVAS");
-          node.style.backgroundImage="url("+this.image+")";
-          node.style.backgroundSize="cover";
-          node.style.backgroundRepeat="no-repeat";
+          var node = document.createElement("video");
+          //node.style.backgroundImage="url("+this.image+")";
+          //node.style.backgroundSize="cover";
+          //node.style.backgroundRepeat="no-repeat";
           node.setAttribute("Id",this.id)
           node.setAttribute("class","displayCanvas")
           node.setAttribute("onclick",'selectObject(this.id)')
+          node.src="http://www.nimbuslaboratory.com/Fractals%2045.mp4"
+          node.width=640;
+          node.height=360;
+          node.autoplay=true;
           //node.setAttribute("onmousedown",'showCoords(event);')
           document.body.appendChild(node);
           makeTransformable("#"+ this.id)
@@ -137,53 +120,8 @@ var displayObject = function(id, classNumber, image, mask, zindex, preset, opaci
     this.init();
 }
 
-function togglePresets(){
-    if(document.getElementById("togglePresetsButton").style.backgroundColor == 'green'){
-          clearInterval(presetsIntervalHandle)
-          document.getElementById("togglePresetsButton").style.backgroundColor = 'grey'
-          setAlphaForPreset(1,1)
-          setAlphaForPreset(2,1)
-          setAlphaForPreset(3,1)
-          setAlphaForPreset(4,1)
-    }else{
-          document.getElementById("togglePresetsButton").style.backgroundColor = 'green'
-          cyclePresets();
-    }
-}
-
-presetsIntervalHandle=0;
-function cyclePresets(){
-     clearInterval(presetsIntervalHandle)
-     var currentPreset=1;
-     presetsIntervalHandle=setInterval(function(){
-          currentPreset=((currentPreset)%4)+1;
-          for(var x=1;x<=4;x++){
-               if (x == currentPreset) {
-                    setAlphaForPreset(currentPreset,1)
-               }else{
-                    setAlphaForPreset(x,0)
-               }
-          }
-     },parseInt(document.getElementById("presetFreqSlider").value));
-}
-
-function setAlphaForPreset(preset,opacity){
-    for(var x=0; x<displayObjectsArray.length;x++){
-        if(displayObjectsArray[x].preset == preset){
-             displayObjectsArray[x].updateOpacity(parseFloat(opacity))
-        }
-    }
-}
-
-function changePresetFadeTime(){
-     var classList = document.getElementsByClassName('displayCanvas')
-     for(var x=0;x<classList.length;x++){
-          classList[x].style.transition="opacity "+parseInt(document.getElementById("presetFadeSlider").value)+"s"
-     }
-}
-
 function addObject(){
-     displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "anim1.gif", 'mask1.png', 1, 1, 1, true))
+     displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "anim1.gif", 'mask1.png', 1, 1, true))
 }
 
 function removeCurrentObject(){
@@ -218,12 +156,6 @@ function changeCurrentMask(){
      }
 }
 
-function changeCurrentPreset(){
-     if (displayObjectsArray[currentObject].isCurrent) {
-           displayObjectsArray[currentObject].updatePreset();
-     }
-}
-
 function hideControls(){
      document.getElementById('controls').style.display='none'
      document.getElementById('showControlsButton').style.display='inline';
@@ -249,33 +181,8 @@ function requestFullScreen() {
     }
 }
 
-function dryWetSliderUpdate(){
-     document.getElementById('video').style.opacity=document.getElementById('dryWetSlider').value;
-}
-
-initializeVideo();
-function initializeVideo() {
-	window.addEventListener("DOMContentLoaded", function() {
-	// Grab elements, create settings, etc.
-	video = document.getElementById("video"),
-	videoObj = { "video": true },
-	errBack = function(error) {
-		console.log("Video capture error: ", error.code); 
-	};
-	// Put video listeners into place
-	if(navigator.webkitGetUserMedia) { // WebKit-prefixed
-		navigator.webkitGetUserMedia(videoObj, function(stream){
-			video.src = window.URL.createObjectURL(stream);
-			video.play();
-		}, errBack);
-	}
-	}, false);
-}
-
-//-------------------------------
-var selector = '#tracerCanvas' // Replace this with the selector for the element you want to make transformable
-jQuery.getScript('//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js', function() {
-jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js', function() {
+initStretcher();
+function initStretcher() {
 (function() {
   var $, applyTransform, getTransform, makeTransformable;
   $ = jQuery;
@@ -423,5 +330,4 @@ jQuery.getScript('//cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js'
   };
   window.makeTransformable = makeTransformable
 }).call(this);
-});
-});
+}
