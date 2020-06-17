@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">s
 	<title>PoiPainter V1.7</title>
 	<link rel="stylesheet" type="text/css">
 	<style>
@@ -20,7 +20,7 @@
 			height:100%;
 			width:100%;
 		}
-		video{
+		img{
 			left:10%;
 			top:10%;
 			float:left;
@@ -52,7 +52,7 @@
 			this.isCurrent=isCurrent;
 			this.updateImage = function(){
 				this.image=mappingController.Image;
-				document.getElementById(this.id).src="Fractals "+(this.image+1)+".mp4";
+				document.getElementById(this.id).src="anim"+(this.image+1)+".gif";
 			}
 			this.updateZvalue = function(){
 				this.zindex=mappingController.ZValue;
@@ -81,11 +81,11 @@
 							handlesSet[x].style.display='none'
 					}
 				}
-				var node = document.createElement("video");
+				var node = document.createElement("img");
 				node.setAttribute("Id",this.id)
 				node.setAttribute("class","displayCanvas")
 				node.setAttribute("onclick",'selectObject(this.id)')
-				node.src="Fractals%201.mp4"
+				node.src="anim1.gif"
 				node.width=640;
 				node.height=360;
 				node.autoplay=true;
@@ -113,7 +113,7 @@
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); displayObjectsArray[currentObject].updateZvalue();});
-				controlsFolder.add( mappingController, "Image", 0, 2, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
+				controlsFolder.add( mappingController, "Image", 0, 8, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
