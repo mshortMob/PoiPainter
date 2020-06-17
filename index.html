@@ -35,7 +35,6 @@
 	</head>
 	<body>
 		<canvas id="canvasp8" autoplay width='256' height='256' style=""></canvas>
-		<canvas id="canvasST" autoplay></canvas>
 		<script src="jsmpeg.min.js"></script>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
@@ -96,11 +95,11 @@
 			function initGlobalVars(){
 				loadContent();
 				clr=new colorObject();
-			    width=document.getElementById('canvasp8').width;
-				height=document.getElementById('canvasp8').height;
+			    width=480;
+				height=360;
 				materialArray=new Uint8Array(width * height * 4);
 				previousData=new Uint8Array(width * height * 4);
-				data=new Uint8Array(width * height * 4);
+				// data=new Uint8Array(width * height * 4);
 				isFirstCycle=true;
 				presetCounter=0.0;
 				colorCounter=0.0;
@@ -187,7 +186,8 @@
 				}
 				mappingController  = {
 					 Visible:false,
-					 ZValue:0
+					 ZValue:0,
+					 Image:0
 				};
 				var count=0; 
 				for(var y=4; y>=0;y--){
@@ -207,6 +207,7 @@
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Image", 0, numberOfVideos-1, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -219,11 +220,13 @@
 			function loadContent(){
 				videoElements=[];
 				videoTextures=[];
-				numberOfVideos=1;
+				numberOfVideos=3;
 				for(var x=1; x<numberOfVideos+1; x++){
 					var vid = document.createElement('video');
-					vid.id="video+x";
-					vid.src="Fractals37.webm";
+					vid.id="video"+x;
+					vid.height=480;
+					vid.width=360;
+					vid.src="Fractals"+x+".webm";
 					document.body.appendChild(vid);
 					vid.autoplay=true;
 					vid.loop=true;
@@ -251,7 +254,7 @@
 			
 			function syncObjectsToJson(){
 				for(var x=0;x<displayObjects.length;x++){
-					displayObjects[x].setState(statesArray[x])
+					displayObjects[x].setState(statesArray[x]);
 					displayObjects[x].hideChildren();
 				}
 				displayObjects[globalController.selectedFixture].showChildren();
@@ -336,6 +339,7 @@
 			  object.setState=function(savedJSON){
 				object.visible=savedJSON.Visible;
 				object.position.z= savedJSON.ZValue
+				object.imageNum=parseInt(savedJSON.Image);
 				object.material.map=videoTextures[object.imageNum]
 				for(var x=0;x<object.geometry.vertices.length;x++){
 					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
@@ -531,13 +535,11 @@
 			
 			function animate() {
 				requestAnimationFrame( animate );
-				//setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 30 );
+				// setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 60 );
 				render();
 			}
 			
 			function render() {
-				//data=pixel8(canvasST,0,0,width,height);
-				//materialArray=data;
 				for(var x=0; x<videoTextures.length;x++){
 				    if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
 						videoTextures[x].needsUpdate = true;
@@ -583,7 +585,8 @@
 
 			function getPixelData(){
 				pixelDataString="";
-				var numPixels=28
+				data=pixel8(document.getElementById("video"+(statesArray[globalController.selectedFixture].Image+1)),0,0,width,height);
+				var numPixels=10
 				for(i=0;i<numPixels;i++){
 					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
 					var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
@@ -595,13 +598,13 @@
 						bv=0;
 					}
 					if(rv<pixelThreshold){
-						rv=rv/3.3;
+						rv=parseInt(rv/3.3);
 					}
 					if(gv<pixelThreshold){
-						gv=gv/3.3;
+						gv=parseInt(gv/3.3);
 					}
 					if(bv<pixelThreshold){
-						bv=bv/3.3;
+						bv=parseInt(bv/3.3);
 					}
 
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
@@ -635,7 +638,7 @@
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
 			}
-			// setTimeout(function(){initializeDMX();setInterval(writeDMX,25);},3000);
+			setTimeout(function(){initializeDMX();setInterval(writeDMX,25);},3000);
 
 		</script>
 	</body>
