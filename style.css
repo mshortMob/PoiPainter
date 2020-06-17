@@ -1,9 +1,9 @@
 .ui-draggable{
     background-color:grey;
-    margin-top:-5px;
-    margin-left:-5px;
-    width:10px;
-    height:10px;
+    margin-top:-15px;
+    margin-left:-15px;
+    width:30px;
+    height:30px;
     z-index:10000000;
 }
 
@@ -59,6 +59,8 @@ button , select , #presetFreqSlider{
 }
 
 video{
+    left:10%;
+    top:10%;
     float:left;
     position: absolute;
     transition: opacity .1s;

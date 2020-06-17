@@ -7,7 +7,7 @@ function initGlobalVars(){
 var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCurrent){
     this.id=id;
     this.classNumber =classNumber;
-    this.image=document.getElementById('imageSelector').value;;
+    this.image=document.getElementById('imageSelector').value;
     this.mask=document.getElementById('maskSelector').value;
     this.zindex=zindex;
     this.opacity=opacity;
@@ -52,9 +52,11 @@ var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCur
 
     }
     this.updateImage = function(){
-          this.image=document.getElementById('imageSelector').value
-          document.getElementById(this.id).style.backgroundImage="url("+this.image+")";
-          console.log(this.image)
+          this.image=document.getElementById('imageSelector').value;
+          document.getElementById(this.id).src="http://www.nimbuslaboratory.com/Fractals%20"+this.image+".mp4";
+          // this.image=document.getElementById('imageSelector').value
+          // document.getElementById(this.id).style.backgroundImage="url("+this.image+")";
+          // console.log(this.image)
     }
     this.setCurrent = function (){
           currentObject=this.id
@@ -63,7 +65,7 @@ var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCur
                handlesSet[x].style.display='inline'
           }
           this.isCurrent=true;
-          document.getElementById("imageSelector").value=document.getElementById(currentObject).style.backgroundImage.substring(5,document.getElementById(currentObject).style.backgroundImage.length-2)
+          document.getElementById("imageSelector").value=document.getElementById(currentObject).src.substring(43,document.getElementById(currentObject).src.length-4);
           document.getElementById("maskSelector").value=this.mask;
     }
     this.setNotCurrent = function (){
@@ -89,7 +91,7 @@ var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCur
           node.setAttribute("Id",this.id)
           node.setAttribute("class","displayCanvas")
           node.setAttribute("onclick",'selectObject(this.id)')
-          node.src="http://www.nimbuslaboratory.com/Fractals%2045.mp4"
+          node.src="http://www.nimbuslaboratory.com/Fractals%201.mp4"
           node.width=640;
           node.height=360;
           node.autoplay=true;
@@ -218,8 +220,8 @@ function initStretcher() {
       for (_i = 0, _len = originalPos.length; _i < _len; _i++) {
         p = originalPos[_i];
         _results.push({
-          x: p[0] - originalPos[0][0],
-          y: p[1] - originalPos[0][1]
+          x: (p[0] - originalPos[0][0])-15,
+          y: (p[1] - originalPos[0][1])-15
         });
       }
       return _results;
