@@ -93,6 +93,7 @@ var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCur
           node.width=640;
           node.height=360;
           node.autoplay=true;
+          node.loop=true;
           //node.setAttribute("onmousedown",'showCoords(event);')
           document.body.appendChild(node);
           makeTransformable("#"+ this.id)
