@@ -73,42 +73,22 @@
 	</style>
 </head>
 <body id="body">
-	<button id="showControlsButton" onclick="showControls()">Show Controls</button>
-	<span id="controls">
-			<button onclick="hideControls()">Hide Controls</button>
-			<button onclick="addObject()">Add Obj</button>
-			<button onclick="removeCurrentObject()">Remove Obj</button>
-			<button onclick="requestFullScreen();">Full Screen</button>
-			<div class="label">Image</div>
-			<select id="imageSelector" onchange="changeCurrentImage()">
-					<option value='1'>1</option>
-					<option value='2'>2</option>
-					<option value='3'>3</option>
-					<option value='4'>4</option>
-			</select>
-			<div class="label">Mask</div>
-			<select id="maskSelector" onchange="changeCurrentMask()">
-					<option value='None'>None</option>
-					<option value='mask1.png'>mask1.png</option>
-					<option value='Gradient1'>Gradient1</option>
-			</select>
-	</span>
 	<script src="jquery-1.12.3.js"></script>
-	<script src="sketch.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
+	<script src='dat.gui.min.js'></script>
 	<script>
 		initGlobalVars()
 		function initGlobalVars(){
 			displayObjectsArray = [];
 			currentObject = "";
+			addControls();
 		}
 
 		var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCurrent){
 			this.id=id;
 			this.classNumber =classNumber;
-			this.image=document.getElementById('imageSelector').value;
-			this.mask=document.getElementById('maskSelector').value;
+			this.image=mappingController.Image;
 			this.zindex=zindex;
 			this.opacity=opacity;
 			this.isCurrent=isCurrent;
@@ -152,8 +132,8 @@
 
 			}
 			this.updateImage = function(){
-				this.image=document.getElementById('imageSelector').value;
-				document.getElementById(this.id).src="http://www.nimbuslaboratory.com/Fractals%20"+this.image+".mp4";
+				this.image=mappingController.Image;
+				document.getElementById(this.id).src="http://www.nimbuslaboratory.com/Fractals%20"+(this.image+1)+".mp4";
 				// this.image=document.getElementById('imageSelector').value
 				// document.getElementById(this.id).style.backgroundImage="url("+this.image+")";
 				// console.log(this.image)
@@ -176,18 +156,13 @@
 				this.isCurrent=false;
 			}
 			this.init = function () {
-				//hide All Handles
 				for(var x=0; x<displayObjectsArray.length;x++){
 					var handlesSet = document.getElementsByClassName('handlesSet'+x)
 					for(var x=0; x<handlesSet.length; x++){
 							handlesSet[x].style.display='none'
 					}
 				}
-				//addObject(this.id, this.image)
 				var node = document.createElement("video");
-				//node.style.backgroundImage="url("+this.image+")";
-				//node.style.backgroundSize="cover";
-				//node.style.backgroundRepeat="no-repeat";
 				node.setAttribute("Id",this.id)
 				node.setAttribute("class","displayCanvas")
 				node.setAttribute("onclick",'selectObject(this.id)')
@@ -196,33 +171,37 @@
 				node.height=360;
 				node.autoplay=true;
 				node.loop=true;
-				//node.setAttribute("onmousedown",'showCoords(event);')
 				document.body.appendChild(node);
 				makeTransformable("#"+ this.id)
-				//mask section
-				if (this.mask != 'None') {
-					var canvas = document.getElementById(this.id);
-					var context = canvas.getContext('2d');
-					base_image = new Image();
-					base_image.src = this.mask;
-					base_image.onload = function(){
-					context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height)             
-				}
-				if (this.mask != 'Gradient1') {
-					var canvas = document.getElementById(this.id);
-					var context = canvas.getContext('2d');
-					var grd = context.createLinearGradient(50, 50, canvas.width, canvas.height);
-					grd.addColorStop(0, "black");
-					grd.addColorStop(1, "transparent");
-					context.fillStyle = grd;
-					context.fillRect(0, 0, canvas.width, canvas.height);          
-				}          
-				}
 				selectObject(this.id);
 			}
 			this.init();
 		}
 
+		function addControls(){
+				globalController  = {
+					 selectedFixture:0
+				}
+				mappingController  = {
+					 ZValue:0,
+					 Image:0
+				};
+				gui = new dat.GUI();
+				gui.width=260;
+				globalFolder=gui.addFolder( "Global" )
+				globalFolder.open();
+				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);});
+				globalFolder.add({ 'Add Object':function(){ addObject(); }},'Add Object');
+				globalFolder.add({ 'Remove Object':function(){ removeCurrentObject(); }},'Remove Object');
+				controlsFolder=gui.addFolder( "MappingControls" )
+				controlsFolder.open();
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue);});
+				controlsFolder.add( mappingController, "Image", 0, 8, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
+				utilsFolder=gui.addFolder( "Utils" )
+				utilsFolder.open();
+				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+			}
+		
 		function addObject(){
 			displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "anim1.gif", 'mask1.png', 1, 1, true))
 		}
@@ -251,22 +230,6 @@
 			if (displayObjectsArray[currentObject].isCurrent) {
 				displayObjectsArray[currentObject].updateImage();
 			}
-		}
-
-		function changeCurrentMask(){
-			if (displayObjectsArray[currentObject].isCurrent) {
-				displayObjectsArray[currentObject].updateMask();
-			}
-		}
-
-		function hideControls(){
-			document.getElementById('controls').style.display='none'
-			document.getElementById('showControlsButton').style.display='inline';
-		}
-
-		function showControls(){
-			document.getElementById('controls').style.display='inline'
-			document.getElementById('showControlsButton').style.display='none';
 		}
 
 		function requestFullScreen() {
