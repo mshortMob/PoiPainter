@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>PoiPainter V1.7</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css">
 	<style>
 		.ui-draggable{
 			background-color:grey;
@@ -11,7 +11,6 @@
 			height:30px;
 			z-index:10000000;
 		}
-
 		body{
 			background-color:black;
 			padding:0px;
@@ -21,48 +20,6 @@
 			height:100%;
 			width:100%;
 		}
-
-		#controls{
-		margin:0px 0px;
-		padding:15px;
-		right:0px;
-		top:0px;
-		width:130px;
-		height:100%;
-		border:3px solid grey;
-		background-color:lightgrey; 
-		position:absolute;
-		}
-
-		.label{
-				margin-top:4px;
-				font-size: 14px;
-		}
-
-		#showControlsButton{
-				display:none;
-				width:100px;
-				height:30px;
-				top:15px;
-				right:15px;
-				opacity:.5;
-				position:absolute;
-		}
-
-		button , select , #presetFreqSlider{
-			width:100%;
-			height:30px;
-			margin-top:2px;
-			margin-bottom:2px;
-		}
-
-
-		.displayCanvas{
-				float:left;
-				position: absolute;
-				transition: opacity .1s;
-		}
-
 		video{
 			left:10%;
 			top:10%;
@@ -85,68 +42,28 @@
 			addControls();
 		}
 
-		var displayObject = function(id, classNumber, image, mask, zindex, opacity,isCurrent){
+		var displayObject = function(id, classNumber, image, zindex,isCurrent){
 			this.id=id;
 			this.classNumber =classNumber;
 			this.image=mappingController.Image;
-			this.zindex=zindex;
-			this.opacity=opacity;
+			this.zindex=mappingController.ZValue;
 			this.isCurrent=isCurrent;
-			this.updateOpacity = function(opacity){
-			document.getElementById(this.id).style.opacity=opacity;
-			this.opacity=opacity
-			//console.log(document.getElementById(this.id));
-			}
-			this.getOpacity = function(opacity){
-				return this.opacity;
-			}
-			this.updateMask = function(){
-				var canvas = document.getElementById(this.id);
-				var context = canvas.getContext('2d');
-				context.clearRect(0, 0, canvas.width, canvas.height);
-				this.mask=document.getElementById('maskSelector').value
-				if (this.mask != 'None' && this.mask != 'Gradient1') {
-					var canvas = document.getElementById(this.id);
-					var context = canvas.getContext('2d');
-					base_image = new Image();
-					base_image.src = this.mask;
-					base_image.onload = function(){
-							context.drawImage(base_image, 0, 0, base_image.width,base_image.height,0,0, canvas.width,canvas.height);
-					}
-				}
-				if (this.mask == 'None') {
-					var canvas = document.getElementById(this.id);
-					var context = canvas.getContext('2d');
-					context.clearRect(0, 0, canvas.width, canvas.height);
-				}
-				if (this.mask == 'Gradient1') {
-					var canvas = document.getElementById(this.id);
-					var context = canvas.getContext('2d');
-					var grd = context.createLinearGradient(50, 50, canvas.width, canvas.height);
-					grd.addColorStop(0, "black");
-					grd.addColorStop(1, "transparent");
-					context.fillStyle = grd;
-					context.fillRect(0, 0, canvas.width, canvas.height);          
-				}          
-				
-
-			}
 			this.updateImage = function(){
 				this.image=mappingController.Image;
 				document.getElementById(this.id).src="http://www.nimbuslaboratory.com/Fractals%20"+(this.image+1)+".mp4";
-				// this.image=document.getElementById('imageSelector').value
-				// document.getElementById(this.id).style.backgroundImage="url("+this.image+")";
-				// console.log(this.image)
+			}
+			this.updateZvalue = function(){
+				this.zindex=mappingController.ZValue;
+				document.getElementById(displayObjectsArray[currentObject].id).style.zIndex=this.zindex;
 			}
 			this.setCurrent = function (){
 				currentObject=this.id
+				updateControlsView();
 				var handlesSet = document.getElementsByClassName(this.classNumber)
 				for(var x=0; x<handlesSet.length; x++){
 					handlesSet[x].style.display='inline'
 				}
 				this.isCurrent=true;
-				document.getElementById("imageSelector").value=document.getElementById(currentObject).src.substring(43,document.getElementById(currentObject).src.length-4);
-				document.getElementById("maskSelector").value=this.mask;
 			}
 			this.setNotCurrent = function (){
 				var handlesSet = document.getElementsByClassName(this.classNumber)
@@ -179,9 +96,6 @@
 		}
 
 		function addControls(){
-				globalController  = {
-					 selectedFixture:0
-				}
 				mappingController  = {
 					 ZValue:0,
 					 Image:0
@@ -190,20 +104,27 @@
 				gui.width=260;
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
-				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);});
 				globalFolder.add({ 'Add Object':function(){ addObject(); }},'Add Object');
 				globalFolder.add({ 'Remove Object':function(){ removeCurrentObject(); }},'Remove Object');
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
-				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue);});
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); displayObjectsArray[currentObject].updateZvalue();});
 				controlsFolder.add( mappingController, "Image", 0, 8, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 			}
+
+		function updateControlsView(){
+			mappingController.Image=displayObjectsArray[currentObject].image;
+			mappingController.ZValue=displayObjectsArray[currentObject].zindex;
+			for (var i in gui.__folders.MappingControls.__controllers) {
+				gui.__folders.MappingControls.__controllers[i].updateDisplay();
+			}
+		}
 		
 		function addObject(){
-			displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "anim1.gif", 'mask1.png', 1, 1, true))
+			displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "1", true))
 		}
 
 		function removeCurrentObject(){
