@@ -97,18 +97,12 @@
 				clr=new colorObject();
 			    width=480;
 				height=360;
-				materialArray=new Uint8Array(width * height * 4);
-				previousData=new Uint8Array(width * height * 4);
-				// data=new Uint8Array(width * height * 4);
+
 				isFirstCycle=true;
 				presetCounter=0.0;
 				colorCounter=0.0;
 				//getVideo("init",0)
 				addControls();	
-				//dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
-				// dataTexture = new THREE.CanvasTexture(document.getElementById('canvasST').getContext('2d').canvas);
-				// dataTexture.needsUpdate = true;
-				// material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				container=null;
 				camera=null;
 				controls=null;
@@ -226,7 +220,7 @@
 					vid.id="video"+x;
 					vid.height=480;
 					vid.width=360;
-					vid.src="Fractals"+x+".webm";
+					vid.src="Fractals"+x+".mp4";
 					document.body.appendChild(vid);
 					vid.autoplay=true;
 					vid.loop=true;
