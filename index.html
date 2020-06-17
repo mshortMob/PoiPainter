@@ -29,13 +29,13 @@
 				position:fixed;
 				float:left;
 				object-fit:fill;
+				/* display:none; */
 			}
 		</style>
 	</head>
 	<body>
 		<canvas id="canvasp8" autoplay width='256' height='256' style=""></canvas>
 		<canvas id="canvasST" autoplay></canvas>
-		<video src="Fractals37.webm" ></video>
 		<script src="jsmpeg.min.js"></script>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
@@ -44,11 +44,7 @@
 		<script src="NURBSSurface.js"></script>
 		<script src="NURBSUtils.js"></script>
 		<script src="TrackballControls.js"></script>
-		<script>
-			player = new JSMpeg.Player('ws://34.204.191.221:9999', {
-		  		canvas: document.getElementById('canvasST'), disableGl: true
- 		   	});
-		</script>
+
 		<script>
 			var colorObject = function() {
 				this.currentColHex="ff00ff";
@@ -98,6 +94,7 @@
 			initGlobalVars();
 								
 			function initGlobalVars(){
+				loadContent();
 				clr=new colorObject();
 			    width=document.getElementById('canvasp8').width;
 				height=document.getElementById('canvasp8').height;
@@ -110,9 +107,9 @@
 				//getVideo("init",0)
 				addControls();	
 				//dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
-				dataTexture = new THREE.CanvasTexture(document.getElementById('canvasST').getContext('2d').canvas);
-				dataTexture.needsUpdate = true;
-				material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				// dataTexture = new THREE.CanvasTexture(document.getElementById('canvasST').getContext('2d').canvas);
+				// dataTexture.needsUpdate = true;
+				// material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				container=null;
 				camera=null;
 				controls=null;
@@ -219,6 +216,24 @@
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 			}
 									
+			function loadContent(){
+				videoElements=[];
+				videoTextures=[];
+				numberOfVideos=1;
+				for(var x=1; x<numberOfVideos+1; x++){
+					var vid = document.createElement('video');
+					vid.id="video+x";
+					vid.src="Fractals37.webm";
+					document.body.appendChild(vid);
+					vid.autoplay=true;
+					vid.loop=true;
+					videoElements.push(vid)
+					var videoTexture1 = new THREE.Texture( vid );
+					videoTexture1.minFilter=THREE.LinearFilter;
+					videoTextures.push(videoTexture1)					
+				}
+			}
+			
 			function updateControlsView(){
 				for (var i in gui.__folders.MappingControls.__controllers) {
 					//mappingController[i]=statesArray[globalController.selectedScene].objects[globalController.selectedFixture]
@@ -274,7 +289,9 @@
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
+				var material = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
 				var object = new THREE.Mesh( geometry, material);				
+				object.imageNum=0;			
 				return object;
 			  }
 			  var object = createObject();
@@ -319,6 +336,7 @@
 			  object.setState=function(savedJSON){
 				object.visible=savedJSON.Visible;
 				object.position.z= savedJSON.ZValue
+				object.material.map=videoTextures[object.imageNum]
 				for(var x=0;x<object.geometry.vertices.length;x++){
 					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
 					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
@@ -327,6 +345,10 @@
 				}
 				object.geometry.verticesNeedUpdate = true;
 			  }	  
+			  object.setImage=function(savedJSON){
+			  		object.imageNum=parseInt(savedJSON)
+					object.material.map=videoTextures[object.imageNum]
+			  }	
 			  object.updateCorners=function(){
 					var cornerNum=[];
 					cornerNum[0]=0;
@@ -514,9 +536,13 @@
 			}
 			
 			function render() {
-				data=pixel8(canvasST,0,0,width,height);
-				materialArray=data;
-				dataTexture.needsUpdate = true
+				//data=pixel8(canvasST,0,0,width,height);
+				//materialArray=data;
+				for(var x=0; x<videoTextures.length;x++){
+				    if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
+						videoTextures[x].needsUpdate = true;
+					}
+				}
 				renderer.render( scene, camera );
 			}
 			
