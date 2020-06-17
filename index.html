@@ -30,6 +30,7 @@
 	</style>
 </head>
 <body id="body">
+	<canvas id="canvasp8" autoplay style="display:none;"></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
@@ -170,6 +171,7 @@
 		}
 
 		function getPixelData(){
+			    var data = pixel8(document.getElementById(displayObjectsArray[currentObject].id),0,0,document.getElementById(displayObjectsArray[currentObject].id).width,document.getElementById(displayObjectsArray[currentObject].id).height);
 				pixelDataString="";
 				var numPixels=28
 				for(i=0;i<numPixels;i++){
