@@ -214,7 +214,7 @@
 			function loadContent(){
 				videoElements=[];
 				videoTextures=[];
-				numberOfVideos=3;
+				numberOfVideos=1;
 				for(var x=1; x<numberOfVideos+1; x++){
 					var vid = document.createElement('video');
 					vid.id="video"+x;
@@ -528,8 +528,8 @@
 			}
 			
 			function animate() {
-				requestAnimationFrame( animate );
-				// setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 60 );
+				// requestAnimationFrame( animate );
+				setTimeout( function() {requestAnimationFrame( animate );}, 1000 / 10 );
 				render();
 			}
 			
