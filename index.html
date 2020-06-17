@@ -41,7 +41,9 @@
 		function initGlobalVars(){
 			displayObjectsArray = [];
 			currentObject = "";
+			dmxInterval=0;
 			addControls();
+			setTimeout(function(){initializeDMX();},3000);
 		}
 
 		var displayObject = function(id, classNumber, image, zindex,isCurrent){
@@ -101,8 +103,12 @@
 
 		function addControls(){
 				mappingController  = {
-					 ZValue:0,
-					 Image:0
+					ZValue:0,
+					Image:0
+				};
+				utilsController={
+					SendDMX:false,
+					DMX_Rate: 50
 				};
 				gui = new dat.GUI();
 				gui.width=260;
@@ -117,7 +123,8 @@
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				utilsFolder.add({ 'DMX Start':function(){ setTimeout(function(){initializeDMX();setInterval(writeDMX,25);},3000); }},'DMX Start');
+				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
 			}
 
 		function updateControlsView(){
@@ -209,6 +216,15 @@
 			return pixelDataString;
 		}
 
+		function toggleDmxSend(){
+			if(utilsController.SendDMX==true){
+				clearInterval(dmxInterval);
+				dmxInterval=setInterval(writeDMX,utilsController.DMX_Rate);
+			}else{
+				clearInterval(dmxInterval);
+			}
+		}
+	
 		function writeDMX() {
 			var xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
