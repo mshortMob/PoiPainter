@@ -111,7 +111,7 @@
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); displayObjectsArray[currentObject].updateZvalue();});
-				controlsFolder.add( mappingController, "Image", 0, 1, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
+				controlsFolder.add( mappingController, "Image", 0, 2, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
