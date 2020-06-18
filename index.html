@@ -41,6 +41,7 @@
 		function initGlobalVars(){
 			displayObjectsArray = [];
 			currentObject = "";
+			dmxInterval=0;
 			addControls();
 		}
 
@@ -104,6 +105,11 @@
 					 ZValue:0,
 					 Image:0
 				};
+				utilsController={
+					SendDMX:false,
+					DMX_Rate: 50,
+					DMX_Level:.5
+				};
 				gui = new dat.GUI();
 				gui.width=260;
 				globalFolder=gui.addFolder( "Global" )
@@ -117,7 +123,9 @@
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				utilsFolder.add({ 'DMX Start':function(){ setTimeout(function(){initializeDMX();setInterval(writeDMX,25);},3000); }},'DMX Start');
+				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
+				utilsFolder.add( utilsController, "DMX_Level", 0.0, 1.0, .01 ).onChange(function(){});
 			}
 
 		function updateControlsView(){
@@ -173,6 +181,15 @@
 			}
 		}
 
+		function toggleDmxSend(){
+			if(utilsController.SendDMX==true){
+				clearInterval(dmxInterval);
+				dmxInterval=setInterval(writeDMX,utilsController.DMX_Rate);
+			}else{
+				clearInterval(dmxInterval);
+			}
+		}
+
 		function getPixelData(){
 			pixelDataString="";
 			if(displayObjectsArray.length>0){
@@ -200,9 +217,9 @@
 						bv=bv/3.3;
 					}
 
-					rv=parseInt(rv);
-					gv=parseInt(gv);
-					bv=parseInt(bv);
+					rv=parseInt(rv*utilsController.DMX_Level);
+					gv=parseInt(gv*utilsController.DMX_Level);
+					bv=parseInt(bv*utilsController.DMX_Level);
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
 			}
