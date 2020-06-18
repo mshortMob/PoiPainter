@@ -35,6 +35,7 @@ function pixel8(image, x, y, w, h) {
 	// to find out how to get specific data from the array
 	// Or just use the pixel8-provided methods below
 	ctx.drawImage(image, x, y, w, h);
+	console.log('here');
 	var _data = ctx.getImageData(0, 0, w, h)
 	var data = _data.data;
 	data.width = _data.width;
