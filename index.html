@@ -109,7 +109,12 @@
 				utilsController={
 					SendDMX:false,
 					DMX_Rate: 50,
-					DMX_Level:.5
+					Pixel_Level:.5,
+					DMX_Level:.5,
+					DMX_X1:1,
+					DMX_Y1:1,
+					DMX_X2:1,
+					DMX_Y2:1,
 				};
 				gui = new dat.GUI();
 				gui.width=260;
@@ -126,7 +131,11 @@
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
-				utilsFolder.add( utilsController, "DMX_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				utilsFolder.add( utilsController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				utilsFolder.add( utilsController, "DMX_X1", 1,255,1 ).onChange(function(){utilsController.DMX_X1=parseInt(utilsController.DMX_X1);});
+				utilsFolder.add( utilsController, "DMX_Y1", 1,255,1 ).onChange(function(){utilsController.DMX_Y1=parseInt(utilsController.DMX_Y1);});
+				utilsFolder.add( utilsController, "DMX_X2", 1,255,1 ).onChange(function(){utilsController.DMX_X2=parseInt(utilsController.DMX_X2);});
+				utilsFolder.add( utilsController, "DMX_Y2", 1,255,1 ).onChange(function(){utilsController.DMX_Y2=parseInt(utilsController.DMX_Y2);});
 			}
 
 		function updateControlsView(){
@@ -142,7 +151,12 @@
 		}
 
 		function removeCurrentObject(){
-			document.getElementById(currentObject).style.display='none';
+			var currentElement=document.getElementById(currentObject);
+			var handles = document.getElementsByClassName("handlesSet"+currentObject);
+			for (var x=0;x<handles.length;x++) {
+				document.body.removeChild(handles[x]);
+			}
+			document.body.removeChild(currentElement)
 			selectObject(currentObject)
 		}
 
@@ -218,9 +232,9 @@
 						bv=bv/3.3;
 					}
 
-					rv=parseInt(rv*utilsController.DMX_Level);
-					gv=parseInt(gv*utilsController.DMX_Level);
-					bv=parseInt(bv*utilsController.DMX_Level);
+					rv=parseInt(rv*utilsController.Pixel_Level);
+					gv=parseInt(gv*utilsController.Pixel_Level);
+					bv=parseInt(bv*utilsController.Pixel_Level);
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
 			}
