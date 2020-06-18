@@ -9,7 +9,7 @@
 			margin-left:-15px;
 			width:30px;
 			height:30px;
-			z-index:10000000;
+			z-index:1000;
 		}
 		body{
 			background-color:black;
@@ -43,6 +43,7 @@
 			currentObject = "";
 			dmxInterval=0;
 			addControls();
+			document.getElementsByClassName('dg ac')[0].style.zIndex=10000
 		}
 
 		var displayObject = function(id, classNumber, image, zindex,isCurrent){
@@ -119,7 +120,7 @@
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); displayObjectsArray[currentObject].updateZvalue();});
-				controlsFolder.add( mappingController, "Image", 0, 2, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
+				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -192,11 +193,11 @@
 
 		function getPixelData(){
 			pixelDataString="";
-			if(displayObjectsArray.length>0){
+			if(displayObjectsArray.length>=0){
 				var data = pixel8(document.getElementById(displayObjectsArray[currentObject].id),0,0,document.getElementById(displayObjectsArray[currentObject].id).width,document.getElementById(displayObjectsArray[currentObject].id).height);
 				var width=document.getElementById(displayObjectsArray[currentObject].id).width;
 				var height=document.getElementById(displayObjectsArray[currentObject].id).height;
-				var numPixels=28
+				var numPixels=4;
 				for(i=0;i<numPixels;i++){
 					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
 					var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
@@ -341,10 +342,10 @@
 				position = _ref[_i];
 				_results.push($('<div class=handlesSet'+classCount+'>').css({
 					border: '3px solid darkgrey',
-					borderRadius: '8px',
+					borderRadius: '18px',
 					cursor: 'move',
 					position: 'absolute',
-					zIndex: 100000
+					zIndex: 1000
 				}).appendTo('body').position({
 					at: position,
 					of: element,
