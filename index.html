@@ -31,13 +31,13 @@
 </head>
 <body id="body">
 	<canvas id="canvasp8" autoplay style="display:none;"></canvas>
+	<canvas id="dmx_canvas" autoplay style="display:none;"></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
 	<script src='dat.gui.min.js'></script>
 	<script src="pixel8.js"></script>
-	<script src="https://unpkg.com/gifler@0.1.0/gifler.min.js"></script>
-	<script src="https://unpkg.com/konva@6.0.0/konva.min.js"></script>
+	<script src="gifler.min.js"></script>
 	<script>
 		initGlobalVars()
 		function initGlobalVars(){
@@ -46,6 +46,7 @@
 			dmxInterval=0;
 			addControls();
 			setTimeout(function(){initializeDMX();},3000);
+			gifler('anim3.gif').animate(document.getElementById('dmx_canvas'));
 		}
 
 		var displayObject = function(id, classNumber, image, zindex,isCurrent){
@@ -184,8 +185,9 @@
 
 		function getPixelData(){
 			pixelDataString="";
-			if(displayObjectsArray.length>0){
-				var data = pixel8(document.getElementById(displayObjectsArray[currentObject].id),0,0,document.getElementById(displayObjectsArray[currentObject].id).width,document.getElementById(displayObjectsArray[currentObject].id).height);
+			if(displayObjectsArray.length>=0){
+				dmx_canvas=document.getElementById("dmx_canvas");
+				var data = pixel8(dmx_canvas,0,0,dmx_canvas.width,dmx_canvas.height);
 				var width=document.getElementById(displayObjectsArray[currentObject].id).width;
 				var height=document.getElementById(displayObjectsArray[currentObject].id).height;
 				var numPixels=28
