@@ -31,7 +31,7 @@
 </head>
 <body id="body">
 	<canvas id="canvasp8" autoplay style="display:none;"></canvas>
-	<canvas id="dmx_canvas" autoplay style="d;"></canvas>
+	<canvas id="dmx_canvas" autoplay style="display:none;"></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
@@ -190,6 +190,7 @@
 			document.body.removeChild(dmx_canvas)
 			dmx_canvas = document.createElement("canvas");
 			dmx_canvas.id="dmx_canvas";
+			dmx_canvas.style.display='none'
 			document.body.appendChild(dmx_canvas)
 			gfo=gifler(gifFilePath).animate(dmx_canvas);
 		}
