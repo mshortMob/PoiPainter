@@ -31,7 +31,7 @@
 </head>
 <body id="body">
 	<canvas id="canvasp8" autoplay style="display:none;"></canvas>
-	<canvas id="dmx_canvas" autoplay style="display:none;"></canvas>
+	<canvas id="dmx_canvas" autoplay style="d;"></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
@@ -46,7 +46,7 @@
 			dmxInterval=0;
 			addControls();
 			setTimeout(function(){initializeDMX();},3000);
-			gifler('anim3.gif').animate(document.getElementById('dmx_canvas'));
+			gfo=gifler('anim3.gif').animate(document.getElementById('dmx_canvas'));
 		}
 
 		var displayObject = function(id, classNumber, image, zindex,isCurrent){
@@ -111,7 +111,8 @@
 				};
 				utilsController={
 					SendDMX:false,
-					DMX_Rate: 50
+					DMX_Rate: 50,
+					DMX_Image: 1
 				};
 				gui = new dat.GUI();
 				gui.width=260;
@@ -128,6 +129,7 @@
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
+				utilsFolder.add( utilsController, "DMX_Image", 1, 9, 1 ).onChange(function(){utilsController.DMX_Image=parseInt(utilsController.DMX_Image);changeDMXImage("anim"+utilsController.DMX_Image+".gif");});
 			}
 
 		function updateControlsView(){
@@ -183,13 +185,22 @@
 			}
 		}
 
+		function changeDMXImage(gifFilePath){
+			dmx_canvas=document.getElementById('dmx_canvas');
+			document.body.removeChild(dmx_canvas)
+			dmx_canvas = document.createElement("canvas");
+			dmx_canvas.id="dmx_canvas";
+			document.body.appendChild(dmx_canvas)
+			gfo=gifler(gifFilePath).animate(dmx_canvas);
+		}
+		
 		function getPixelData(){
 			pixelDataString="";
 			if(displayObjectsArray.length>=0){
 				dmx_canvas=document.getElementById("dmx_canvas");
 				var data = pixel8(dmx_canvas,0,0,dmx_canvas.width,dmx_canvas.height);
-				var width=document.getElementById(displayObjectsArray[currentObject].id).width;
-				var height=document.getElementById(displayObjectsArray[currentObject].id).height;
+				var width=dmx_canvas.width;
+				var height=dmx_canvas.height;
 				var numPixels=28
 				for(i=0;i<numPixels;i++){
 					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
