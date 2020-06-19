@@ -116,7 +116,9 @@
 					SendDMX:false,
 					DMX_Rate: 50,
 					Pixel_Level:.5,
+					Num_Pixels:4,
 					DMX_Level:.5,
+					Universe:0,
 					DMX_X1:1,
 					DMX_Y1:1,
 					DMX_X2:1,
@@ -138,6 +140,8 @@
 				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
 				utilsFolder.add( utilsController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				utilsFolder.add( utilsController, "Num_Pixels", 4,30,1 ).onChange(function(){utilsController.Num_Pixels=parseInt(utilsController.Num_Pixels);});
+				utilsFolder.add( utilsController, "Universe", 0,3,1 ).onChange(function(){utilsController.Universe=parseInt(utilsController.Universe);});
 				// utilsFolder.add( utilsController, "DMX_X1", 1,255,1 ).onChange(function(){utilsController.DMX_X1=parseInt(utilsController.DMX_X1);});
 				// utilsFolder.add( utilsController, "DMX_Y1", 1,255,1 ).onChange(function(){utilsController.DMX_Y1=parseInt(utilsController.DMX_Y1);});
 				// utilsFolder.add( utilsController, "DMX_X2", 1,255,1 ).onChange(function(){utilsController.DMX_X2=parseInt(utilsController.DMX_X2);});
@@ -238,11 +242,11 @@
 
 		function getPixelData(){
 			pixelDataString="";
-			if(displayObjectsArray.length>0){
-				var data = pixel8(document.getElementById(displayObjectsArray[currentObject].id),0,0,document.getElementById(displayObjectsArray[currentObject].id).width,document.getElementById(displayObjectsArray[currentObject].id).height);
-				var width=document.getElementById(displayObjectsArray[currentObject].id).width;
-				var height=document.getElementById(displayObjectsArray[currentObject].id).height;
-				var numPixels=4;
+			if(displayObjectsArray.length>0 && parseInt(currentObject)!=parseInt(-1)){
+				var data = pixel8(document.getElementById(getCurrentObject().id),0,0,document.getElementById(getCurrentObject().id).width,document.getElementById(getCurrentObject().id).height);
+				var width=document.getElementById(getCurrentObject().id).width;
+				var height=document.getElementById(getCurrentObject().id).height;
+				var numPixels=utilsController.Num_Pixels;
 				for(i=0;i<numPixels;i++){
 					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
 					var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
@@ -285,7 +289,7 @@
 			xhttp.setRequestHeader("cache-control", "no-cache");
 			xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 			xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=0&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			xhttp.send("u="+parseInt(utilsController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}	
 
 		function initializeDMX() {
