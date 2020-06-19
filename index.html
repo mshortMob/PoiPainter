@@ -243,7 +243,7 @@
 		function getPixelData(){
 			pixelDataString="";
 			if(displayObjectsArray.length>0){
-				pixelElement=document.getElementById(displayObjectsArray[1].id);
+				pixelElement=document.getElementById(displayObjectsArray[0].id);
 				var data = pixel8(pixelElement,0,0,pixelElement.width,pixelElement.height);
 				var width=pixelElement.width;
 				var height=pixelElement.height;
@@ -457,7 +457,6 @@
 	
 		addObject();
 		removeCurrentObject();
-		pixelElement=document.getElementById(getCurrentObject.id);
 	</script>
 </body>
 </html>
