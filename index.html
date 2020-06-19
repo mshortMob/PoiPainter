@@ -166,6 +166,7 @@
 		}
 		
 		function addObject(){
+			createDmxElement();
 			maxObjectsCreated=maxObjectsCreated+1;
 			currentObject=maxObjectsCreated;
 			displayObjectsArray.push(new displayObject(maxObjectsCreated, "1", 0, true));
@@ -239,8 +240,8 @@
 				dmxVid = document.createElement("video");
 				dmxVid.setAttribute("Id","dmxVid")
 				dmxVid.src="Fractals%201.mp4"
-				dmxVid.width=320;
-				dmxVid.height=180;
+				dmxVid.width=160;
+				dmxVid.height=90;
 				dmxVid.autoplay="true";
 				dmxVid.play()
 				dmxVid.loop=true;
