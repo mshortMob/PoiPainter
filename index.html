@@ -31,7 +31,7 @@
 	</style>
 </head>
 <body id="body">
-	<canvas id="canvasp8" controls style=""></canvas>
+	<canvas id="canvasp8"></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
@@ -238,16 +238,14 @@
 			if(!dmxVidCreated){
 				dmxVid = document.createElement("video");
 				dmxVid.setAttribute("Id","dmxVid")
-				dmxVid.setAttribute("class","displayCanvas")
-				dmxVid.setAttribute("onclick",'selectObject(this.id)')
 				dmxVid.src="Fractals%201.mp4"
 				dmxVid.width=320;
 				dmxVid.height=180;
 				dmxVid.autoplay="true";
 				dmxVid.play()
 				dmxVid.loop=true;
-				dmxVid.style.display="none";
 				document.body.appendChild(dmxVid);
+				dmxVid.style.display="none";
 				dmxVidCreated=true;
 			}
 			return dmxVid;
