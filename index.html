@@ -242,10 +242,11 @@
 
 		function getPixelData(){
 			pixelDataString="";
-			if(displayObjectsArray.length>0 && parseInt(currentObject)!=parseInt(-1)){
-				var data = pixel8(document.getElementById(getCurrentObject().id),0,0,document.getElementById(getCurrentObject().id).width,document.getElementById(getCurrentObject().id).height);
-				var width=document.getElementById(getCurrentObject().id).width;
-				var height=document.getElementById(getCurrentObject().id).height;
+			if(parseInt(currentObject)!=parseInt(-1)){
+				var pixelElement=document.getElementById(currentObject);
+				var data = pixel8(pixelElement,0,0,pixelElement.width,pixelElement.height);
+				var width=pixelElement.width;
+				var height=pixelElement.height;
 				var numPixels=utilsController.Num_Pixels;
 				for(i=0;i<numPixels;i++){
 					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
