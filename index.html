@@ -37,15 +37,6 @@
 	<script src='dat.gui.min.js'></script>
 	<script src="pixel8.js"></script>
 	<script>
-		function test(){
-			ct=document.getElementById('canvasp8').getContext('2d')
-			dmxVid=createDmxElement();
-			dmxVid.addEventListener('loadeddata', function() {
-				dmxVid.play();
-				ct.drawImage(dmxVid, 0, 0, dmxVid.width, dmxVid.height);
-			});
-		}
-
 		initGlobalVars()
 		function initGlobalVars(){
 			displayObjectsArray = [];
