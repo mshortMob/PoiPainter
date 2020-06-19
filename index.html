@@ -41,16 +41,16 @@
 		initGlobalVars()
 		function initGlobalVars(){
 			displayObjectsArray = [];
-			currentObject = "";
+			currentObject = -1;
+			maxObjectsCreated=-1;
 			dmxInterval=0;
 			addControls();
 			document.getElementsByClassName('dg ac')[0].style.zIndex=10000;
 			initializeDMX();
 		}
 
-		var displayObject = function(id, classNumber, image, zindex,isCurrent){
+		var displayObject = function(id, image, zindex,isCurrent){
 			this.id=id;
-			this.classNumber =classNumber;
 			this.image=mappingController.Image;
 			this.zindex=mappingController.ZValue;
 			this.isCurrent=isCurrent;
@@ -64,21 +64,26 @@
 			}
 			this.setCurrent = function (){
 				currentObject=this.id
-				updateControlsView();
-				var handlesSet = document.getElementsByClassName(this.classNumber)
+				var handlesSet = document.getElementsByClassName("ui-draggable");
+				for(var x=0; x<handlesSet.length; x++){
+					handlesSet[x].style.display='none'
+				}		
+				var handlesSet = document.getElementsByClassName("handlesSet"+this.id);
 				for(var x=0; x<handlesSet.length; x++){
 					handlesSet[x].style.display='inline'
 				}
 				this.isCurrent=true;
+				updateControlsView();
 			}
 			this.setNotCurrent = function (){
-				var handlesSet = document.getElementsByClassName(this.classNumber)
+				var handlesSet = document.getElementsByClassName("handlesSet"+this.id);
 				for(var x=0; x<handlesSet.length; x++){
 					handlesSet[x].style.display='none'
 				}
 				this.isCurrent=false;
 			}
 			this.init = function () {
+				currentObject=this.id;
 				for(var x=0; x<displayObjectsArray.length;x++){
 					var handlesSet = document.getElementsByClassName('handlesSet'+x)
 					for(var x=0; x<handlesSet.length; x++){
@@ -96,7 +101,6 @@
 				node.loop=true;
 				document.body.appendChild(node);
 				makeTransformable("#"+ this.id)
-				selectObject(this.id);
 				this.updateImage();
 				this.updateZvalue();
 			}
@@ -126,55 +130,80 @@
 				globalFolder.add({ 'Remove Object':function(){ removeCurrentObject(); }},'Remove Object');
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
-				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); displayObjectsArray[currentObject].updateZvalue();});
-				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);displayObjectsArray[currentObject].updateImage();});
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); if(parseInt(currentObject)!=parseInt(-1)){getCurrentObject().updateZvalue();}});
+				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);if(parseInt(currentObject)!=parseInt(-1)){getCurrentObject().updateImage();}});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
-				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				// utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
 				utilsFolder.add( utilsController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
-				utilsFolder.add( utilsController, "DMX_X1", 1,255,1 ).onChange(function(){utilsController.DMX_X1=parseInt(utilsController.DMX_X1);});
-				utilsFolder.add( utilsController, "DMX_Y1", 1,255,1 ).onChange(function(){utilsController.DMX_Y1=parseInt(utilsController.DMX_Y1);});
-				utilsFolder.add( utilsController, "DMX_X2", 1,255,1 ).onChange(function(){utilsController.DMX_X2=parseInt(utilsController.DMX_X2);});
-				utilsFolder.add( utilsController, "DMX_Y2", 1,255,1 ).onChange(function(){utilsController.DMX_Y2=parseInt(utilsController.DMX_Y2);});
+				// utilsFolder.add( utilsController, "DMX_X1", 1,255,1 ).onChange(function(){utilsController.DMX_X1=parseInt(utilsController.DMX_X1);});
+				// utilsFolder.add( utilsController, "DMX_Y1", 1,255,1 ).onChange(function(){utilsController.DMX_Y1=parseInt(utilsController.DMX_Y1);});
+				// utilsFolder.add( utilsController, "DMX_X2", 1,255,1 ).onChange(function(){utilsController.DMX_X2=parseInt(utilsController.DMX_X2);});
+				// utilsFolder.add( utilsController, "DMX_Y2", 1,255,1 ).onChange(function(){utilsController.DMX_Y2=parseInt(utilsController.DMX_Y2);});
 			}
 
 		function updateControlsView(){
-			mappingController.Image=displayObjectsArray[currentObject].image;
-			mappingController.ZValue=displayObjectsArray[currentObject].zindex;
-			for (var i in gui.__folders.MappingControls.__controllers) {
-				gui.__folders.MappingControls.__controllers[i].updateDisplay();
+			if(parseInt(currentObject)!=parseInt(-1)){
+				for(var x=0;x<displayObjectsArray.length;x++){
+					if (parseInt(displayObjectsArray[x].id)==parseInt(currentObject)) {
+						mappingController.Image=displayObjectsArray[x].image;
+						mappingController.ZValue=displayObjectsArray[x].zindex;
+					}
+				}
+				for (var i in gui.__folders.MappingControls.__controllers) {
+					gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				}
 			}
 		}
 		
 		function addObject(){
-			displayObjectsArray.push(new displayObject(displayObjectsArray.length, 'handlesSet'+displayObjectsArray.length, "1", true))
+			maxObjectsCreated=maxObjectsCreated+1;
+			currentObject=maxObjectsCreated;
+			displayObjectsArray.push(new displayObject(maxObjectsCreated, "1", 0, true));
+			displayObjectsArray[displayObjectsArray.length-1].setCurrent();
 		}
 
 		function removeCurrentObject(){
-			var currentElement=document.getElementById(currentObject);
-			var handles = document.getElementsByClassName("handlesSet"+currentObject);
-			for (var x=0;x<handles.length;x++) {
-				document.body.removeChild(handles[x]);
+			if(parseInt(currentObject)!=parseInt(-1) && displayObjectsArray.length>0){
+				var currentElement=document.getElementById(currentObject);
+				for (var x=4;x>0;x--) {
+					var handles = document.getElementsByClassName("handlesSet"+currentObject);
+					document.body.removeChild(handles[0]);
+				}
+				document.body.removeChild(currentElement)
 			}
-			document.body.removeChild(currentElement)
-			selectObject(currentObject)
+			for(var x=0;x<displayObjectsArray.length;x++){
+				if (parseInt(displayObjectsArray[x].id)==parseInt(currentObject)) {
+					displayObjectsArray.splice(x,1);
+				}
+			}
+			currentObject=-1;
 		}
 
+		function getCurrentObject(){
+			for(var x=0;x<displayObjectsArray.length;x++){
+				if (parseInt(displayObjectsArray[x].id)==parseInt(currentObject)) {
+					return displayObjectsArray[x];
+				}
+			}
+			
+		}
+		
 		function selectObject(id){
 			for(var x=0;x<displayObjectsArray.length;x++){
-				if (x==id) {
-					if (displayObjectsArray[x].isCurrent==true) {
-							displayObjectsArray[id].setNotCurrent(); 
+				if (parseInt(displayObjectsArray[x].id)==parseInt(id)) {
+					if(displayObjectsArray[x].isCurrent==false){
+						displayObjectsArray[x].setCurrent(); 
 					}else{
-							displayObjectsArray[id].setCurrent(); 
-					} 
+						displayObjectsArray[x].setNotCurrent(); 
+						currentObject=-1;
+					}
 				}else{
-					displayObjectsArray[x].setNotCurrent();    
+					displayObjectsArray[x].setNotCurrent(); 
 				}  
 			}
-			currentObject=id;
 		}
 
 		function changeCurrentImage(){
@@ -209,7 +238,7 @@
 
 		function getPixelData(){
 			pixelDataString="";
-			if(displayObjectsArray.length>=0){
+			if(displayObjectsArray.length>0){
 				var data = pixel8(document.getElementById(displayObjectsArray[currentObject].id),0,0,document.getElementById(displayObjectsArray[currentObject].id).width,document.getElementById(displayObjectsArray[currentObject].id).height);
 				var width=document.getElementById(displayObjectsArray[currentObject].id).width;
 				var height=document.getElementById(displayObjectsArray[currentObject].id).height;
