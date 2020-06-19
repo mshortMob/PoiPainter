@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>PoiPainter V1.7</title>
+	<link rel="stylesheet" type="text/css">
+	<style>
+
+	</style>
+</head>
+<body id="body">
+	<canvas id="canvasp8" controls style="display:none;"></canvas>
+	<script src="pixel8.js"></script>
+	<script>
+		dmxVid = document.createElement("video");
+		dmxVid.setAttribute("Id","dmxVid")
+		dmxVid.setAttribute("class","displayCanvas")
+		dmxVid.setAttribute("onclick",'selectObject(this.id)')
+		dmxVid.src="Fractals%201.mp4"
+		dmxVid.width=320;
+		dmxVid.height=180;
+		dmxVid.autoplay="true";
+		dmxVid.play()
+		dmxVid.loop=true;
+		document.body.appendChild(dmxVid);
+
+		function getPixelData(){
+			pixelDataString="";
+			var data = pixel8(dmxVid,0,0,dmxVid.width,dmxVid.height);
+			var width=dmxVid.width;
+			var height=dmxVid.height;
+			var numPixels=4;
+			for(i=0;i<numPixels;i++){
+				var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
+				var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
+				var bv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"];
+				pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
+			}
+			return pixelDataString;
+		}
+	</script>
+</body>
+</html>
