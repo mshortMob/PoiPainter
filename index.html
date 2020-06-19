@@ -31,7 +31,7 @@
 	</style>
 </head>
 <body id="body">
-	<canvas id="canvasp8" controls style="display:none;"></canvas>
+	<canvas id="canvasp8" controls style=""></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
@@ -246,6 +246,7 @@
 				dmxVid.autoplay="true";
 				dmxVid.play()
 				dmxVid.loop=true;
+				dmxVid.style.display="none";
 				document.body.appendChild(dmxVid);
 				dmxVidCreated=true;
 			}
