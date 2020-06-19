@@ -33,8 +33,8 @@
 		</style>
 	</head>
 	<body>
-		<video id="video" autoplay width='600' height='300' style="display:none;"></video>
-		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
+		<video id="video" autoplay width='256' height='128' style="display:none;"></video>
+		<canvas id="canvasp8" autoplay width='256' height='128' style=""></canvas>
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
 		<script src='dat.gui.min.js'></script>
@@ -326,15 +326,23 @@
 				}
 			}
 
+			function getPixelAt(x,y){
+				var i = y * this.width * 4 + x * 4;
+				return {
+						red: materialArray[i],
+						green: materialArray[i + 1],
+						blue: materialArray[i + 2],
+						alpha: materialArray[i + 3]
+				};
+			}
+
 			function getPixelData(){
 				pixelDataString="";
-				var width=document.getElementById('canvasp8').width;
-				var height=document.getElementById('canvasp8').height;
 				var numPixels=globalController.Num_Pixels;
 				for(i=0;i<numPixels;i++){
-					var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
-					var gv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
-					var bv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"];
+					var rv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
+					var gv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
+					var bv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"];
 					// pixelThreshold=70;
 					// if( (rv+gv+bv)< pixelThreshold){
 					// 	rv=0;
@@ -718,6 +726,15 @@
 						}
 						if(materialArray[x+3] > 0 ){
 							materialArray[x+3]=materialArray[x+3]-(delVal);
+						}
+						if(materialArray[x+2] > 0 ){
+							materialArray[x+2]=materialArray[x+2]-(delVal);
+						}
+						if(materialArray[x+1] > 0 ){
+							materialArray[x+1]=materialArray[x+1]-(delVal);
+						}
+						if(materialArray[x] > 0 ){
+							materialArray[x]=materialArray[x]-(delVal);
 						}
 						if( materialArray[x+3] < 0 ){
 							materialArray[x+3]=0;
