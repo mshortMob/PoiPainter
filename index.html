@@ -31,7 +31,7 @@
 	</style>
 </head>
 <body id="body">
-	<canvas id="canvasp8" autoplay style="display:none;"></canvas>
+	<canvas id="canvasp8" controls style="display:none;"></canvas>
 	<script src="jquery-1.12.3.js"></script>
 	<script src="numeric.min.js"> </script>
 	<script src="jquery-ui.min.js"> </script>
@@ -44,6 +44,7 @@
 			currentObject = -1;
 			maxObjectsCreated=-1;
 			dmxInterval=0;
+			dmxVidCreated=false;
 			addControls();
 			document.getElementsByClassName('dg ac')[0].style.zIndex=10000;
 			initializeDMX();
@@ -114,6 +115,7 @@
 				};
 				utilsController={
 					SendDMX:false,
+					DMX_Image:0,
 					DMX_Rate: 50,
 					Pixel_Level:.5,
 					Num_Pixels:4,
@@ -133,11 +135,12 @@
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){mappingController.ZValue=parseInt(mappingController.ZValue); if(parseInt(currentObject)!=parseInt(-1)){getCurrentObject().updateZvalue();}});
-				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);if(parseInt(currentObject)!=parseInt(-1)){getCurrentObject().updateImage();}});
+				controlsFolder.add( mappingController, "Image", 0, 7, 1 ).onChange(function(){mappingController.Image=parseInt(mappingController.Image);if(parseInt(currentObject)!=parseInt(-1)){getCurrentObject().updateImage();}; linkDMXImage();setDmxImage(); });
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				// utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add( utilsController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				utilsFolder.add( utilsController, "DMX_Image", 0, 7, 1 ).onChange(function(){utilsController.DMX_Image=parseInt(utilsController.DMX_Image);setDmxImage();});
 				utilsFolder.add( utilsController, "DMX_Rate", 25, 250, 1 ).onChange(function(){utilsController.DMX_Rate=parseInt(utilsController.DMX_Rate);toggleDmxSend();});
 				utilsFolder.add( utilsController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
 				utilsFolder.add( utilsController, "Num_Pixels", 4,30,1 ).onChange(function(){utilsController.Num_Pixels=parseInt(utilsController.Num_Pixels);});
@@ -231,6 +234,36 @@
 			}
 		}
 
+		function createDmxElement(){
+			if(!dmxVidCreated){
+				dmxVid = document.createElement("video");
+				dmxVid.setAttribute("Id","dmxVid")
+				dmxVid.setAttribute("class","displayCanvas")
+				dmxVid.setAttribute("onclick",'selectObject(this.id)')
+				dmxVid.src="Fractals%201.mp4"
+				dmxVid.width=320;
+				dmxVid.height=180;
+				dmxVid.autoplay="true";
+				dmxVid.play()
+				dmxVid.loop=true;
+				document.body.appendChild(dmxVid);
+				dmxVidCreated=true;
+			}
+			return dmxVid;
+		}
+
+		function setDmxImage(){
+			dmxVid=document.getElementById('dmxVid');
+			dmxVid.src="Fractals "+parseInt(utilsController.DMX_Image+1)+".mp4";
+		}
+
+		function linkDMXImage(){
+			utilsController.DMX_Image=parseInt(mappingController.Image)
+			for (var i in gui.__folders.Utils.__controllers) {
+					gui.__folders.Utils.__controllers[i].updateDisplay();
+			}
+		}
+
 		function toggleDmxSend(){
 			if(utilsController.SendDMX==true){
 				clearInterval(dmxInterval);
@@ -242,10 +275,9 @@
 
 		function getPixelData(){
 			pixelDataString="";
-			pixelElement=document.getElementById(getCurrentObject().id);
-			var data = pixel8(pixelElement,0,0,pixelElement.width,pixelElement.height);
-			var width=pixelElement.width;
-			var height=pixelElement.height;
+			var data = pixel8(dmxVid,0,0,dmxVid.width,dmxVid.height);
+			var width=dmxVid.width;
+			var height=dmxVid.height;
 			var numPixels=utilsController.Num_Pixels;
 			for(i=0;i<numPixels;i++){
 				var rv=data.pixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
