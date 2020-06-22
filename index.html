@@ -415,15 +415,26 @@ void main()	{
 			}
 									
 			function loadShaderPreset(shaderNum){
-				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent; 
-				document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent=document.getElementById('frag_shader_text_box').value
-				materialsList=initShaderMaterial(uniforms1);
-				for(var i=0;i<displayObjects.length;i++){
-					if(statesArray[i].Visible==true){
-						displayObjects[i].material=materialsList[statesArray[i].Shader-1]
-					}
+				if(shaderNum==1){
+					var shaverVal=parseInt(globalController.loadShaderA);
+				}else{
+					var shaverVal=parseInt(globalController.loadShaderB);
 				}
-				syncObjectsToJson();
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn=shader"+parseInt(shaverVal)+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					console.log(xmlhttp.response)
+					// document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent; 
+					// document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent=document.getElementById('frag_shader_text_box').value
+					// materialsList=initShaderMaterial(uniforms1);
+					// for(var i=0;i<displayObjects.length;i++){
+					// 	if(statesArray[i].Visible==true){
+					// 		displayObjects[i].material=materialsList[statesArray[i].Shader-1]
+					// 	}
+					// }
+					// syncObjectsToJson();
+				}
 			}
 			
 			function updateControlsView(){
@@ -803,6 +814,26 @@ void main()	{
 				// }
 				// dataTexture.needsUpdate = true
 			}
+		
+			function saveState(){
+				var requestBody=JSON.stringify({"storage" : statesArray, "storage2": presetsArray})
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+			
+			function recallState(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					statesArray=JSON.parse(xmlhttp.response).storage
+					presetsArray=JSON.parse(xmlhttp.response).storage2
+					updateControlsView();
+					syncObjectsToJson();
+				}
+			}	
 		</script>
 	</body>
 </html>
