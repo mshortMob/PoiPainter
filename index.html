@@ -135,86 +135,68 @@ void main()	{
 		<script id="fragmentShader1" type="x-shader/x-fragment">
 precision mediump float;
 precision mediump int;
-
 uniform float time;
-
+uniform vec2 resolution;
+uniform sampler2D colorTexture;
 varying vec2 vUv;
 
-void main()	{
-	vec2 position = - 1.0 + 2.0 * vUv;
-	float red = abs( sin( position.x * position.y + time / 2.0 ) );
-	float green = abs( sin( position.x * position.y + time / 1.0 ) );
-	float blue = abs( sin( position.x * position.y + time / 3.0 ) );
-	gl_FragColor = vec4( red, green, blue, 1.0 );
+float distanceToMandelbrot( in vec2 c )
+{
+	#if 1
+	{
+		float c2 = dot(c, c);
+		// skip computation inside M1 - http://iquilezles.org/www/articles/mset_1bulb/mset1bulb.htm
+		if( 256.0*c2*c2 - 96.0*c2 + 32.0*c.x - 3.0 < 0.0 ) return 0.0;
+		// skip computation inside M2 - http://iquilezles.org/www/articles/mset_2bulb/mset2bulb.htm
+		if( 16.0*(c2+2.0*c.x+1.0) - 1.0 < 0.0 ) return 0.0;
+	}
+	#endif
+
+	// iterate
+	float di =  1.0;
+	vec2 z  = vec2(0.0);
+	float m2 = 0.0;
+	vec2 dz = vec2(0.0);
+	for( int i=0; i<300; i++ )
+	{
+		if( m2>1024.0 ) { di=0.0; break; }
+
+		// Z' -> 2·Z·Z' + 1
+		dz = 2.0*vec2(z.x*dz.x-z.y*dz.y, z.x*dz.y + z.y*dz.x) + vec2(1.0,0.0);
+			
+		// Z -> Z² + c			
+		z = vec2( z.x*z.x - z.y*z.y, 2.0*z.x*z.y ) + c;
+			
+		m2 = dot(z,z);
+	}
+
+	// distance	
+	// d(c) = |Z|·log|Z|/|Z'|
+	float d = 0.5*sqrt(dot(z,z)/dot(dz,dz))*log(dot(z,z));
+	if( di>0.5 ) d=0.0;
+	
+	return d;
 }
-		</script>
-		<!-- <script id="fragmentShader1" type="x-shader/x-fragment">
-			precision mediump float;
-			precision mediump int;
-			uniform float time;
-			uniform vec2 resolution;
-			uniform sampler2D colorTexture;
-			varying vec2 vUv;
-			
-			float distanceToMandelbrot( in vec2 c )
-			{
-				#if 1
-				{
-					float c2 = dot(c, c);
-					// skip computation inside M1 - http://iquilezles.org/www/articles/mset_1bulb/mset1bulb.htm
-					if( 256.0*c2*c2 - 96.0*c2 + 32.0*c.x - 3.0 < 0.0 ) return 0.0;
-					// skip computation inside M2 - http://iquilezles.org/www/articles/mset_2bulb/mset2bulb.htm
-					if( 16.0*(c2+2.0*c.x+1.0) - 1.0 < 0.0 ) return 0.0;
-				}
-				#endif
-			
-				// iterate
-				float di =  1.0;
-				vec2 z  = vec2(0.0);
-				float m2 = 0.0;
-				vec2 dz = vec2(0.0);
-				for( int i=0; i<300; i++ )
-				{
-					if( m2>1024.0 ) { di=0.0; break; }
-			
-					// Z' -> 2·Z·Z' + 1
-					dz = 2.0*vec2(z.x*dz.x-z.y*dz.y, z.x*dz.y + z.y*dz.x) + vec2(1.0,0.0);
-						
-					// Z -> Z² + c			
-					z = vec2( z.x*z.x - z.y*z.y, 2.0*z.x*z.y ) + c;
-						
-					m2 = dot(z,z);
-				}
-			
-				// distance	
-				// d(c) = |Z|·log|Z|/|Z'|
-				float d = 0.5*sqrt(dot(z,z)/dot(dz,dz))*log(dot(z,z));
-				if( di>0.5 ) d=0.0;
-				
-				return d;
-			}
-			
-			void main()	{
-			
-				vec2 p = -1.0+2.0*vUv;
-			
-				// animation	
-				float tz = 0.8 - 0.25*cos(0.1*time);
-				float zoo = pow( 0.5, 13.0*tz );
-				vec2 c = vec2(-0.05,.6805) + p*zoo;
-			
-				// distance to Mandelbrot
-				float d = distanceToMandelbrot(c);
-				
-				// do some soft coloring based on distance
-				d = clamp( pow(4.0*d/zoo,0.2), 0.0, 1.0 );
-				
-				vec3 poiPainterInput = texture2D( colorTexture, p ).rgb; 
-			
-				vec3 col = vec3(d)*poiPainterInput;
-				
-				gl_FragColor = vec4( col, 1.0 );
-			}
+
+void main()	{
+
+	vec2 p = -1.0+2.0*vUv;
+
+	// animation	
+	float tz = 0.8 - 0.25*cos(0.1*time);
+	float zoo = pow( 0.5, 13.0*tz );
+	vec2 c = vec2(-0.05,.6805) + p*zoo;
+
+	// distance to Mandelbrot
+	float d = distanceToMandelbrot(c);
+	
+	// do some soft coloring based on distance
+	d = clamp( pow(4.0*d/zoo,0.2), 0.0, 1.0 );
+
+	vec3 col = vec3(d);
+	
+	gl_FragColor = vec4( col, 1.0 );
+}
 		</script>
 
 		<script id="fragmentShader2" type="x-shader/x-fragment">
@@ -297,7 +279,7 @@ void main()	{
 }	
 		</script>
 		
-		<script id="fragmentShader5" type="x-shader/x-fragment">
+		<!-- <script id="fragmentShader5" type="x-shader/x-fragment">
 precision mediump float;
 precision mediump int;
 
@@ -474,7 +456,7 @@ void main( void ) {
 			function initShaderMaterial(uniforms1){
 
 				matList=[];
-				for(var x=1;x<=1;x++){
+				for(var x=1;x<=4;x++){
 					var material = new THREE.RawShaderMaterial( {
 						uniforms: uniforms1,
 						vertexShader: document.getElementById( 'vertexShader' ).textContent,
@@ -607,13 +589,13 @@ void main( void ) {
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				// globalFolder.add(globalController, "shaderToEdit", 1, 8, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
+				globalFolder.add(globalController, "shaderToEdit", 1, 4, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				// controlsFolder.add( mappingController, "Shader", 1, 1, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Shader", 1, 4, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
 				// painterFolder=gui.addFolder( "PainterControls" )
 				// painterFolder.open();
 				// painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();});
