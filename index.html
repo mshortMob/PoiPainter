@@ -359,7 +359,8 @@ void main()	{
 					 mappingMode:0,
 					 shaderToEdit:1,
 					 loadShaderA:1,
-					 loadShaderB:1
+					 loadShaderB:1,
+					 PresetName:"Shader_Preset1.txt"
 				}
 				mappingController  = {
 					 Visible:false,
@@ -398,20 +399,13 @@ void main()	{
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Shader", 1, 2, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
-				// painterFolder=gui.addFolder( "PainterControls" )
-				// painterFolder.open();
-				// painterFolder.add( painterController, "VelocitySensitivity", 0, 1, .01 ).onChange(function(){painterController.VelocitySensitivity=parseFloat(painterController.VelocitySensitivity);updateControlsValues();});
-				// painterFolder.add( painterController, "BrightnessSensitivity", 0, 1, .01 ).onChange(function(){painterController.BrightnessSensitivity=parseFloat(painterController.BrightnessSensitivity);updateControlsValues();});
-				// painterFolder.add( painterController, "FadeTime", 0, 1, .01 ).onChange(function(){painterController.FadeTime=parseFloat(painterController.FadeTime);updateControlsValues();});
-				// painterFolder.add( painterController, "ColorMix", 0, 1, .01 ).onChange(function(){painterController.ColorMix=parseFloat(painterController.ColorMix);updateControlsValues();});
-				// painterFolder.add( painterController, "ColorRate", 0, .7, .001 ).onChange(function(){painterController.ColorRate=parseFloat(painterController.ColorRate);updateControlsValues();});
-				// painterFolder.add( painterController, "ColorHop", 0, 10, 1 ).onChange(function(){painterController.ColorHop=parseFloat(painterController.ColorHop);updateControlsValues();});				
-				// //painterFolder.add( painterController, "Resolution", 100, 600, 1 ).onChange(function(){painterController.Resolution=parseFloat(painterController.Resolution);updateControlsValues();});				
-				// painterFolder.add( painterController, "KaleidoScope", 1, 4, 1 ).onChange(function(){painterController.KaleidoScope=parseInt(painterController.KaleidoScope);updateControlsValues();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
+				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
+				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
+				utilsFolder.add(globalController, 'PresetName').onChange(function(){});			
 			}
 									
 			function loadShaderPreset(shaderNum){
@@ -836,6 +830,8 @@ void main()	{
 					syncObjectsToJson();
 				}
 			}	
+		
+			setTimeout(function(){document.getElementById('hide_shader_editor').click();},100);
 		</script>
 	</body>
 </html>
