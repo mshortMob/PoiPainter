@@ -418,7 +418,7 @@ void main()	{
 				xmlhttp.open("GET", "read.php?fn=shader"+parseInt(shaverVal)+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
-					console.log(xmlhttp.response)
+					// console.log(xmlhttp.response)
 					if(shaderNum==globalController.shaderToEdit){
 						document.getElementById('frag_shader_text_box').value=xmlhttp.response; 
 					}
