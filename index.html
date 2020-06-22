@@ -812,7 +812,7 @@ void main()	{
 			}
 		
 			function saveState(){
-				var requestBody=JSON.stringify({"storage" : statesArray, "storage2": presetsArray})
+				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
 				xmlhttp.send(requestBody);
@@ -825,7 +825,7 @@ void main()	{
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response).storage
-					presetsArray=JSON.parse(xmlhttp.response).storage2
+					// presetsArray=JSON.parse(xmlhttp.response).storage2
 					updateControlsView();
 					syncObjectsToJson();
 				}
