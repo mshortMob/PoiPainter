@@ -93,13 +93,12 @@
 		</style>
 	</head>
 	<body>
-		<video id="video" autoplay width='512' height='256' style="display:none;"></video>
 		<textarea wrap="soft" id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
 		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>
 		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
 		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='inline';">Hide Editor</button>
 		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
-		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
+		<!-- <canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas> -->
 		<script src="three.js"></script>
 		<script src="pixel8.js"></script>
 		<script src='dat.gui.min.js'></script>
@@ -143,8 +142,8 @@ varying vec2 vUv;
 
 void main()	{
 	vec2 position = - 1.0 + 2.0 * vUv;
-	float red = abs( sin( position.x * position.y + time / 5.0 ) );
-	float green = abs( sin( position.x * position.y + time / 4.0 ) );
+	float red = abs( sin( position.x * position.y + time / 2.0 ) );
+	float green = abs( sin( position.x * position.y + time / 1.0 ) );
 	float blue = abs( sin( position.x * position.y + time / 3.0 ) );
 	gl_FragColor = vec4( red, green, blue, 1.0 );
 }
@@ -489,11 +488,13 @@ void main( void ) {
 
 			function initGlobalVars(){
 				clr=new colorObject();
-				width=document.getElementById('video').width;
-				height=document.getElementById('video').height;	
+				// width=document.getElementById('video').width;
+				// height=document.getElementById('video').height;	
+				width=32;
+				height=32;
 				materialArray=new Uint8Array(width * height * 4);
-				previousData=new Uint8Array(width * height * 4);
-				data=new Uint8Array(width * height * 4);
+				// previousData=new Uint8Array(width * height * 4);
+				// data=new Uint8Array(width * height * 4);
 				isFirstCycle=true;
 				colorCounter=0.0;
 				// getVideo("init",0)
@@ -531,19 +532,16 @@ void main( void ) {
 			}
 			
 			function initScene() {
-				width=document.getElementById('video').width;
-				height=document.getElementById('video').height;	
-				prevData=pixel8(video,0,0,width,height)
+				// prevData=pixel8(video,0,0,width,height)
 				dataTexture=[]	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
 				uniforms1 = {
 					"time": { value: 1.0 },
 					"resolution": [width,height],
-					"mouse": [0,0],
-					"colorTexture": { value: dataTexture }
+					"mouse": [0,0]
 				};
-				uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
+				// uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
 				materialsList=initShaderMaterial(uniforms1);
 				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader1' ).textContent
 				document.getElementById('vertex_shader_text_box').value=document.getElementById( 'vertexShader' ).textContent
