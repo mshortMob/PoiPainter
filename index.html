@@ -425,15 +425,17 @@ void main()	{
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					console.log(xmlhttp.response)
-					// document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent; 
-					// document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent=document.getElementById('frag_shader_text_box').value
-					// materialsList=initShaderMaterial(uniforms1);
-					// for(var i=0;i<displayObjects.length;i++){
-					// 	if(statesArray[i].Visible==true){
-					// 		displayObjects[i].material=materialsList[statesArray[i].Shader-1]
-					// 	}
-					// }
-					// syncObjectsToJson();
+					if(shaderNum==globalController.shaderToEdit){
+						document.getElementById('frag_shader_text_box').value=xmlhttp.response; 
+					}
+					document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent=xmlhttp.response;
+					materialsList=initShaderMaterial(uniforms1);
+					for(var i=0;i<displayObjects.length;i++){
+						if(statesArray[i].Visible==true){
+							displayObjects[i].material=materialsList[statesArray[i].Shader-1]
+						}
+					}
+					syncObjectsToJson();
 				}
 			}
 			

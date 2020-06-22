@@ -3,8 +3,6 @@ precision mediump int;
 
 uniform float time;
 
-#uniform sampler2D colorTexture;
-
 varying vec2 vUv;
 
 vec2 rotate2D (vec2 _st, float _angle) {
