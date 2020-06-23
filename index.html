@@ -267,6 +267,8 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				dmxInterval=0;
+				initializeDMX();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
@@ -356,12 +358,22 @@ void main()	{
 				
 			function addControls(){
 				globalController  = {
-					 selectedFixture:0,
-					 mappingMode:0,
-					 shaderToEdit:1,
-					 loadShaderA:1,
-					 loadShaderB:2,
-					 PresetName:"Shader_Preset1.txt"
+					selectedFixture:0,
+					mappingMode:0,
+					shaderToEdit:1,
+					loadShaderA:1,
+					loadShaderB:2,
+					PresetName:"Shader_Preset1.txt",
+					SendDMX:false,
+					DMX_Rate: 100,
+					Pixel_Level:.5,
+					Num_Pixels:4,
+					DMX_Level:.5,
+					Universe:0,
+					DMX_X1:1,
+					DMX_Y1:1,
+					DMX_X2:1,
+					DMX_Y2:1
 				}
 				mappingController  = {
 					 Visible:false,
@@ -406,7 +418,16 @@ void main()	{
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
-				utilsFolder.add(globalController, 'PresetName').onChange(function(){});			
+				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				utilsFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				utilsFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
+				utilsFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				utilsFolder.add(globalController, "Num_Pixels", 4,30,1 ).onChange(function(){globalController.Num_Pixels=parseInt(globalController.Num_Pixels);});
+				utilsFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
+				// utilsFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);});
+				// utilsFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);});
+				// utilsFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);});
+				// utilsFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);});		
 			}
 									
 			function loadShaderPreset(shaderNum){
@@ -1007,6 +1028,82 @@ void main()	{
 
 			window.addEventListener("keypress", keyHandler);	
 			setTimeout(function(){document.getElementById('hide_shader_editor').click();},100);
+
+			function toggleDmxSend(){
+				if(globalController.SendDMX==true){
+					clearInterval(dmxInterval);
+					dmxInterval=setInterval(writeDMX,globalController.DMX_Rate);
+				}else{
+					clearInterval(dmxInterval);
+				}
+			}
+
+			function getPixelAt(x,y){
+				var i = y * this.width * 4 + x * 4;
+				return {
+						red: materialArray[i],
+						green: materialArray[i + 1],
+						blue: materialArray[i + 2],
+						alpha: materialArray[i + 3]
+				};
+			}
+
+			function getPixelData(){
+				pixelDataString="";
+				var numPixels=globalController.Num_Pixels;
+				// for(i=0;i<numPixels;i++){
+				// 	var rv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
+				// 	var gv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
+				// 	var bv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"];
+				// 	// pixelThreshold=70;
+				// 	// if( (rv+gv+bv)< pixelThreshold){
+				// 	// 	rv=0;
+				// 	// 	gv=0;
+				// 	// 	bv=0;
+				// 	// }
+				// 	// if(rv<pixelThreshold){
+				// 	// 	rv=rv/3.3;
+				// 	// }
+				// 	// if(gv<pixelThreshold){
+				// 	// 	gv=gv/3.3;
+				// 	// }
+				// 	// if(bv<pixelThreshold){
+				// 	// 	bv=bv/3.3;
+				// 	// }
+				// 	rv=parseInt(rv*globalController.Pixel_Level);
+				// 	gv=parseInt(gv*globalController.Pixel_Level);
+				// 	bv=parseInt(bv*globalController.Pixel_Level);
+				// 	pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
+				// }
+				return pixelDataString;
+			}
+
+			function writeDMX() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						console.log("Send DMX: "+this.responseText);
+					}
+				};
+				xhttp.open("POST","proxy/set_dmx", true);
+				xhttp.setRequestHeader("accept", "*/*");
+				xhttp.setRequestHeader("accept-language", "en-US,en;q=0.9,und;q=0.8");
+				xhttp.setRequestHeader("cache-control", "no-cache");
+				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+				xhttp.setRequestHeader("pragma", "no-cache" );
+				xhttp.send("u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			}	
+
+			function initializeDMX() {
+				xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						console.log("Initialize DMX: "+this.responseText);
+					}
+				};
+				xhttp.open("GET","proxy/reload", true);
+				xhttp.send();
+			}
 		</script>
 	</body>
 </html>
