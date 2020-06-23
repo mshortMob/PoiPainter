@@ -267,6 +267,7 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
 				// height=document.getElementById('video').height;	
@@ -831,6 +832,97 @@ void main()	{
 				}
 			}	
 		
+			function keyHandler(event){
+				if(event.key=="<"){
+					if(globalController.selectedFixture>0){
+						globalController.selectedFixture=globalController.selectedFixture-1;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}else{
+						globalController.selectedFixture=3;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key==">"){
+					if(globalController.selectedFixture<3){
+						globalController.selectedFixture=globalController.selectedFixture+1;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}else{
+						globalController.selectedFixture=0;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key=="?"){
+					for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ 
+						displayObjects[globalController.selectedFixture].children[x].visible=false; 
+					};
+				}
+				if(event.key=="a"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+4;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="s"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-4;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="d"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-4;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="w"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+4;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="A"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="S"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="D"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="W"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+			}
+
+			window.addEventListener("keypress", keyHandler);	
 			setTimeout(function(){document.getElementById('hide_shader_editor').click();},100);
 		</script>
 	</body>
