@@ -7,15 +7,15 @@ varying vec2 vUv;
 
 void main( void ) {
 
-	vec2 position = -1.+2.*vUv;
+	vec2 position = -1.5+3.*vUv;
 		position=position*position*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
 
 	float color = 0.0;
-	color += sin( position.x * cos( time / 55.0 ) * 80.0 ) + cos( position.y * cos( time / 45.0 ) * 10.0 );
-	color += sin( position.y * sin( time / 100.0 ) * 40.0 ) + cos( position.x * sin( time / 425.0 ) * 40.0 );
-	color += sin( position.x * sin( time / 25.0 ) * 10.0 ) + sin( position.y * sin( time / 325.0 ) * 80.0 );
-	color *= sin( time / 500.0 ) * 0.5;
+	color += sin( position.x * cos( time / 55.0 ) * 80.0 ) + cos( position.y * cos( time / 15.0 ) * 30.0 );
+	color += sin( position.y * sin( time / 100.0 ) * 40.0 ) + cos( position.x * sin( time / 45.0 ) * 70.0 );
+	color += sin( position.x * sin( time / 25.0 ) * 10.0 ) + sin( position.y * sin( time / 35.0 ) * 110.0 );
+	color *= sin( time / 500.0 ) * 1.5;
 
-	gl_FragColor = vec4( vec3( color, color * 1.2, sin( color + time / 400.0 ) * 0.95 ), 1.0 );
+	gl_FragColor = vec4( vec3( color * 8.0, color * 8.2, 8.2*(1.-color)), 1.0 );
 
 }

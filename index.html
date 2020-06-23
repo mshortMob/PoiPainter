@@ -419,11 +419,11 @@ void main()	{
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
-				utilsFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
-				utilsFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
-				utilsFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
-				utilsFolder.add(globalController, "Num_Pixels", 4,30,1 ).onChange(function(){globalController.Num_Pixels=parseInt(globalController.Num_Pixels);});
-				utilsFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
+				// utilsFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				// utilsFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
+				// utilsFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				// utilsFolder.add(globalController, "Num_Pixels", 4,30,1 ).onChange(function(){globalController.Num_Pixels=parseInt(globalController.Num_Pixels);});
+				// utilsFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
 				// utilsFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);});
 				// utilsFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);});
 				// utilsFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);});
