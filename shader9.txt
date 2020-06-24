@@ -6,6 +6,7 @@ uniform vec2 resolution;
 
 varying vec2 vUv;
 
+
 float hash(float n) { return fract(sin(n) * 1e4); }
 
 float noise(float x, float scale) {
