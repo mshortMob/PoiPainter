@@ -16,6 +16,6 @@ void main()	{
 		newp.y+=0.8/float(i)*sin(float(i)*p.x+time/(100.0/speed)+0.3*float(i+10))-11.4;
 		p=newp;
 	}
-	vec3 col=vec3(sin(p.x*1.+p.y), 0.2*sin(12.0*p.y), 0.);
+	vec3 col=vec3(.77*sin(p.x*1.+p.y), 0.2*sin(12.0*p.y), .77*sin(p.x*1.));
 	gl_FragColor=vec4(col, 1.0);
 }	
