@@ -347,6 +347,8 @@ void main()	{
 					DMX_Rate: 100,
 					Pixel_Level:.5,
 					DMX_Preset:1,
+					DMX_Preset_Rate:.1,
+					DMX_Scene:0.0,
 					DMX_Level:.5,
 					Universe:0,
 					DMX_X1:1,
@@ -403,6 +405,9 @@ void main()	{
 				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				dmxFolder.add(globalController, "DMX_Scene", 0.0,3.0,.1 ).onChange(function(){});
+				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){});
+
 				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
 				// dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
 				// utilsFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);});
@@ -1062,6 +1067,25 @@ void main()	{
 					gui.__folders.DMX.__controllers[1].updateDisplay();
 					retrievePixelPattern();
 				}
+				if(event.key=="i"){
+					if(globalController.DMX_Preset_Rate+.05>.5){
+						globalController.DMX_Preset_Rate=0.0;
+						
+					}else{
+						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate+.05;
+					}
+					gui.__folders.DMX.__controllers[3].updateDisplay();
+					retrievePixelPattern();
+				}
+				if(event.key=="I"){
+					if(globalController.DMX_Preset_Rate-.05>0){
+						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate-.05;
+					}else{
+						globalController.DMX_Preset_Rate=.5;
+					}
+					gui.__folders.DMX.__controllers[3].updateDisplay();
+					retrievePixelPattern();
+				}
 			}
 
 			function toggleDmxSend(){
@@ -1072,27 +1096,35 @@ void main()	{
 					clearInterval(dmxInterval);
 				}
 			}
-
+			
 			function retrievePixelPattern(){
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("GET", "read.php?fn=pixelPattern"+globalController.DMX_Preset+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					var response=xmlhttp.response;
-					var temp=response.split(",");
-					for(var x=0;x<temp.length;x++){
-						temp[x]=parseInt(temp[x]);
+					var presetScenes=response.split('\n')
+					var fullPresetArray=[];
+					for(var s=0;s<presetScenes.length;s++){
+						var stringArray=presetScenes[s].split(',');
+						for(var t=0; t<stringArray.length;t++){
+							stringArray[t]=parseInt(stringArray[t]);
+						}
+					fullPresetArray.push(stringArray);
 					}
-					dmxPresetData=temp;
+					dmxPresetData=fullPresetArray;
 					console.log(dmxPresetData);
 				}
 			}	
-			
+
 			function getPixelData(){
+				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%3;
+				gui.__folders.DMX.__controllers[2].updateDisplay();
+				//---------
 				pixelDataString="";
 				var numPixels=4;
-				for(i=0;i<dmxPresetData.length;i++){
-					pixelDataString=pixelDataString+parseInt(dmxPresetData[i]*globalController.Pixel_Level)+","
+				for(i=0;i<dmxPresetData[parseInt(globalController.DMX_Scene)].length;i++){
+					pixelDataString=pixelDataString+parseInt(dmxPresetData[parseInt(globalController.DMX_Scene)][i]*globalController.Pixel_Level)+","
 				}
 				return pixelDataString;
 			}
@@ -1110,7 +1142,9 @@ void main()	{
 				xhttp.setRequestHeader("cache-control", "no-cache");
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
-				xhttp.send("u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				console.log(dmxPayloadString);
+				xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
