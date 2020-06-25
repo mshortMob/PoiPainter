@@ -1040,43 +1040,15 @@ void main()	{
 				}
 			}
 
-			function getPixelAt(x,y){
-				var i = y * this.width * 4 + x * 4;
-				return {
-						red: materialArray[i],
-						green: materialArray[i + 1],
-						blue: materialArray[i + 2],
-						alpha: materialArray[i + 3]
-				};
-			}
-
 			function getPixelData(){
 				pixelDataString="";
-				var numPixels=globalController.Num_Pixels;
-				// for(i=0;i<numPixels;i++){
-				// 	var rv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["red"];
-				// 	var gv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["green"];
-				// 	var bv=getPixelAt(parseInt(width/numPixels*i+width/(numPixels*2)),height/2)["blue"];
-				// 	// pixelThreshold=70;
-				// 	// if( (rv+gv+bv)< pixelThreshold){
-				// 	// 	rv=0;
-				// 	// 	gv=0;
-				// 	// 	bv=0;
-				// 	// }
-				// 	// if(rv<pixelThreshold){
-				// 	// 	rv=rv/3.3;
-				// 	// }
-				// 	// if(gv<pixelThreshold){
-				// 	// 	gv=gv/3.3;
-				// 	// }
-				// 	// if(bv<pixelThreshold){
-				// 	// 	bv=bv/3.3;
-				// 	// }
+				var numPixels=4;
+				for(i=0;i<numPixels;i++){
 				// 	rv=parseInt(rv*globalController.Pixel_Level);
 				// 	gv=parseInt(gv*globalController.Pixel_Level);
 				// 	bv=parseInt(bv*globalController.Pixel_Level);
 				// 	pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
-				// }
+				}
 				return pixelDataString;
 			}
 
