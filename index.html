@@ -267,8 +267,11 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				addControls();	
 				dmxInterval=0;
-				// initializeDMX();
+				dmxPresetData=[];
+				retrievePixelPattern();
+				initializeDMX();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
@@ -281,7 +284,6 @@ void main()	{
 				isFirstCycle=true;
 				colorCounter=0.0;
 				// getVideo("init",0)
-				addControls();	
 				container=null;
 				camera=null;
 				controls=null;
@@ -367,7 +369,7 @@ void main()	{
 					SendDMX:false,
 					DMX_Rate: 100,
 					Pixel_Level:.5,
-					Num_Pixels:4,
+					DMX_Preset:1,
 					DMX_Level:.5,
 					Universe:0,
 					DMX_X1:1,
@@ -422,10 +424,10 @@ void main()	{
 				dmxFolder=gui.addFolder( "DMX" );
 				dmxFolder.open();
 				dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
-				dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
+				dmxFolder.add(globalController, "DMX_Preset", 1,3,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
 				dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
-				dmxFolder.add(globalController, "Num_Pixels", 4,30,1 ).onChange(function(){globalController.Num_Pixels=parseInt(globalController.Num_Pixels);});
 				// utilsFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);});
 				// utilsFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);});
 				// utilsFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);});
@@ -1040,14 +1042,26 @@ void main()	{
 				}
 			}
 
+			function retrievePixelPattern(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "read.php?fn=pixelPattern"+globalController.DMX_Preset+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					var response=xmlhttp.response;
+					var temp=response.split(",");
+					for(var x=0;x<temp.length;x++){
+						temp[x]=parseInt(temp[x]);
+					}
+					dmxPresetData=temp;
+					console.log(dmxPresetData);
+				}
+			}	
+			
 			function getPixelData(){
 				pixelDataString="";
 				var numPixels=4;
-				for(i=0;i<numPixels;i++){
-				// 	rv=parseInt(rv*globalController.Pixel_Level);
-				// 	gv=parseInt(gv*globalController.Pixel_Level);
-				// 	bv=parseInt(bv*globalController.Pixel_Level);
-				// 	pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
+				for(i=0;i<dmxPresetData.length;i++){
+					pixelDataString=pixelDataString+parseInt(dmxPresetData[i]*globalController.Pixel_Level)+","
 				}
 				return pixelDataString;
 			}
