@@ -424,7 +424,7 @@ void main()	{
 				dmxFolder=gui.addFolder( "DMX" );
 				dmxFolder.open();
 				dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
-				dmxFolder.add(globalController, "DMX_Preset", 1,3,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
+				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
 				dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
 				dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
@@ -1028,6 +1028,16 @@ void main()	{
 					gui.__folders.Global.__controllers[3].updateDisplay();
 					loadShaderPreset(2);
 				}
+				if(event.key=="k"){
+					if(globalController.DMX_Preset+1>6){
+						globalController.DMX_Preset=1;
+						
+					}else{
+						globalController.DMX_Preset=globalController.DMX_Preset+1;
+					}
+					gui.__folders.DMX.__controllers[1].updateDisplay();
+				}
+				retrievePixelPattern();
 			}
 
 			window.addEventListener("keypress", keyHandler);	
