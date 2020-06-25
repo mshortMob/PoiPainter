@@ -6,9 +6,9 @@ uniform float time;
 varying vec2 vUv;
 
 void main()	{
-	vec2 position = -4.0 * vUv;
-	float red = abs( sin( position.x * position.y + time / .7 ) );
-	float green = abs( sin( position.x * position.y + time / .4 ) );
-	float blue = abs( sin( position.x * position.y + time / .9 ) );
+	vec2 position = -12.0 * vUv;
+	float red = abs( sin( position.x + time / .25) );
+	float green = abs( sin( position.x + 3.14/2. + time / .25 ) );
+	float blue = abs( sin( position.x + 3.14/5.5 + time / .25 ) );
 	gl_FragColor = vec4( red, green, blue, 1.0 );
 }

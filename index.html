@@ -242,7 +242,7 @@ void main()	{
 			}
 
 			function initGlobalVars(){
-				setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
+				// setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
 				addControls();	
 				dmxInterval=0;
 				dmxPresetData=[];
@@ -1035,12 +1035,29 @@ void main()	{
 					}
 					gui.__folders.DMX.__controllers[0].updateDisplay();
 				}
+				if(event.key=="K"){
+					if(globalController.DMX_Preset-1>0){
+						globalController.DMX_Preset=globalController.DMX_Preset-1;
+					}else{
+						globalController.DMX_Preset=6;
+					}
+					gui.__folders.DMX.__controllers[0].updateDisplay();
+				}
 				if(event.key=="j"){
 					if(globalController.Pixel_Level+.1>1){
 						globalController.Pixel_Level=0;
 						
 					}else{
 						globalController.Pixel_Level=globalController.Pixel_Level+.1;
+					}
+					gui.__folders.DMX.__controllers[1].updateDisplay();
+					retrievePixelPattern();
+				}
+				if(event.key=="J"){
+					if(globalController.Pixel_Level-.1>0){
+						globalController.Pixel_Level=globalController.Pixel_Level-.1;
+					}else{
+						globalController.Pixel_Level=1.0;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
 					retrievePixelPattern();
