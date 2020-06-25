@@ -8,7 +8,7 @@ varying vec2 vUv;
 void main()	{
 	vec2 p = - 1.0 + 2.0 * vUv;
 
-	for(int i=1;i<100;i++)
+	for(int i=1;i<20;i++)
 	{
 		vec2 newp=p;
 		float speed = 45.0; // speed control

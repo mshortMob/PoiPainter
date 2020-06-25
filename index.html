@@ -140,34 +140,12 @@ uniform float time;
 
 varying vec2 vUv;
 
-void main(void) {
-
-	vec2 p = - 1.0 + 2.0 * vUv;
-	float a = time * 40.0;
-	float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
-
-	e = 400.0 * ( p.x * 0.5 + 0.5 );
-	f = 400.0 * ( p.y * 0.5 + 0.5 );
-	i = 200.0 + sin( e * g + a / 150.0 ) * 20.0;
-	d = 200.0 + cos( f * g / 2.0 ) * 18.0 + cos( e * g ) * 7.0;
-	r = sqrt( pow( abs( i - e ), 2.0 ) + pow( abs( d - f ), 2.0 ) );
-	q = f / r;
-	e = ( r * cos( q ) ) - a / 2.0;
-	f = ( r * sin( q ) ) - a / 2.0;
-	d = sin( e * g ) * 176.0 + sin( e * g ) * 164.0 + r;
-	h = ( ( f + d ) + a / 2.0 ) * g;
-	i = cos( h + r * p.x / 1.3 ) * ( e + e + a ) + cos( q * g * 6.0 ) * ( r + h / 3.0 );
-	h = sin( f * g ) * 144.0 - sin( e * g ) * 212.0 * p.x;
-	h = ( h + ( f - e ) * q + sin( r - ( a + h ) / 7.0 ) * 10.0 + i / 4.0 ) * g;
-	i += cos( h * 2.3 * sin( a / 350.0 - q ) ) * 184.0 * sin( q - ( r * 4.3 + a / 12.0 ) * g ) + tan( r * g + h ) * 184.0 * cos( r * g + h );
-	i = mod( i / 5.6, 256.0 ) / 64.0;
-	if ( i < 0.0 ) i += 4.0;
-	if ( i >= 2.0 ) i = 4.0 - i;
-	d = r / 350.0;
-	d += sin( d * d * 8.0 ) * 0.52;
-	f = ( sin( a * g ) + 1.0 ) / 2.0;
-	gl_FragColor = vec4( vec3( f * i / 1.6, i / 2.0 + d / 13.0, i ) * d * p.x + vec3( i / 1.3 + d / 8.0, i / 2.0 + d / 18.0, i ) * d * ( 1.0 - p.x ), 1.0 );
-
+void main()	{
+	vec2 position = - 1.0 + 2.0 * vUv;
+	float red = abs( sin( position.x * position.y + time / 5.0 ) );
+	float green = abs( sin( position.x * position.y + time / 4.0 ) );
+	float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+	gl_FragColor = vec4( red, green, blue, 1.0 );
 }
 		</script>
 		
@@ -180,14 +158,11 @@ uniform float time;
 varying vec2 vUv;
 
 void main()	{
-	vec2 position = -5.+10.*vUv;
-		position=position*position*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
-		position.y*= .02;
-		position.x*= .02;
-	float red = sin(position.x/.1+time/18. )+cos(time/8.)-position.y*4.;
-	float green = cos(position.x/.1+time )+sin(time/14. )+position.y*8.;
-	float blue =tan(position.x/.3+time/4. )+sin(time/3.5 )+position.y*4.;
-	gl_FragColor = vec4( red-green-blue, green-red-blue, blue, 1.0 );
+	vec2 position = - 3.0 + 6.0 * vUv;
+	float red = abs( sin( position.x * position.y - time / 2.0 ) );
+	float green = abs( sin( position.x * position.y + time / 4.0 ) );
+	float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+	gl_FragColor = vec4( red*.7, green-.7, blue*1.2, 1.0 );
 }
 		</script>
 
@@ -267,6 +242,7 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
 				addControls();	
 				dmxInterval=0;
 				dmxPresetData=[];
@@ -406,9 +382,9 @@ void main()	{
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				// globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
-				globalFolder.add(globalController, "loadShaderA", 1, 10, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);});				
-				globalFolder.add(globalController, "loadShaderB", 1, 10, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);});								
+				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
+				globalFolder.add(globalController, "loadShaderA", 1, 8, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);});				
+				globalFolder.add(globalController, "loadShaderB", 1, 8, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);});								
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				//controlsFolder.open();
@@ -424,11 +400,11 @@ void main()	{
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 				dmxFolder=gui.addFolder( "DMX" );
 				dmxFolder.open();
-				dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
-				dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
-				dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
+				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
+				// dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
 				// utilsFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);});
 				// utilsFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);});
 				// utilsFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);});
@@ -858,6 +834,7 @@ void main()	{
 				}
 			}	
 		
+			window.addEventListener("keypress", keyHandler);	
 			function keyHandler(event){
 				if(event.key=="<"){
 					if(globalController.selectedFixture>0){
@@ -1016,18 +993,38 @@ void main()	{
 					}else{
 						globalController.loadShaderA=globalController.loadShaderA+1;
 					}
-					gui.__folders.Global.__controllers[2].updateDisplay();
+					gui.__folders.Global.__controllers[1].updateDisplay();
 					loadShaderPreset(1);
 				}
 				if(event.key=="L"){
+					if(globalController.loadShaderA-1>0){
+						globalController.loadShaderA=globalController.loadShaderA-1;
+						
+					}else{
+						globalController.loadShaderA=8;
+					}
+					gui.__folders.Global.__controllers[1].updateDisplay();
+					loadShaderPreset(1);
+				}
+				if(event.key=="o"){
 					if(globalController.loadShaderB+1>8){
 						globalController.loadShaderB=1;
 						
 					}else{
 						globalController.loadShaderB=globalController.loadShaderB+1;
 					}
-					gui.__folders.Global.__controllers[3].updateDisplay();
+					gui.__folders.Global.__controllers[2].updateDisplay();
 					loadShaderPreset(2);
+				}
+				if(event.key=="O"){
+					if(globalController.loadShaderB-1>0){
+						globalController.loadShaderB=globalController.loadShaderB-1;
+						
+					}else{
+						globalController.loadShaderB=8;
+					}
+					gui.__folders.Global.__controllers[2].updateDisplay();
+					loadShaderPreset(1);
 				}
 				if(event.key=="k"){
 					if(globalController.DMX_Preset+1>6){
@@ -1036,7 +1033,7 @@ void main()	{
 					}else{
 						globalController.DMX_Preset=globalController.DMX_Preset+1;
 					}
-					gui.__folders.DMX.__controllers[1].updateDisplay();
+					gui.__folders.DMX.__controllers[0].updateDisplay();
 				}
 				if(event.key=="j"){
 					if(globalController.Pixel_Level+.1>1){
@@ -1045,13 +1042,10 @@ void main()	{
 					}else{
 						globalController.Pixel_Level=globalController.Pixel_Level+.1;
 					}
-					gui.__folders.DMX.__controllers[2].updateDisplay();
+					gui.__folders.DMX.__controllers[1].updateDisplay();
+					retrievePixelPattern();
 				}
-				retrievePixelPattern();
 			}
-
-			window.addEventListener("keypress", keyHandler);	
-			setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
 
 			function toggleDmxSend(){
 				if(globalController.SendDMX==true){
