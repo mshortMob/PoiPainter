@@ -408,22 +408,24 @@ void main()	{
 				globalFolder.add(globalController, "loadShaderB", 1, 10, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);});								
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
-				controlsFolder.open();
+				//controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Shader", 1, 2, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
-				utilsFolder.open();
+				// utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
-				// utilsFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
-				// utilsFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
-				// utilsFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
-				// utilsFolder.add(globalController, "Num_Pixels", 4,30,1 ).onChange(function(){globalController.Num_Pixels=parseInt(globalController.Num_Pixels);});
-				// utilsFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
+				dmxFolder=gui.addFolder( "DMX" );
+				dmxFolder.open();
+				dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
+				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
+				dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
+				dmxFolder.add(globalController, "Num_Pixels", 4,30,1 ).onChange(function(){globalController.Num_Pixels=parseInt(globalController.Num_Pixels);});
 				// utilsFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);});
 				// utilsFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);});
 				// utilsFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);});
@@ -1027,7 +1029,7 @@ void main()	{
 			}
 
 			window.addEventListener("keypress", keyHandler);	
-			setTimeout(function(){document.getElementById('hide_shader_editor').click();},100);
+			setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
 
 			function toggleDmxSend(){
 				if(globalController.SendDMX==true){
