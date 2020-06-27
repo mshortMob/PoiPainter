@@ -6,10 +6,23 @@
 		</style>
 	</head>
 	<body>
-		<canvas></canvas>
-		<video src="media/anim1.mp4" style="display: none;"></video>
-		<script>
-
+		<script src="packages/pixel8.js"></script>
+		<script>	
+			vid = document.createElement('video');
+			vid.id="video1"
+			vid.src="media/anim"+1+".mp4"
+			vid.autoplay=true;
+			vid.loop=true;
+			vid.style.display='none';
+			vid.width=480;
+			vid.height=360;
+			canvasp8 = document.createElement('canvas');
+			canvasp8.id="canvasp8"
+			canvasp8.width=vid.width;
+			canvasp8.height=vid.height;
+			// document.body.appendChild(canvasp8);
+			context = canvasp8.getContext("2d");
+			context.drawImage(vid, 0, 0, vid.width, vid.height);
 		</script>
 	</body>
 </html>

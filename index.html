@@ -31,23 +31,32 @@
 			initGlobalVars();
 			
 			function initGlobalVars(){
-			    numberOfVideos=2;
+			    numberOfVideos=1;
 				imageCycle=0;
 				fadeCycle=false;
 				returnCycle=false;
 				videoElements=[];
 				videoTextures=[];
 				for(var x=1; x<numberOfVideos+1; x++){
-					var vid = document.createElement('video');
-					vid.id="video+x"
-					vid.src="media/anim"+x+".mp4"
+					vid = document.createElement('video');
+					vid.id="video1"
+					vid.src="media/anim"+1+".mp4"
 					vid.autoplay=true;
 					vid.loop=true;
-					videoElements.push(vid)
-					// document.body.appendChild(vid);
+					vid.style.display='none';
+					vid.width=480;
+					vid.height=360;
+					canvasp8 = document.createElement('canvas');
+					canvasp8.id="canvasp8"
+					canvasp8.width=vid.width;
+					canvasp8.height=vid.height;
+					// document.body.appendChild(canvasp8);
+					context = canvasp8.getContext("2d");
+					context.drawImage(vid, 0, 0, vid.width, vid.height);
 					var videoTexture1 = new THREE.Texture( vid );
 					videoTexture1.minFilter=THREE.LinearFilter;
-					videoTextures.push(videoTexture1)					
+					videoTextures.push(videoTexture1)
+					videoElements.push[vid];	
 				}
 				PICKED=false;
 				addControls();			
@@ -474,9 +483,10 @@
 			
 			function render() {
 				for(var x=0; x<videoTextures.length;x++){
-				    if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
+				    // if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
+						// context.drawImage(videoElements[x], 0, 0, videoElements[x].width, videoElements[x].height);
 						videoTextures[x].needsUpdate = true;
-					}
+					// }
 				}
 				//controls.update();
 				renderer.render( scene, camera );

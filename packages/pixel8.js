@@ -48,7 +48,7 @@ function pixel8(image, x, y, w, h) {
 			this[i + 1] = set.green;
 			this[i + 2] = set.blue;
 			this[i + 3] = set.alpha;
-		} else return = {
+		} else return {
 			red: this[i],
 			green: this[i + 1],
 			blue: this[i + 2],
