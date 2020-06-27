@@ -1180,7 +1180,7 @@ void main()	{
 				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+fade_Position);
 				pixelDataString="";
 				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
-					pixelDataString=pixelDataString+parseInt(parseInt(globalController.Pixel_Level*(dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position))))+",";
+					pixelDataString=pixelDataString+parseInt(parseInt(globalController.Pixel_Level*((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))))+",";
 				}
 				// console.log(pixelDataString);
 				return pixelDataString;
