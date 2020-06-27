@@ -18,6 +18,18 @@
 				float:left;
 				object-fit:fill;
 			}
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:10;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
 		</style>
 	</head>
 	<body>
@@ -27,6 +39,9 @@
 		<script src="packages/NURBSSurface.js"></script>
 		<script src="packages/NURBSUtils.js"></script>
 		<script src="packages/TrackballControls.js"></script>
+		<script src="packages/pixel8.js"></script>
+		<video id="video" controls autoplay loop src="media/anim1.mp4" width="600" height="300" style="display:inline;"></video>
+		<canvas id="canvasp8" width="600" height="300" style="display:none"></canvas>
 		<script>
 			initGlobalVars();
 			
@@ -37,27 +52,37 @@
 				returnCycle=false;
 				videoElements=[];
 				videoTextures=[];
-				for(var x=1; x<numberOfVideos+1; x++){
-					vid = document.createElement('video');
-					vid.id="video1"
-					vid.src="media/anim"+1+".mp4"
-					vid.autoplay=true;
-					vid.loop=true;
-					vid.style.display='none';
-					vid.width=480;
-					vid.height=360;
-					canvasp8 = document.createElement('canvas');
-					canvasp8.id="canvasp8"
-					canvasp8.width=vid.width;
-					canvasp8.height=vid.height;
-					// document.body.appendChild(canvasp8);
-					context = canvasp8.getContext("2d");
-					context.drawImage(vid, 0, 0, vid.width, vid.height);
-					var videoTexture1 = new THREE.Texture( vid );
-					videoTexture1.minFilter=THREE.LinearFilter;
-					videoTextures.push(videoTexture1)
-					videoElements.push[vid];	
-				}
+				width=document.getElementById('video').width;
+				height=document.getElementById('video').height;
+				materialArray=new Uint8Array(width * height * 4);
+				data=new Uint8Array(width * height * 4);
+				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				dataTexture.needsUpdate = true;
+				material = new THREE.MeshLambertMaterial({map:dataTexture, morphTargets: true, side: THREE.DoubleSide, transparent:true})
+
+
+				// data=pixel8(document.getElementById('video'),0,0,width,height);
+				// for(var x=1; x<numberOfVideos+1; x++){
+				// 	vid = document.createElement('video');
+				// 	vid.id="video1"
+				// 	vid.src="media/anim"+1+".mp4"
+				// 	vid.autoplay=true;
+				// 	vid.loop=true;
+				// 	vid.style.display='none';
+				// 	vid.width=480;
+				// 	vid.height=360;
+				// 	canvasp8 = document.createElement('canvas');
+				// 	canvasp8.id="canvasp8"
+				// 	canvasp8.width=vid.width;
+				// 	canvasp8.height=vid.height;
+				// 	// document.body.appendChild(canvasp8);
+				// 	context = canvasp8.getContext("2d");
+				// 	context.drawImage(vid, 0, 0, vid.width, vid.height);
+				// 	var videoTexture1 = new THREE.Texture( vid );
+				// 	videoTexture1.minFilter=THREE.LinearFilter;
+				// 	videoTextures.push(videoTexture1)
+				// 	videoElements.push[vid];	
+				// }
 				PICKED=false;
 				addControls();			
 				points=[];
@@ -227,8 +252,8 @@
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
 				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
-				var material = new THREE.MeshLambertMaterial({map : videoTextures[0] , morphTargets: true, side: THREE.DoubleSide, transparent:true})
-				var object = new THREE.Mesh( geometry, material);				
+				// var material = new THREE.MeshLambertMaterial({map : dataTexture , morphTargets: true, side: THREE.DoubleSide, transparent:true})
+				var object = new THREE.Mesh( geometry, material);		
 				object.imageNum=0;
 				return object;
 			  }
@@ -482,12 +507,21 @@
 			}
 			
 			function render() {
-				for(var x=0; x<videoTextures.length;x++){
-				    // if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
-						// context.drawImage(videoElements[x], 0, 0, videoElements[x].width, videoElements[x].height);
-						videoTextures[x].needsUpdate = true;
-					// }
+				data=pixel8(document.getElementById('video'),0,0,width,height);
+				for (x=0; x < ((width * height) * 4); x=x+4) {
+					materialArray[x]=data[x];
+					materialArray[x+1]=data[x+1];
+					materialArray[x+2]=data[x+2];
+					materialArray[x+3]=data[x+3];
 				}
+				dataTexture.needsUpdate = true
+				// dataTexture.image.data=pixel8(document.getElementById('video'),0,0,width*4,height*4);
+				// for(var x=0; x<videoTextures.length;x++){
+				//     // if( videoElements[x].readyState === videoElements[x].HAVE_ENOUGH_DATA ){
+				// 		// context.drawImage(videoElements[x], 0, 0, videoElements[x].width, videoElements[x].height);
+				// 		// videoTextures[x].needsUpdate = true;
+				// 	// }
+				// }
 				//controls.update();
 				renderer.render( scene, camera );
 			}
@@ -543,6 +577,21 @@
 
 			}
 		
+			function setPPResolution(){
+				resW=400;
+				if(parseInt(resW) != parseInt(document.getElementById('video').width)){
+					document.getElementById('video').width=parseInt(resW)
+					document.getElementById('video').height=parseInt(resW/2)
+					document.getElementById('canvasp8').width=parseInt(resW)
+					document.getElementById('canvasp8').height=parseInt(resW/2)
+			   		width=document.getElementById('video').width;
+					height=document.getElementById('video').height;	
+					dataTexture=[]	
+					dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+					dataTexture.needsUpdate = true;
+					material.map=dataTexture;
+				}
+			}
 		</script>
 	</body>
 </html>
