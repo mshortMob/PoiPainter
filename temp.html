@@ -20,9 +20,13 @@
 			canvasp8.id="canvasp8"
 			canvasp8.width=vid.width;
 			canvasp8.height=vid.height;
-			// document.body.appendChild(canvasp8);
+			document.body.appendChild(canvasp8);
 			context = canvasp8.getContext("2d");
-			context.drawImage(vid, 0, 0, vid.width, vid.height);
+			videoLoop();
+			function videoLoop() {
+				context.drawImage(vid, 0, 0, vid.width, vid.height);
+				setTimeout(videoLoop, 1000 / 30);
+			}
 		</script>
 	</body>
 </html>
