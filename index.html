@@ -44,8 +44,9 @@
 					vid.autoplay=true;
 					vid.loop=true;
 					videoElements.push(vid)
+					// document.body.appendChild(vid);
 					var videoTexture1 = new THREE.Texture( vid );
-					//videoTexture1.minFilter=THREE.LinearFilter;
+					videoTexture1.minFilter=THREE.LinearFilter;
 					videoTextures.push(videoTexture1)					
 				}
 				PICKED=false;
