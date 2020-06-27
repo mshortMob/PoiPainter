@@ -94,7 +94,7 @@
 	</head>
 	<body>
 		<textarea wrap="soft" id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
-		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>
+		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>  
 		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
 		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='none';">Hide Editor</button>
 		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
@@ -242,6 +242,7 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				fade_Position=0;
 				setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
 				addControls();	
 				dmxInterval=0;
@@ -345,6 +346,7 @@ void main()	{
 					PresetName:"Shader_Preset1",
 					SendDMX:true,
 					DMX_Rate: 100,
+					DMX_Fade_Time:.2,
 					Pixel_Level:.5,
 					DMX_Preset:1,
 					DMX_Preset_Rate:.1,
@@ -407,6 +409,7 @@ void main()	{
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
 				dmxFolder.add(globalController, "DMX_Scene", 0.0,4.0,.1 ).onChange(function(){});
 				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){});
+				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){});
 
 				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
 				// dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
@@ -1151,11 +1154,16 @@ void main()	{
 				gui.__folders.DMX.__controllers[2].updateDisplay();
 				var top=(Math.ceil(globalController.DMX_Scene)%4);
 				var bottom=Math.floor(globalController.DMX_Scene);
-				var position=globalController.DMX_Scene%1.0;
-				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+position);
+				fade_Position=globalController.DMX_Scene%1.0;
+				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
+					fade_Position=1.0;
+				}else{
+					fade_Position=fade_Position+globalController.DMX_Fade_Time;
+				}
+				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+fade_Position);
 				pixelDataString="";
 				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
-					pixelDataString=pixelDataString+parseInt((dmxPresetData[top][i]*position) + (dmxPresetData[bottom][i]*(1-position)))+",";
+					pixelDataString=pixelDataString+parseInt((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))+",";
 				}
 				console.log(pixelDataString);
 				return pixelDataString;
