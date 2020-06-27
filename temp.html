@@ -7,26 +7,38 @@
 	</head>
 	<body>
 		<script src="packages/pixel8.js"></script>
+		<video id="video" autoplay loop src="media/anim1.mp4" width='600' height='300' style="display:none;"></video>
+		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
 		<script>	
-			vid = document.createElement('video');
-			vid.id="video1"
-			vid.src="media/anim"+1+".webm"
-			vid.autoplay=true;
-			vid.loop=true;
-			vid.style.display='none';
-			vid.width=480;
-			vid.height=360;
-			canvasp8 = document.createElement('canvas');
-			canvasp8.id="canvasp8"
-			canvasp8.width=vid.width;
-			canvasp8.height=vid.height;
-			document.body.appendChild(canvasp8);
-			context = canvasp8.getContext("2d");
+			// vid = document.createElement('video');
+			// vid.id="video1"
+			// vid.src="media/anim"+1+".webm"
+			// vid.autoplay=true;
+			// vid.loop=true;
+			// vid.style.display='none';
+			// vid.width=480;
+			// vid.height=360;
+			// canvasp8 = document.createElement('canvas');
+			// canvasp8.id="canvasp8"
+			// canvasp8.width=vid.width;
+			// canvasp8.height=vid.height;
+			// document.body.appendChild(canvasp8);
+			// context = canvasp8.getContext("2d");
+			// videoLoop();
+			// function videoLoop() {
+			// 	context.drawImage(vid, 0, 0, vid.width, vid.height);
+			// 	setTimeout(videoLoop, 1000 / 30);
+			// }
+			width=600;
+			height=300;
 			videoLoop();
 			function videoLoop() {
-				context.drawImage(vid, 0, 0, vid.width, vid.height);
+				data=pixel8(document.getElementById('video'),0,0,width,height);
+				console.log(data);
 				setTimeout(videoLoop, 1000 / 30);
 			}
+			
+			
 		</script>
 	</body>
 </html>
