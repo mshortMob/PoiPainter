@@ -405,7 +405,7 @@ void main()	{
 				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
-				dmxFolder.add(globalController, "DMX_Scene", 0.0,3.0,.1 ).onChange(function(){});
+				dmxFolder.add(globalController, "DMX_Scene", 0.0,4.0,.1 ).onChange(function(){});
 				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){});
 
 				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
@@ -1039,6 +1039,7 @@ void main()	{
 						globalController.DMX_Preset=globalController.DMX_Preset+1;
 					}
 					gui.__folders.DMX.__controllers[0].updateDisplay();
+					retrievePixelPattern();
 				}
 				if(event.key=="K"){
 					if(globalController.DMX_Preset-1>0){
@@ -1047,6 +1048,7 @@ void main()	{
 						globalController.DMX_Preset=6;
 					}
 					gui.__folders.DMX.__controllers[0].updateDisplay();
+					retrievePixelPattern();
 				}
 				if(event.key=="j"){
 					if(globalController.Pixel_Level+.1>1){
@@ -1056,7 +1058,6 @@ void main()	{
 						globalController.Pixel_Level=globalController.Pixel_Level+.1;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
-					retrievePixelPattern();
 				}
 				if(event.key=="J"){
 					if(globalController.Pixel_Level-.1>0){
@@ -1065,7 +1066,6 @@ void main()	{
 						globalController.Pixel_Level=1.0;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
-					retrievePixelPattern();
 				}
 				if(event.key=="i"){
 					if(globalController.DMX_Preset_Rate+.05>.5){
@@ -1113,19 +1113,20 @@ void main()	{
 					fullPresetArray.push(stringArray);
 					}
 					dmxPresetData=fullPresetArray;
-					console.log(dmxPresetData);
+					//console.log(dmxPresetData);
 				}
 			}	
 
 			function getPixelData(){
-				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%3;
+				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%4;
 				gui.__folders.DMX.__controllers[2].updateDisplay();
 				//---------
 				pixelDataString="";
 				var numPixels=4;
-				for(i=0;i<dmxPresetData[parseInt(globalController.DMX_Scene)].length;i++){
-					pixelDataString=pixelDataString+parseInt(dmxPresetData[parseInt(globalController.DMX_Scene)][i]*globalController.Pixel_Level)+","
+				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
+					pixelDataString=pixelDataString+parseInt(dmxPresetData[Math.floor(globalController.DMX_Scene)][i]*globalController.Pixel_Level)+","
 				}
+				// console.log(dmxPresetData[Math.floor(globalController.DMX_Scene)]);
 				return pixelDataString;
 			}
 
@@ -1143,8 +1144,8 @@ void main()	{
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				console.log(dmxPayloadString);
-				xhttp.send(dmxPayloadString);
+				// console.log(dmxPayloadString);
+				// xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
@@ -1156,6 +1157,16 @@ void main()	{
 				};
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
+			}
+		
+			function interpolateBetweenScenes(){
+				gui.__folders.DMX.__controllers[2].updateDisplay();
+				//---------
+				pixelDataString="";
+				var numPixels=4;
+				for(i=0;i<dmxPresetData[parseInt(globalController.DMX_Scene)].length;i++){
+					pixelDataString=pixelDataString+parseInt(dmxPresetData[parseInt(globalController.DMX_Scene)][i]*globalController.Pixel_Level)+","
+				}
 			}
 		</script>
 	</body>
