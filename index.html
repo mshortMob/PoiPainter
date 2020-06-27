@@ -1117,20 +1117,6 @@ void main()	{
 				}
 			}	
 
-			// function getPixelData(){
-			// 	globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%4;
-			// 	gui.__folders.DMX.__controllers[2].updateDisplay();
-			// 	interpolateBetweenScenes();
-			// 	//---------
-			// 	pixelDataString="";
-			// 	var numPixels=4;
-			// 	for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
-			// 		pixelDataString=pixelDataString+parseInt(dmxPresetData[Math.floor(globalController.DMX_Scene)][i]*globalController.Pixel_Level)+","
-			// 	}
-			// 	// console.log(dmxPresetData[Math.floor(globalController.DMX_Scene)]);
-			// 	return pixelDataString;
-			// }
-
 			function writeDMX() {
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
