@@ -576,7 +576,9 @@
 					if(bv<pixelThreshold){
 						bv=bv/3.3;
 					}
-
+					rv=parseInt(rv);
+					gv=parseInt(gv);
+					bv=parseInt(bv);
 					pixelDataString=pixelDataString+rv+","+gv+","+bv+",";
 				}
 				return pixelDataString;
