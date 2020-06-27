@@ -186,7 +186,7 @@
 			}
 			
 			function addPlane(){
-			  function createGeometry(u,v){
+			  function createGeometry(u,v,target){
 					nsControlPoints = [
 						 [
 							 new THREE.Vector4 ( -200, -200, 0, 1 ),
@@ -212,7 +212,7 @@
 					 knots1 = [0, 0, 0, 1, 1, 1];
 					 knots2 = [0, 0, 0, 0, 1, 1, 1, 1];
 					 nurbsSurface = new THREE.NURBSSurface(degree1, degree2, knots1, knots2, nsControlPoints);
-					 return nurbsSurface.getPoint(u, v);		
+					 return nurbsSurface.getPoint(u, v, target);		
 			  }
 			  function createObject(){
 				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
