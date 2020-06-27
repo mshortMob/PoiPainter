@@ -1089,6 +1089,23 @@ void main()	{
 					gui.__folders.DMX.__controllers[3].updateDisplay();
 					retrievePixelPattern();
 				}
+				if(event.key=="u"){
+					if(globalController.DMX_Fade_Time+.05>1.0){
+						globalController.DMX_Fade_Time=0.0;
+						
+					}else{
+						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time+.05;
+					}
+					gui.__folders.DMX.__controllers[4].updateDisplay();
+				}
+				if(event.key=="U"){
+					if(globalController.DMX_Fade_Time-.05>0){
+						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time-.05;
+					}else{
+						globalController.DMX_Fade_Time=1.0;
+					}
+					gui.__folders.DMX.__controllers[4].updateDisplay();
+				}			
 			}
 
 			function toggleDmxSend(){
@@ -1135,7 +1152,7 @@ void main()	{
 				xhttp.setRequestHeader("pragma", "no-cache" );
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				// console.log(dmxPayloadString);
-				// xhttp.send(dmxPayloadString);
+				xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
@@ -1165,7 +1182,7 @@ void main()	{
 				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
 					pixelDataString=pixelDataString+parseInt((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))+",";
 				}
-				console.log(pixelDataString);
+				// console.log(pixelDataString);
 				return pixelDataString;
 			}
 		</script>
