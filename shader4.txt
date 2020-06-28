@@ -2,8 +2,9 @@ precision mediump float;
 precision mediump int;
 
 uniform float time;
-
 varying vec2 vUv;
+uniform sampler2D colorTexture;
+uniform sampler2D colorTexture2;
 
 void main()	{
 	vec2 p = - 1.0 + 2.0 * vUv;
@@ -17,5 +18,6 @@ void main()	{
 		p=newp;
 	}
 	vec3 col=vec3(.7*sin(p.x*1.+p.y), 0.6*sin(12.0*p.y), .99*sin(p.x*1.));
-	gl_FragColor=vec4(col, 1.0);
+	vec3 mask = texture2D( colorTexture, vUv ).rgb;
+	gl_FragColor=vec4(col, mask.r);
 }	
