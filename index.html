@@ -1204,7 +1204,7 @@ void main()	{
 				moverString=moverString+parseInt(temp[11])+",0,0,0,0,0,0,";
 				//final
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-
+				console.log(dmxPayloadString);
 				xhttp.send(dmxPayloadString);
 			}	
 
