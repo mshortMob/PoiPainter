@@ -248,7 +248,7 @@ void main()	{
 
 			function initGlobalVars(){
 				fade_Position=0;
-				setTimeout(function(){document.getElementById('hide_shader_editor').click();},10);
+				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();},10);
 				addControls();	
 				dmxInterval=0;
 				dmxPresetData=[];
