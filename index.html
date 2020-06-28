@@ -1167,9 +1167,45 @@ void main()	{
 				xhttp.setRequestHeader("cache-control", "no-cache");
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
-				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData();
+				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData();
 				// console.log(dmxPayloadString);
-				//xhttp.send(dmxPayloadString);
+
+				var temp=getPixelData()
+				temp=temp.substring(0,temp.length-1).split(",");
+				moverString=""
+				//m1
+				moverString=moverString+parseInt(globalController.DMX_X1)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(globalController.DMX_Y1)+",";
+				moverString=moverString+"0,0,0,";
+				moverString=moverString+parseInt(globalController.Pixel_Level)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[0])+",";
+				moverString=moverString+parseInt(temp[1])+",";
+				moverString=moverString+parseInt(temp[2])+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[3])+",";
+				moverString=moverString+parseInt(temp[4])+",";
+				moverString=moverString+parseInt(temp[5])+",0,0,0,0,0,0,";
+
+				//m2
+				moverString=moverString+parseInt(globalController.DMX_X2)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(globalController.DMX_Y2)+",";
+				moverString=moverString+"0,0,0,";
+				moverString=moverString+parseInt(globalController.Pixel_Level)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[6])+",";
+				moverString=moverString+parseInt(temp[7])+",";
+				moverString=moverString+parseInt(temp[8])+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[9])+",";
+				moverString=moverString+parseInt(temp[10])+",";
+				moverString=moverString+parseInt(temp[11])+",0,0,0,0,0,0,";
+				//final
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+
+				xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
