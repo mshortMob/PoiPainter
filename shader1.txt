@@ -9,8 +9,8 @@ uniform sampler2D colorTexture2;
 void main()	{
 	vec2 position = - 3.0 + 6.0 * vUv;
 	float red = abs( sin(time / 2.0 ) );
-	float green = abs( sin( time / 4.0 ) );
-	float blue = abs( sin( time / 3.0 ) );
+	float green = abs( sin( time / 3.9 ) );
+	float blue = abs( sin( time / 2.8 ) );
 	vec3 mask = texture2D( colorTexture, vUv ).rgb;
-	gl_FragColor = vec4( mask.r*red*.7, mask.g*green-.7, mask.b*blue*1.2, 1.0 );
+	gl_FragColor = vec4( mask.r*red*.1, mask.g*green*1.8, mask.b*blue*0.7, mask.r );
 }
