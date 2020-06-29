@@ -14,6 +14,6 @@ void main()	{
 	float red = sin(position.x/.1+time/18. )+cos(time/8.)-position.y*4.;
 	float green = cos(position.x/.1+time )+sin(time/14. )+position.y*8.;
 	float blue =tan(position.x/.3+time/4. )+sin(time/3.5 )+position.y*4.;
-	vec3 mask = texture2D( colorTexture2, vUv ).rgb;
+	vec3 mask = texture2D( colorTexture, vUv ).rgb;
 	gl_FragColor = vec4( red-green-blue, green-red-blue, blue, mask.r );
 }
