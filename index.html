@@ -364,10 +364,10 @@ void main()	{
 					DMX_Scene:0.0,
 					DMX_Level:.5,
 					Universe:1,
-					DMX_X1:1,
-					DMX_Y1:2,
-					DMX_X2:3,
-					DMX_Y2:4
+					DMX_X1:0,
+					DMX_Y1:175,
+					DMX_X2:150,
+					DMX_Y2:175
 				}
 				mappingController  = {
 					 Visible:false,
@@ -1204,7 +1204,7 @@ void main()	{
 				moverString=moverString+parseInt(temp[11])+",0,0,0,0,0,0,";
 				//final
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				console.log(dmxPayloadString);
+				// console.log(dmxPayloadString);
 				xhttp.send(dmxPayloadString);
 			}	
 
