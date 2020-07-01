@@ -259,8 +259,8 @@ void main()	{
 				dmxInterval=0;
 				dmxPresetData=[];
 				retrievePixelPattern();
-				// initializeDMX();
-				// toggleDmxSend();
+				initializeDMX();
+				toggleDmxSend();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
@@ -364,7 +364,7 @@ void main()	{
 					loadShaderA:1,
 					loadShaderB:2,
 					Mask:1,
-					PresetName:"Shader_Preset1",
+					PresetName:"GlobalPreset1",
 					SendDMX:true,
 					DMX_Rate: 70,
 					DMX_Fade_Time:.2,
@@ -424,15 +424,15 @@ void main()	{
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
-				utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				// utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 				dmxFolder=gui.addFolder( "DMX" );
 				dmxFolder.open();
 				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
-				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);retrievePixelPattern()});
-				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){});
-				dmxFolder.add(globalController, "DMX_Scene", 0.0,4.0,.1 ).onChange(function(){});
-				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){});
-				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){});
+				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
+				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Scene", 0.0,4.0,.1 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){updateControlsValues(); });
 
 				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
 				// dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
@@ -509,6 +509,7 @@ void main()	{
 				changeMask();
 				loadShaderPreset(1);
 				loadShaderPreset(2);
+				retrievePixelPattern();
 			}
 			
 			function addPlane(){
@@ -1176,6 +1177,38 @@ void main()	{
 					}
 					gui.__folders.DMX.__controllers[4].updateDisplay();
 				}			
+				if(event.key=="!"){
+					globalController.PresetName="GlobalPreset1"
+					saveState();
+				}
+				if(event.key=="1"){
+					globalController.PresetName="GlobalPreset1"
+					recallState();
+				}
+				if(event.key=="@"){
+					globalController.PresetName="GlobalPreset2"
+					saveState();
+				}
+				if(event.key=="2"){
+					globalController.PresetName="GlobalPreset2"
+					recallState();
+				}
+				if(event.key=="#"){
+					globalController.PresetName="GlobalPreset3"
+					saveState();
+				}
+				if(event.key=="3"){
+					globalController.PresetName="GlobalPreset3"
+					recallState();
+				}			
+				if(event.key=="$"){
+					globalController.PresetName="GlobalPreset4"
+					saveState();
+				}
+				if(event.key=="4"){
+					globalController.PresetName="GlobalPreset4"
+					recallState();
+				}				
 			}
 
 			function toggleDmxSend(){
