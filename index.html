@@ -1080,6 +1080,7 @@ void main()	{
 					}
 					gui.__folders.Global.__controllers[3].updateDisplay();
 					changeMask();
+					updateControlsValues();
 				}
 				if(event.key==")"){
 					if(globalController.Mask-1>0){
@@ -1090,6 +1091,7 @@ void main()	{
 					}
 					gui.__folders.Global.__controllers[3].updateDisplay();
 					changeMask(); 
+					updateControlsValues();
 				}
 				if(event.key=="o"){
 					if(globalController.loadShaderB+1>8){
@@ -1100,6 +1102,7 @@ void main()	{
 					}
 					gui.__folders.Global.__controllers[2].updateDisplay();
 					loadShaderPreset(2);
+					updateControlsValues();
 				}
 				if(event.key=="O"){
 					if(globalController.loadShaderB-1>0){
@@ -1109,7 +1112,8 @@ void main()	{
 						globalController.loadShaderB=8;
 					}
 					gui.__folders.Global.__controllers[2].updateDisplay();
-					loadShaderPreset(1);
+					loadShaderPreset(2);
+					updateControlsValues();
 				}
 				if(event.key=="k"){
 					if(globalController.DMX_Preset+1>6){
@@ -1119,6 +1123,7 @@ void main()	{
 						globalController.DMX_Preset=globalController.DMX_Preset+1;
 					}
 					gui.__folders.DMX.__controllers[0].updateDisplay();
+					updateControlsValues();
 					retrievePixelPattern();
 				}
 				if(event.key=="K"){
@@ -1128,6 +1133,7 @@ void main()	{
 						globalController.DMX_Preset=6;
 					}
 					gui.__folders.DMX.__controllers[0].updateDisplay();
+					updateControlsValues();
 					retrievePixelPattern();
 				}
 				if(event.key=="j"){
@@ -1138,6 +1144,7 @@ void main()	{
 						globalController.Pixel_Level=globalController.Pixel_Level+.1;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
+					updateControlsValues();
 				}
 				if(event.key=="J"){
 					if(globalController.Pixel_Level-.1>0){
@@ -1146,6 +1153,7 @@ void main()	{
 						globalController.Pixel_Level=1.0;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
+					updateControlsValues();
 				}
 				if(event.key=="i"){
 					if(globalController.DMX_Preset_Rate+.05>.5){
@@ -1155,7 +1163,7 @@ void main()	{
 						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate+.05;
 					}
 					gui.__folders.DMX.__controllers[3].updateDisplay();
-					retrievePixelPattern();
+					updateControlsValues();
 				}
 				if(event.key=="I"){
 					if(globalController.DMX_Preset_Rate-.05>0){
@@ -1164,7 +1172,7 @@ void main()	{
 						globalController.DMX_Preset_Rate=.5;
 					}
 					gui.__folders.DMX.__controllers[3].updateDisplay();
-					retrievePixelPattern();
+					updateControlsValues();
 				}
 				if(event.key=="u"){
 					if(globalController.DMX_Fade_Time+.025>1.0){
@@ -1174,6 +1182,7 @@ void main()	{
 						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time+.025;
 					}
 					gui.__folders.DMX.__controllers[4].updateDisplay();
+					updateControlsValues();
 				}
 				if(event.key=="U"){
 					if(globalController.DMX_Fade_Time-.025>0){
@@ -1182,6 +1191,7 @@ void main()	{
 						globalController.DMX_Fade_Time=1.0;
 					}
 					gui.__folders.DMX.__controllers[4].updateDisplay();
+					updateControlsValues();
 				}			
 				if(event.key=="!"){
 					globalController.PresetName="GlobalPreset1"
