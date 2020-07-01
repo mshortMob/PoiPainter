@@ -253,8 +253,8 @@ void main()	{
 				dmxInterval=0;
 				dmxPresetData=[];
 				retrievePixelPattern();
-				initializeDMX();
-				toggleDmxSend();
+				// initializeDMX();
+				// toggleDmxSend();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
@@ -302,7 +302,7 @@ void main()	{
 			function initScene() {
 				// prevData=pixel8(video,0,0,width,height)
 				imgTexture = new THREE.TextureLoader().load( 'img1.jpg' );
-				imgTexture2 = new THREE.TextureLoader().load( 'img2.jpg' );
+				// imgTexture2 = new THREE.TextureLoader().load( 'img2.jpg' );
 				dataTexture=[]	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
@@ -310,8 +310,7 @@ void main()	{
 					"time": { value: 1.0 },
 					"resolution": [width,height],
 					"mouse": [0,0],
-					"colorTexture": { value: imgTexture },
-					"colorTexture2": { value: imgTexture2 },
+					"colorTexture": { value: imgTexture }
 				};
 				// uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
 				materialsList=initShaderMaterial(uniforms1);
@@ -352,8 +351,7 @@ void main()	{
 					shaderToEdit:1,
 					loadShaderA:1,
 					loadShaderB:2,
-					MaskA:1,
-					MaskB:2,
+					Mask:1,
 					PresetName:"Shader_Preset1",
 					SendDMX:true,
 					DMX_Rate: 70,
@@ -400,7 +398,7 @@ void main()	{
 				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
 				globalFolder.add(globalController, "loadShaderA", 1, 8, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);});				
 				globalFolder.add(globalController, "loadShaderB", 1, 8, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);});								
-				// globalFolder.add(globalController, "MaskA", 0, 2, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA);});				
+				globalFolder.add(globalController, "Mask", 1, 4, 1 ).onChange(function(){globalController.Mask=parseInt(globalController.Mask);changeMask()});				
 				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB);});							
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
@@ -432,6 +430,10 @@ void main()	{
 				// utilsFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);});		
 			}
 									
+			function changeMask(){
+				uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.Mask)+'.jpg' ) }
+			}
+			
 			function loadShaderPreset(shaderNum){
 				if(shaderNum==1){
 					var shaverVal=parseInt(globalController.loadShaderA);
