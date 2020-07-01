@@ -259,8 +259,8 @@ void main()	{
 				dmxInterval=0;
 				dmxPresetData=[];
 				retrievePixelPattern();
-				initializeDMX();
-				toggleDmxSend();
+				// initializeDMX();
+				// toggleDmxSend();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
@@ -410,7 +410,7 @@ void main()	{
 				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
 				globalFolder.add(globalController, "loadShaderA", 1, 8, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);});				
 				globalFolder.add(globalController, "loadShaderB", 1, 8, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);});								
-				globalFolder.add(globalController, "Mask", 1, 4, 1 ).onChange(function(){globalController.Mask=parseInt(globalController.Mask);changeMask()});				
+				globalFolder.add(globalController, "Mask", 1, 3, 1 ).onChange(function(){globalController.Mask=parseInt(globalController.Mask);changeMask()});				
 				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB);});							
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
@@ -476,7 +476,14 @@ void main()	{
 				  	mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
 					gui.__folders.MappingControls.__controllers[i].updateDisplay();
 				}
-				gui.__folders.Global.__controllers[1].updateDisplay();
+				for (var i in gui.__folders.Global.__controllers) {
+					globalController[gui.__folders.Global.__controllers[i].property]=globalState[gui.__folders.Global.__controllers[i].property];
+					gui.__folders.Global.__controllers[i].updateDisplay();
+				}
+				for (var i in gui.__folders.DMX.__controllers) {
+					globalController[gui.__folders.DMX.__controllers[i].property]=globalState[gui.__folders.DMX.__controllers[i].property];
+					gui.__folders.DMX.__controllers[i].updateDisplay();
+				}
 			}
 			
 			function updateControlsValues(){  
@@ -854,7 +861,7 @@ void main()	{
 			}
 		
 			function saveState(){
-				var requestBody=JSON.stringify({"storage" : statesArray})
+				var requestBody=JSON.stringify({"storage" : statesArray, "global": globalState})
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
 				xmlhttp.send(requestBody);
@@ -867,6 +874,7 @@ void main()	{
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response).storage
+					globalState=JSON.parse(xmlhttp.response).global
 					// presetsArray=JSON.parse(xmlhttp.response).storage2
 					updateControlsView();
 					syncObjectsToJson();
@@ -1046,7 +1054,7 @@ void main()	{
 					loadShaderPreset(1);
 				}
 				if(event.key=="0"){
-					if(globalController.Mask+1>4){
+					if(globalController.Mask+1>3){
 						globalController.Mask=1;
 						
 					}else{
@@ -1060,7 +1068,7 @@ void main()	{
 						globalController.Mask=globalController.Mask-1;
 						
 					}else{
-						globalController.Mask=4;
+						globalController.Mask=3;
 					}
 					gui.__folders.Global.__controllers[3].updateDisplay();
 					changeMask(); 
