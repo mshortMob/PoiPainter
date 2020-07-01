@@ -301,6 +301,12 @@ void main()	{
 					addPlane();
 				}
 				statesArray[0].Visible=true;
+				//=------
+				globalState={};
+				for (var key in globalController) {
+					globalState[key]=globalController[key]
+				}
+				//=------
 				updateControlsView()
 				syncObjectsToJson()
 			}
