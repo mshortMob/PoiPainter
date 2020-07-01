@@ -500,7 +500,7 @@ void main()	{
 				}
 			}
 			
-			function syncObjectsToJson(){
+			function syncObjectsToJson(includGlobal){
 				for(var x=0;x<displayObjects.length;x++){
 					displayObjects[x].setState(statesArray[x])
 					displayObjects[x].hideChildren();
@@ -508,10 +508,12 @@ void main()	{
 				displayObjects[globalController.selectedFixture].showChildren();
 
 				//--------------------------
-				changeMask();
-				loadShaderPreset(1);
-				loadShaderPreset(2);
-				retrievePixelPattern();
+				if(includGlobal){
+					changeMask();
+					loadShaderPreset(1);
+					loadShaderPreset(2);
+					retrievePixelPattern();
+				}
 			}
 			
 			function addPlane(){
@@ -891,7 +893,7 @@ void main()	{
 					globalState=JSON.parse(xmlhttp.response).global
 					// presetsArray=JSON.parse(xmlhttp.response).storage2
 					updateControlsView();
-					syncObjectsToJson();
+					syncObjectsToJson(true);
 				}
 			}	
 		
