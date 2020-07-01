@@ -254,7 +254,7 @@ void main()	{
 
 			function initGlobalVars(){
 				fade_Position=0;
-				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();},10);
+				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
 				addControls();	
 				dmxInterval=0;
 				dmxPresetData=[];
@@ -408,9 +408,9 @@ void main()	{
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
 				// globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
 				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
-				globalFolder.add(globalController, "loadShaderA", 1, 8, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);});				
-				globalFolder.add(globalController, "loadShaderB", 1, 8, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);});								
-				globalFolder.add(globalController, "Mask", 1, 3, 1 ).onChange(function(){globalController.Mask=parseInt(globalController.Mask);changeMask()});				
+				globalFolder.add(globalController, "loadShaderA", 1, 8, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);updateControlsValues();});				
+				globalFolder.add(globalController, "loadShaderB", 1, 8, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);updateControlsValues();});								
+				globalFolder.add(globalController, "Mask", 1, 3, 1 ).onChange(function(){globalController.Mask=parseInt(globalController.Mask); changeMask(); updateControlsValues();});				
 				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB);});							
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
@@ -419,7 +419,7 @@ void main()	{
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Shader", 1, 2, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
 				utilsFolder=gui.addFolder( "Utils" )
-				// utilsFolder.open();
+				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
@@ -467,7 +467,7 @@ void main()	{
 							displayObjects[i].material=materialsList[statesArray[i].Shader-1]
 						}
 					}
-					syncObjectsToJson();
+					// syncObjectsToJson();
 				}
 			}
 			
@@ -490,6 +490,12 @@ void main()	{
 				for (var i in gui.__folders.MappingControls.__controllers) {
 				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
 				}
+				for (var i in gui.__folders.Global.__controllers) {
+					globalState[gui.__folders.Global.__controllers[i].property]=globalController[gui.__folders.Global.__controllers[i].property];
+				}
+				for (var i in gui.__folders.DMX.__controllers) {
+					globalState[gui.__folders.DMX.__controllers[i].property]=globalController[gui.__folders.DMX.__controllers[i].property];
+				}
 			}
 			
 			function syncObjectsToJson(){
@@ -498,6 +504,11 @@ void main()	{
 					displayObjects[x].hideChildren();
 				}
 				displayObjects[globalController.selectedFixture].showChildren();
+
+				//--------------------------
+				changeMask();
+				loadShaderPreset(1);
+				loadShaderPreset(2);
 			}
 			
 			function addPlane(){
