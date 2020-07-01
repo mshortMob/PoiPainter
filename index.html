@@ -1045,6 +1045,26 @@ void main()	{
 					gui.__folders.Global.__controllers[1].updateDisplay();
 					loadShaderPreset(1);
 				}
+				if(event.key=="0"){
+					if(globalController.Mask+1>4){
+						globalController.Mask=1;
+						
+					}else{
+						globalController.Mask=globalController.Mask+1;
+					}
+					gui.__folders.Global.__controllers[3].updateDisplay();
+					changeMask();
+				}
+				if(event.key==")"){
+					if(globalController.Mask-1>0){
+						globalController.Mask=globalController.Mask-1;
+						
+					}else{
+						globalController.Mask=4;
+					}
+					gui.__folders.Global.__controllers[3].updateDisplay();
+					changeMask();
+				}
 				if(event.key=="o"){
 					if(globalController.loadShaderB+1>8){
 						globalController.loadShaderB=1;
