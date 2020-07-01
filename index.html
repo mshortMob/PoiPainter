@@ -133,22 +133,28 @@ void main()	{
 		</script>
 
 		<script id="fragmentShader1" type="x-shader/x-fragment">
-precision mediump float;
-precision mediump int;
-
-uniform float time;
-varying vec2 vUv;
-uniform sampler2D colorTexture;
-uniform sampler2D colorTexture2;
-
-void main()	{
-	vec2 position = - 3.0 + 6.0 * vUv;
-	float red = abs( sin(time / 2.0 ) );
-	float green = abs( sin( time / 3.9 ) );
-	float blue = abs( sin( time / 2.8 ) );
-	vec3 mask = texture2D( colorTexture, vUv ).rgb;
-	gl_FragColor = vec4( mask.r*red*.1, mask.g*green*1.8, mask.b*blue*0.7, mask.r );
-}
+			precision mediump float;
+			precision mediump int;
+			
+			uniform float time;
+			varying vec2 vUv;
+			uniform sampler2D colorTexture;
+			uniform sampler2D colorTexture2;
+			
+			void main( void ) {
+			
+				vec2 position = -1.0+2.*vUv;
+					position=position*position*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
+			
+				float color = 0.0;
+				color += sin( position.x * cos( time / 55.0 ) * 80.0 ) + cos( position.y * cos( time / 15.0 ) * 10.0 );
+				color += sin( position.y * sin( time / 100.0 ) * 40.0 ) + cos( position.x * sin( time / 45.0 ) * 40.0 );
+				color += sin( position.x * sin( time / 25.0 ) * 10.0 ) + sin( position.y * sin( time / 35.0 ) * 30.0 );
+				color *= sin( time / 500.0 ) * 1.5;
+				vec3 mask = texture2D( colorTexture, vUv ).rgb;
+				gl_FragColor = vec4( vec3(  color * 4.2,6.2*(1.-color),color * 12.0 ), mask.r );
+			
+			}			
 		</script>
 		
 		 <script id="fragmentShader2" type="x-shader/x-fragment">
@@ -253,8 +259,8 @@ void main()	{
 				dmxInterval=0;
 				dmxPresetData=[];
 				retrievePixelPattern();
-				// initializeDMX();
-				// toggleDmxSend();
+				initializeDMX();
+				toggleDmxSend();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
