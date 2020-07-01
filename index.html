@@ -366,7 +366,7 @@ void main()	{
 					Mask:1,
 					PresetName:"GlobalPreset1",
 					SendDMX:true,
-					DMX_Rate: 70,
+					DMX_Rate: 50,
 					DMX_Fade_Time:.2,
 					Pixel_Level:.5,
 					DMX_Preset:1,
@@ -1163,17 +1163,17 @@ void main()	{
 					retrievePixelPattern();
 				}
 				if(event.key=="u"){
-					if(globalController.DMX_Fade_Time+.05>1.0){
+					if(globalController.DMX_Fade_Time+.025>1.0){
 						globalController.DMX_Fade_Time=0.0;
 						
 					}else{
-						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time+.05;
+						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time+.025;
 					}
 					gui.__folders.DMX.__controllers[4].updateDisplay();
 				}
 				if(event.key=="U"){
-					if(globalController.DMX_Fade_Time-.05>0){
-						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time-.05;
+					if(globalController.DMX_Fade_Time-.025>0){
+						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time-.025;
 					}else{
 						globalController.DMX_Fade_Time=1.0;
 					}
