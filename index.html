@@ -414,7 +414,7 @@ void main()	{
 				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB);});							
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
-				//controlsFolder.open();
+				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
 				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
 				controlsFolder.add( mappingController, "Shader", 1, 2, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
