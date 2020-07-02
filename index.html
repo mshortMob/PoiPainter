@@ -240,11 +240,19 @@ void main()	{
 
 				matList=[];
 				for(var x=1;x<=2;x++){
-					var material = new THREE.RawShaderMaterial( {
-						uniforms: uniforms1,
-						vertexShader: document.getElementById( 'vertexShader' ).textContent,
-						fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
-					} );			
+					if(x==1){
+						var material = new THREE.RawShaderMaterial( {
+							uniforms: uniforms1,
+							vertexShader: document.getElementById( 'vertexShader' ).textContent,
+							fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
+						} );	
+					}else{
+						var material = new THREE.RawShaderMaterial( {
+							uniforms: uniforms2,
+							vertexShader: document.getElementById( 'vertexShader' ).textContent,
+							fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
+						} );	
+					}		
 					material.side=THREE.DoubleSide;
 					// material.transparent=true;
 					matList.push(material)		
@@ -314,7 +322,7 @@ void main()	{
 			function initScene() {
 				// prevData=pixel8(video,0,0,width,height)
 				imgTexture = new THREE.TextureLoader().load( 'img1.jpg' );
-				// imgTexture2 = new THREE.TextureLoader().load( 'img2.jpg' );
+				imgTexture2 = new THREE.TextureLoader().load( 'img2.jpg' );
 				dataTexture=[]	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
@@ -323,6 +331,12 @@ void main()	{
 					"resolution": [width,height],
 					"mouse": [0,0],
 					"colorTexture": { value: imgTexture }
+				};
+				uniforms2 = {
+					"time": { value: 1.0 },
+					"resolution": [width,height],
+					"mouse": [0,0],
+					"colorTexture": { value: imgTexture2 }
 				};
 				// uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
 				materialsList=initShaderMaterial(uniforms1);
@@ -363,7 +377,8 @@ void main()	{
 					shaderToEdit:1,
 					loadShaderA:1,
 					loadShaderB:2,
-					Mask:1,
+					MaskA:1,
+					MaskB:2,
 					PresetName:"GlobalPreset1",
 					SendDMX:true,
 					DMX_Rate: 50,
@@ -409,9 +424,10 @@ void main()	{
 				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
 				globalFolder.add(globalController, "loadShaderA", 1, 8, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);updateControlsValues();});				
 				globalFolder.add(globalController, "loadShaderB", 1, 8, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);updateControlsValues();});								
-				globalFolder.add(globalController, "Mask", 1, 3, 1 ).onChange(function(){globalController.Mask=parseInt(globalController.Mask); changeMask(); updateControlsValues();});				
+				globalFolder.add(globalController, "MaskA", 1, 3, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA); changeMask(1); updateControlsValues();});				
+				globalFolder.add(globalController, "MaskB", 1, 3, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});				
 				// globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB);});							
+				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskAB=parseInt(globalController.MaskAB);});							
 				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
@@ -442,8 +458,12 @@ void main()	{
 				// utilsFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);});		
 			}
 									
-			function changeMask(){
-				uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.Mask)+'.jpg' ) }
+			function changeMask(changedMask){
+				if(changedMask==1){
+					uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskA)+'.jpg' ) }
+				}else{
+					uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskB)+'.jpg' ) }
+				}
 			}
 			
 			function loadShaderPreset(shaderNum){
@@ -509,7 +529,8 @@ void main()	{
 
 				//--------------------------
 				if(includGlobal){
-					changeMask();
+					changeMask(1);
+					changeMask(2);
 					loadShaderPreset(1);
 					loadShaderPreset(2);
 					retrievePixelPattern();
@@ -759,6 +780,7 @@ void main()	{
 			
 			function render() {
 				uniforms1[ "time" ].value += .01 * 5;
+				uniforms2[ "time" ].value += .01 * 5;
 				computeTraces();
 				for(var x=0;x<displayObjects.length;x++){
 					displayObjects[x].material.transparent=true
@@ -1033,12 +1055,6 @@ void main()	{
 					updateControlsView();
 					syncObjectsToJson();
 				}
-				if(event.key=="p" ){
-					recallState();
-				}
-				if(event.key=="P" ){
-					saveState();
-				}
 				if(event.key=="," ){
 					if( (selectedVertice-1)>=0){
 						selectedVertice=selectedVertice-1;
@@ -1072,25 +1088,47 @@ void main()	{
 					updateControlsValues();
 				}
 				if(event.key=="0"){
-					if(globalController.Mask+1>3){
-						globalController.Mask=1;
+					if(globalController.MaskA+1>3){
+						globalController.MaskA=1;
 						
 					}else{
-						globalController.Mask=globalController.Mask+1;
+						globalController.MaskA=globalController.MaskA+1;
 					}
 					gui.__folders.Global.__controllers[3].updateDisplay();
-					changeMask();
+					changeMask(1);
 					updateControlsValues();
 				}
 				if(event.key==")"){
-					if(globalController.Mask-1>0){
-						globalController.Mask=globalController.Mask-1;
+					if(globalController.MaskA-1>0){
+						globalController.MaskA=globalController.MaskA-1;
 						
 					}else{
-						globalController.Mask=3;
+						globalController.MaskA=3;
 					}
 					gui.__folders.Global.__controllers[3].updateDisplay();
-					changeMask(); 
+					changeMask(1); 
+					updateControlsValues();
+				}
+				if(event.key=="p"){
+					if(globalController.MaskB+1>3){
+						globalController.MaskB=1;
+						
+					}else{
+						globalController.MaskB=globalController.MaskB+1;
+					}
+					gui.__folders.Global.__controllers[4].updateDisplay();
+					changeMask(2);
+					updateControlsValues();
+				}
+				if(event.key=="P"){
+					if(globalController.MaskB-1>0){
+						globalController.MaskA=globalController.MaskB-1;
+						
+					}else{
+						globalController.MaskB=3;
+					}
+					gui.__folders.Global.__controllers[4].updateDisplay();
+					changeMask(2); 
 					updateControlsValues();
 				}
 				if(event.key=="o"){
