@@ -9,7 +9,7 @@ uniform sampler2D colorTexture2;
 void main()	{
 	vec2 p = - 4.0 + 8.0 * vUv;
 
-	for(int i=1;i<20;i++)
+	for(int i=1;i<6;i++)
 	{
 		vec2 newp=p;
 		float speed = 85.0; // speed control
@@ -17,7 +17,7 @@ void main()	{
 		newp.y+=0.8/float(i)*sin(float(i)*p.x+time/(100.0/speed)+0.3*float(i+10))-11.4;
 		p=newp;
 	}
-	vec3 col=vec3(.7*sin(p.x*1.+p.y), 0.6*sin(12.0*p.y), .99*sin(p.x*1.));
+	vec3 col=vec3(2.7*sin(p.x*1.+p.y), 0.3*sin(2.0*p.y), 0.3*sin(2.0*p.y));
 	vec3 mask = texture2D( colorTexture, vUv ).rgb;
 	gl_FragColor=vec4(col, mask.r);
 }	
