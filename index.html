@@ -1121,7 +1121,7 @@ void main()	{
 				}
 				if(event.key=="P"){
 					if(globalController.MaskB-1>0){
-						globalController.MaskA=globalController.MaskB-1;
+						globalController.MaskB=globalController.MaskB-1;
 						
 					}else{
 						globalController.MaskB=3;
@@ -1265,6 +1265,26 @@ void main()	{
 				if(event.key=="m"){
 					globalController.mappingMode=parseInt(globalController.mappingMode+1)%2;
 					if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};
+				}
+				if(event.key=="9"){
+					if(globalController.DMX_X1+5>255){
+						globalController.DMX_X1=0;
+						
+					}else{
+						globalController.DMX_X1=globalController.DMX_X1+5;
+					}
+					gui.__folders.DMX.__controllers[5].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="("){
+					if(globalController.DMX_X1-1>0){
+						globalController.DMX_X1=globalController.DMX_X1-1;
+						
+					}else{
+						globalController.DMX_X1=3;
+					}
+					gui.__folders.DMX.__controllers[5].updateDisplay();
+					updateControlsValues();
 				}
 			}
 
