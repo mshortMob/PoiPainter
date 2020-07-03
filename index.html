@@ -446,7 +446,7 @@ void main()	{
 				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
-				dmxFolder.add(globalController, "DMX_Scene", 0.0,4.0,.1 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Scene", 0.0,8.0,.1 ).onChange(function(){updateControlsValues(); });
 				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
 				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){updateControlsValues(); });
 				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
@@ -1427,18 +1427,18 @@ void main()	{
 				moverString=moverString+parseInt(temp[5])+",0,0,0,0,0,0,";
 
 				//pix
-				moverString=moverString+parseInt(temp[0]/6)+",";
-				moverString=moverString+parseInt(temp[1]/6)+",";
-				moverString=moverString+parseInt(temp[2]/6)+",";
-				moverString=moverString+parseInt(temp[3]/6)+",";
-				moverString=moverString+parseInt(temp[4]/6)+",";
-				moverString=moverString+parseInt(temp[5]/6)+",";
-				moverString=moverString+parseInt(temp[0]/6)+",";
-				moverString=moverString+parseInt(temp[1]/6)+",";
-				moverString=moverString+parseInt(temp[2]/6)+",";
-				moverString=moverString+parseInt(temp[3]/6)+",";
-				moverString=moverString+parseInt(temp[4]/6)+",";
-				moverString=moverString+parseInt(temp[5]/6)+",";
+				moverString=moverString+parseInt(temp[6]/6)+",";
+				moverString=moverString+parseInt(temp[7]/6)+",";
+				moverString=moverString+parseInt(temp[8]/6)+",";
+				moverString=moverString+parseInt(temp[9]/6)+",";
+				moverString=moverString+parseInt(temp[10]/6)+",";
+				moverString=moverString+parseInt(temp[11]/6)+",";
+				moverString=moverString+parseInt(temp[6]/6)+",";
+				moverString=moverString+parseInt(temp[7]/6)+",";
+				moverString=moverString+parseInt(temp[8]/6)+",";
+				moverString=moverString+parseInt(temp[9]/6)+",";
+				moverString=moverString+parseInt(temp[10]/6)+",";
+				moverString=moverString+parseInt(temp[11]/6)+",";
 
 				//final
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
@@ -1459,29 +1459,11 @@ void main()	{
 			}
 		
 			function getMoverData(){
-				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%4;
+				// maxNumScenes=gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Scene"})[0].max;
+				maxNumScenes=8;
+				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%maxNumScenes;
 				gui.__folders.DMX.__controllers[2].updateDisplay();
-				var top=(Math.ceil(globalController.DMX_Scene)%4);
-				var bottom=Math.floor(globalController.DMX_Scene);
-				fade_Position=globalController.DMX_Scene%1.0;
-				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
-					fade_Position=1.0;
-				}else{
-					fade_Position=fade_Position+globalController.DMX_Fade_Time;
-				}
-				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+fade_Position);
-				pixelDataString="";
-				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
-					pixelDataString=pixelDataString+parseInt(parseInt(globalController.Pixel_Level*((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))))+",";
-				}
-				// console.log(pixelDataString);
-				return pixelDataString;
-			}
-
-			function getPixelData(){
-				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%4;
-				gui.__folders.DMX.__controllers[2].updateDisplay();
-				var top=(Math.ceil(globalController.DMX_Scene)%4);
+				var top=(Math.ceil(globalController.DMX_Scene)%maxNumScenes);
 				var bottom=Math.floor(globalController.DMX_Scene);
 				fade_Position=globalController.DMX_Scene%1.0;
 				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
