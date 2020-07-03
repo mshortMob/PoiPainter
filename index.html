@@ -388,7 +388,7 @@ void main()	{
 					DMX_Preset_Rate:.1,
 					DMX_Scene:0.0,
 					DMX_Level:.5,
-					Universe:0,
+					Universe:1,
 					DMX_X1:0,
 					DMX_Y1:175,
 					DMX_X2:150,
@@ -1349,7 +1349,7 @@ void main()	{
 				//final
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				// console.log(dmxPayloadString);
-				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				xhttp.send(dmxPayloadString);
 			}	
 
