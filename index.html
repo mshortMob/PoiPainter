@@ -1266,7 +1266,7 @@ void main()	{
 					globalController.mappingMode=parseInt(globalController.mappingMode+1)%2;
 					if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};
 				}
-				if(event.key=="9"){
+				if(event.key=="6"){
 					if(globalController.DMX_X1+5>255){
 						globalController.DMX_X1=0;
 						
@@ -1276,7 +1276,7 @@ void main()	{
 					gui.__folders.DMX.__controllers[5].updateDisplay();
 					updateControlsValues();
 				}
-				if(event.key=="("){
+				if(event.key=="^"){
 					if(globalController.DMX_X1-1>0){
 						globalController.DMX_X1=globalController.DMX_X1-1;
 						
@@ -1286,6 +1286,66 @@ void main()	{
 					gui.__folders.DMX.__controllers[5].updateDisplay();
 					updateControlsValues();
 				}
+				if(event.key=="7"){
+					if(globalController.DMX_Y1+5>255){
+						globalController.DMX_Y1=0;
+						
+					}else{
+						globalController.DMX_Y1=globalController.DMX_Y1+5;
+					}
+					gui.__folders.DMX.__controllers[6].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="&"){
+					if(globalController.DMX_Y1-1>0){
+						globalController.DMX_Y1=globalController.DMX_Y1-1;
+						
+					}else{
+						globalController.DMX_Y1=3;
+					}
+					gui.__folders.DMX.__controllers[6].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="8"){
+					if(globalController.DMX_X2+5>255){
+						globalController.DMX_X2=0;
+						
+					}else{
+						globalController.DMX_X2=globalController.DMX_X2+5;
+					}
+					gui.__folders.DMX.__controllers[7].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="*"){
+					if(globalController.DMX_X2-1>0){
+						globalController.DMX_X2=globalController.DMX_X2-1;
+						
+					}else{
+						globalController.DMX_X2=3;
+					}
+					gui.__folders.DMX.__controllers[7].updateDisplay();
+					updateControlsValues();
+				}	
+				if(event.key=="9"){
+					if(globalController.DMX_Y2+5>255){
+						globalController.DMX_Y2=0;
+						
+					}else{
+						globalController.DMX_Y2=globalController.DMX_Y2+5;
+					}
+					gui.__folders.DMX.__controllers[8].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="("){
+					if(globalController.DMX_Y2-1>0){
+						globalController.DMX_Y2=globalController.DMX_Y2-1;
+						
+					}else{
+						globalController.DMX_Y2=3;
+					}
+					gui.__folders.DMX.__controllers[8].updateDisplay();
+					updateControlsValues();
+				}		
 			}
 
 			function toggleDmxSend(){
