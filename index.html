@@ -1393,7 +1393,7 @@ void main()	{
 				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData();
 				// console.log(dmxPayloadString);
 
-				var temp=getPixelData()
+				var temp=getMoverData()
 				temp=temp.substring(0,temp.length-1).split(",");
 				moverString=""
 				//m1
@@ -1458,6 +1458,26 @@ void main()	{
 				xhttp.send();
 			}
 		
+			function getMoverData(){
+				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%4;
+				gui.__folders.DMX.__controllers[2].updateDisplay();
+				var top=(Math.ceil(globalController.DMX_Scene)%4);
+				var bottom=Math.floor(globalController.DMX_Scene);
+				fade_Position=globalController.DMX_Scene%1.0;
+				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
+					fade_Position=1.0;
+				}else{
+					fade_Position=fade_Position+globalController.DMX_Fade_Time;
+				}
+				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+fade_Position);
+				pixelDataString="";
+				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
+					pixelDataString=pixelDataString+parseInt(parseInt(globalController.Pixel_Level*((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))))+",";
+				}
+				// console.log(pixelDataString);
+				return pixelDataString;
+			}
+
 			function getPixelData(){
 				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%4;
 				gui.__folders.DMX.__controllers[2].updateDisplay();
