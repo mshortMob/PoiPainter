@@ -610,7 +610,8 @@
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
 			}
-			setTimeout(function(){initializeDMX();setInterval(writeDMX,25);},3000);
+			setTimeout(function(){initializeDMX();setInterval(writeDMX,50);},3000);
+			setTimeout(function(){recallState();},1000);
 
 		</script>
 	</body>
