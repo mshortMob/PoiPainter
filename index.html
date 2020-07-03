@@ -513,8 +513,8 @@
 			}
 			
 			function render() {
-				data=pixel8(canvasST,0,0,width,height);
-				materialArray=data;
+				// data=pixel8(canvasST,0,0,width,height);
+				// materialArray=data;
 				dataTexture.needsUpdate = true
 				renderer.render( scene, camera );
 			}
@@ -597,7 +597,11 @@
             xhttp.setRequestHeader("cache-control", "no-cache");
             xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
             xhttp.setRequestHeader("pragma", "no-cache" );
-			xhttp.send("u=0&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+			data=pixel8(canvasST,0,0,width,height);
+			materialArray=data;
+			var pixelDataSt=getPixelData();
+			console.log(pixelDataSt)
+			xhttp.send("u=0&d="+pixelDataSt+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
 		}	
 
 			function initializeDMX() {
@@ -610,7 +614,7 @@
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
 			}
-			setTimeout(function(){initializeDMX();setInterval(writeDMX,50);},3000);
+			setTimeout(function(){initializeDMX();setInterval(writeDMX,200);},3000);
 			setTimeout(function(){recallState();},1000);
 
 		</script>
