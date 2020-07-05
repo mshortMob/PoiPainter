@@ -9,7 +9,7 @@ uniform sampler2D colorTexture;
 uniform sampler2D colorTexture2;
 
 void main()	{
-	vec2 p = - 4.0 + 8.0 * vUv;
+	vec2 p = ( -8.0 - (6.0 * abs(mousey))  )/2.0 - ( -8.0 - (6.0 * abs(mousey))  ) * vUv;
 	p=p*p*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
 	p.y*= .5;
 	p.x*= .5;

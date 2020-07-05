@@ -9,7 +9,7 @@ uniform sampler2D colorTexture;
 uniform sampler2D colorTexture2;
 
 void main()	{
-	vec2 position = - 5.0 + 10.0 * vUv;
+	vec2 position = ( -10.0 - (5.0 * abs(mousex))  )/2.0 - ( -10.0 - (5.0 * abs(mousex))  ) * vUv;
 	float red = 1.0 * ( sin( position.x * position.y - time / 1.1 ) );
 	float green = 1.0 * ( sin( position.x * position.y + time / 1.8 ) );
 	float blue = 1.0 * ( sin( position.x * position.y + time / 1.9) );
