@@ -261,6 +261,8 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				lastMaskAValue=-1;
+				lastMaskBValue=-1;
 				fade_Position=0;
 				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
 				addControls();	
@@ -459,9 +461,15 @@ void main()	{
 									
 			function changeMask(changedMask){
 				if(changedMask==1){
-					uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskA)+'.jpg' ) }
+					if(parseInt(globalController.MaskA)!=lastMaskAValue){
+						uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskA)+'.jpg' ) };
+						lastMaskAValue=parseInt(globalController.MaskA);
+					}
 				}else{
-					uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskB)+'.jpg' ) }
+					if(parseInt(globalController.MaskB)!=lastMaskBValue){
+						uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskB)+'.jpg' ) };
+						lastMaskBValue=parseInt(globalController.MaskB);
+					}
 				}
 			}
 			
