@@ -331,13 +331,15 @@ void main()	{
 				uniforms1 = {
 					"time": { value: 1.0 },
 					"resolution": [width,height],
-					"mouse": [0,0],
+					"mousex": { value: 0.0 },
+					"mousey": { value: 0.0 },
 					"colorTexture": { value: imgTexture }
 				};
 				uniforms2 = {
 					"time": { value: 1.0 },
 					"resolution": [width,height],
-					"mouse": [0,0],
+					"mousex": { value: 0.0 },
+					"mousey": { value: 0.0 },
 					"colorTexture": { value: imgTexture2 }
 				};
 				// uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
@@ -719,6 +721,10 @@ void main()	{
 			function onDocumentMouseMove( event ) {
 				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
+				uniforms1.mousey={ value: mouse.y };
+				uniforms2.mousey={ value: mouse.y };
+				uniforms1.mousex={ value: mouse.x };
+				uniforms2.mousex={ value: mouse.x };
 				raycaster.setFromCamera( mouse, camera );
 				if ( SELECTED ) {
 					

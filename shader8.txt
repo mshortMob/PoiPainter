@@ -2,17 +2,19 @@ precision mediump float;
 precision mediump int;
 
 uniform float time;
+uniform float mousey;
+uniform float mousex;
 varying vec2 vUv;
 uniform sampler2D colorTexture;
 uniform sampler2D colorTexture2;
 
 void main()	{
-	vec2 p = -4.0 * vUv;
+	vec2 p = ( -1.0 - (4.0 * abs(mousey))  )/2.0 - ( -1.0 - (4.0 * abs(mousey))  ) * vUv;
 
 	for(int i=1;i<5;i++)
 	{
 		vec2 newp=p;
-		float speed = 45.0; // speed control
+		float speed = 60.0+30.0*abs(mousex); // speed control
 		newp.x+=0.8/float(i)*sin(float(i)*p.y+time/(100.0/speed)+0.8*float(i))+1.0;
 		newp.y+=0.8/float(i)*sin(float(i)*p.x+time/(100.0/speed)+0.3*float(i+10))-11.4;
 		p=newp;
