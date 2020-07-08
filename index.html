@@ -100,13 +100,13 @@
 		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='none';">Hide Editor</button>
 		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
 		<!-- <canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas> -->
-		<script src="three.js"></script>
-		<script src="pixel8.js"></script>
-		<script src='dat.gui.min.js'></script>
-		<script src="Detector.js"></script>
-		<script src="NURBSSurface.js"></script>
-		<script src="NURBSUtils.js"></script>
-		<script src="TrackballControls.js"></script> 
+		<script src="dependancies/three.js"></script>
+		<script src="dependancies/pixel8.js"></script>
+		<script src="dependancies/dat.gui.min.js"></script>
+		<script src="dependancies/Detector.js"></script>
+		<script src="dependancies/NURBSSurface.js"></script>
+		<script src="dependancies/NURBSUtils.js"></script>
+		<script src="dependancies/TrackballControls.js"></script> 
 
 		<script id="vertexShader" type="x-shader/x-vertex">
 precision mediump float;
@@ -271,7 +271,6 @@ void main()	{
 				dmxPresetData=[];
 				retrievePixelPattern();
 				initializeDMX();
-				toggleDmxSend();
 				selectedVertice=0;
 				clr=new colorObject();
 				// width=document.getElementById('video').width;
@@ -915,14 +914,14 @@ void main()	{
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray, "global": globalState})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.open("POST", "write.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.open("GET", "read.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response).storage
@@ -1471,6 +1470,7 @@ void main()	{
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						console.log("Initialize DMX: "+this.responseText);
+						toggleDmxSend();
 					}else{
 						clearInterval(dmxInterval);
 						console.log("DMX Not Available");
