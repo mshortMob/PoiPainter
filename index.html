@@ -324,8 +324,8 @@ void main()	{
 			
 			function initScene() {
 				// prevData=pixel8(video,0,0,width,height)
-				imgTexture = new THREE.TextureLoader().load( 'img1.jpg' );
-				imgTexture2 = new THREE.TextureLoader().load( 'img2.jpg' );
+				imgTexture = new THREE.TextureLoader().load( 'masks/img1.jpg' );
+				imgTexture2 = new THREE.TextureLoader().load( 'masks/img2.jpg' );
 				dataTexture=[]	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
@@ -465,12 +465,12 @@ void main()	{
 			function changeMask(changedMask){
 				if(changedMask==1){
 					if(parseInt(globalController.MaskA)!=lastMaskAValue){
-						uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskA)+'.jpg' ) };
+						uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'masks/img'+parseInt(globalController.MaskA)+'.jpg' ) };
 						lastMaskAValue=parseInt(globalController.MaskA);
 					}
 				}else{
 					if(parseInt(globalController.MaskB)!=lastMaskBValue){
-						uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'img'+parseInt(globalController.MaskB)+'.jpg' ) };
+						uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'masks/img'+parseInt(globalController.MaskB)+'.jpg' ) };
 						lastMaskBValue=parseInt(globalController.MaskB);
 					}
 				}
@@ -1378,7 +1378,7 @@ void main()	{
 			
 			function retrievePixelPattern(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn=pixelPattern"+globalController.DMX_Preset+".txt", true);
+				xmlhttp.open("GET", "read.php?fn=dmxPresets/pixelPattern"+globalController.DMX_Preset+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					var response=xmlhttp.response;
@@ -1471,6 +1471,9 @@ void main()	{
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						console.log("Initialize DMX: "+this.responseText);
+					}else{
+						clearInterval(dmxInterval);
+						console.log("DMX Not Available");
 					}
 				};
 				xhttp.open("GET","proxy/reload", true);
