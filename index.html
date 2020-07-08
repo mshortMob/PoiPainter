@@ -450,7 +450,7 @@ void main()	{
 				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
-				dmxFolder.add(globalController, "DMX_Scene", 0.0,8.0,.1 ).onChange(function(){updateControlsValues(); });
+				// dmxFolder.add(globalController, "DMX_Scene", 0.0,8.0,.1 ).onChange(function(){updateControlsValues(); });
 				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
 				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){updateControlsValues(); });
 				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
@@ -482,7 +482,7 @@ void main()	{
 					var shaverVal=parseInt(globalController.loadShaderB);
 				}
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn=fragmentShaders/shader"+parseInt(shaverVal)+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn=fragmentShaders/shader"+parseInt(shaverVal)+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					// console.log(xmlhttp.response)
@@ -606,7 +606,7 @@ void main()	{
 					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
 					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
 					//var mesh1 = new THREE.Mesh( geo, mat );
-					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(15, 15, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(35, 35, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
 					mesh1.name="vertice"+x;
 					mesh1.isCorner=false;
 					if (x == 0 || x == 4 || x == 24 || x == 20) {
@@ -914,14 +914,14 @@ void main()	{
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray, "global": globalState})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "write.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
+				xmlhttp.open("POST", "php/write.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response).storage
@@ -1377,7 +1377,7 @@ void main()	{
 			
 			function retrievePixelPattern(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn=dmxPresets/pixelPattern"+globalController.DMX_Preset+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn=dmxPresets/pixelPattern"+globalController.DMX_Preset+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					var response=xmlhttp.response;
@@ -1484,7 +1484,7 @@ void main()	{
 				// maxNumScenes=gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Scene"})[0].max;
 				maxNumScenes=8;
 				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%maxNumScenes;
-				gui.__folders.DMX.__controllers[2].updateDisplay();
+				//gui.__folders.DMX.__controllers[2].updateDisplay();
 				var top=(Math.ceil(globalController.DMX_Scene)%maxNumScenes);
 				var bottom=Math.floor(globalController.DMX_Scene);
 				fade_Position=globalController.DMX_Scene%1.0;
