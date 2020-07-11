@@ -267,7 +267,7 @@ void main()	{
 				setTimeout(function(){
 					setInterval(function(){  
 						audioVolume=audioData.reduce(function(a, b){return a + b;}, 0)/1024/100; 
-						if(audioVolume>.05){
+						if(audioVolume>.005){
 							audioVolume=0.0;
 							uniforms1.mousex={ value: ((uniforms1.mousex.value+.1)%1.0) };
 							uniforms2.mousex={ value: ((uniforms2.mousex.value+.1)%1.0) };
