@@ -177,52 +177,7 @@ void main()	{
 	}
 		</script>
 
-		<script>
-			var colorObject = function() {
-				this.currentColHex="ff00ff";
-				this.currentColRGB={};
-				this.currentColRGB.r=255;
-				this.currentColRGB.g=0;
-				this.currentColRGB.b=255;
-				this.timeElapsed=0;
-				this.ci=0;
-				//this.rList=[255,255,255,255,200,100,000,000,000,000,000,000,000,100,200,255,255,255];
-				//this.gList=[000,100,200,255,255,255,255,255,255,255,200,100,000,000,000,000,000,000];
-				//this.bList=[000,000,000,000,000,000,000,100,200,255,255,255,255,255,255,255,200,100];
-				this.rList=[255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255];
-				this.gList=[000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050,000,000,000,000,000,000,000,000,000,000];
-				this.bList=[000,000,000,000,000,000,000,000,000,000,000,050,100,150,200,255,255,255,255,255,255,255,255,255,255,255,200,150,100,050];
-				ci=this.ci;
-				this.rgbToHex=function(r, g, b) {
-					return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-				}
-				this.hexToRgb=function(hex) {
-					var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-					return result ? {
-						r: parseInt(result[1], 16),
-						g: parseInt(result[2], 16),
-						b: parseInt(result[3], 16)
-					} : null;
-				}
-				this.addHexColor=function() {
-					var hexStr = (parseInt(this.currentColHex, 16) + parseInt("F1010f", 16)).toString(16);
-					while (hexStr.length < 5) { hexStr = '0' + hexStr; } // Zero pad.
-					return hexStr;
-				}
-				//this.change= function(){
-				//	this.currentColHex=this.addHexColor()
-				//	this.currentColRGB=this.hexToRgb("#"+this.currentColHex.substring(1,this.currentColHex.length))
-				//
-				//}	
-				//this.requestR= function(){return this.currentColRGB.r;}
-				//this.requestG= function(){return this.currentColRGB.g;}
-				//this.requestB= function(){return this.currentColRGB.b;}
-				this.change= function(){ci=(ci+parseInt(painterController.ColorHop)) % 30;}	
-				this.requestR= function(){return this.rList[ci];}
-				this.requestG= function(){return this.gList[ci];}
-				this.requestB= function(){return this.bList[ci];}		
-			}
-					
+		<script>					
 			initGlobalVars();
 			
 			function updateShader(){
@@ -267,14 +222,14 @@ void main()	{
 				setTimeout(function(){
 					setInterval(function(){  
 						audioVolume=audioData.reduce(function(a, b){return a + b;}, 0)/1024/100; 
-						if(audioVolume>.004){
+						if(audioVolume>.003){
 							audioVolume=0.0;
 							uniforms1.mousex={ value: ((uniforms1.mousex.value+.1)%1.0) };
 							uniforms2.mousex={ value: ((uniforms2.mousex.value+.1)%1.0) };
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1)%1.0) };
 							console.log(audioVolume);
-							globalController.DMX_Scene=(globalController.DMX_Scene+1.0)%maxNumDMXScenes;
+							globalController.DMX_Scene=(globalController.DMX_Scene+.45)%maxNumDMXScenes;
 						}
 					} ,200);
 				}, 2000);
