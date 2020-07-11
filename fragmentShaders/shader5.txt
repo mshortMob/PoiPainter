@@ -17,5 +17,5 @@ void main()	{
 	float green = cos(position.x/abs(mousey/2.0)+time )+sin(time/14. )+position.y*8.;
 	float blue =tan(position.x/.3+time/4. )+sin(time/3.5 )+position.y*4.;
 	vec3 mask = texture2D( colorTexture, vUv ).rgb;
-	gl_FragColor = vec4( red-green-blue, green-red-blue, blue, mask.r );
+	gl_FragColor = vec4( (red-green-blue)*(1.0-abs(mousey/1.5)), (green-red-blue)*abs(mousey/1.5), blue*(1.0-abs(mousex/.5)), mask.r );
 }
