@@ -267,13 +267,14 @@ void main()	{
 				setTimeout(function(){
 					setInterval(function(){  
 						audioVolume=audioData.reduce(function(a, b){return a + b;}, 0)/1024/100; 
-						if(audioVolume>.001){
+						if(audioVolume>.004){
 							audioVolume=0.0;
 							uniforms1.mousex={ value: ((uniforms1.mousex.value+.1)%1.0) };
 							uniforms2.mousex={ value: ((uniforms2.mousex.value+.1)%1.0) };
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1)%1.0) };
 							console.log(audioVolume);
+							globalController.DMX_Scene=(globalController.DMX_Scene+1.0)%maxNumDMXScenes;
 						}
 					} ,200);
 				}, 2000);
@@ -284,6 +285,7 @@ void main()	{
 				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
 				addControls();	
 				dmxInterval=0;
+				maxNumDMXScenes=8;
 				dmxPresetData=[];
 				retrievePixelPattern();
 				initializeDMX();
@@ -1448,11 +1450,10 @@ void main()	{
 			}
 		
 			function getMoverData(){
-				// maxNumScenes=gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Scene"})[0].max;
-				maxNumScenes=8;
-				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%maxNumScenes;
+				// maxNumDMXScenes=gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Scene"})[0].max;
+				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%maxNumDMXScenes;
 				//gui.__folders.DMX.__controllers[2].updateDisplay();
-				var top=(Math.ceil(globalController.DMX_Scene)%maxNumScenes);
+				var top=(Math.ceil(globalController.DMX_Scene)%maxNumDMXScenes);
 				var bottom=Math.floor(globalController.DMX_Scene);
 				fade_Position=globalController.DMX_Scene%1.0;
 				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
