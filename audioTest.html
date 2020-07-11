@@ -1,48 +1,41 @@
 <!DOCTYPE html>
 <html>
     <head></head>
+
     <body>
-        <script type=text/javascript>
-            navigator.getUserMedia = navigator.getUserMedia
-                                   || navigator.webkitGetUserMedia
-                                   || navigator.mozGetUserMedia;
 
-            navigator.getUserMedia({ video : false, audio : true }, callback, console.log);
+    </body>
+
+    <script type=text/javascript>
+        navigator.getUserMedia = navigator.getUserMedia
+                               || navigator.webkitGetUserMedia
+                               || navigator.mozGetUserMedia;
+
+        navigator.getUserMedia({ video : false, audio : true }, callback, console.log);
 
 
-            function callback(stream) {
-                var ctx = new AudioContext();
-                var mic = ctx.createMediaStreamSource(stream);
-                var analyser = ctx.createAnalyser();
-                var osc = ctx.createOscillator();
+        function callback(stream) {
+            var ctx = new AudioContext();
+            var mic = ctx.createMediaStreamSource(stream);
+            var analyser = ctx.createAnalyser();
 
-                mic.connect(analyser); 
-                osc.connect(ctx.destination);
-                osc.start(0);
+            mic.connect(analyser); 
 
-                var data = new Uint8Array(analyser.frequencyBinCount);
+            audioData = new Uint8Array(analyser.frequencyBinCount);
 
-                function play() {
-                    analyser.getByteFrequencyData(data);
-
-                    // get fullest bin
-                    var idx = 0;
-                    for (var j=0; j < analyser.frequencyBinCount; j++) {
-                        if (data[j] > data[idx]) {
-                            idx = j;
-                        }
-                    }
-
-                    var frequency = idx * ctx.sampleRate / analyser.fftSize;
-                    console.log(frequency);
-                    osc.frequency.value = frequency;
-
-                    requestAnimationFrame(play);
-                }
-
-                play();
+            function play() {
+                analyser.getByteFrequencyData(audioData);
+                //console.log(audioData);
+                requestAnimationFrame(play);
             }
 
-        </script>
-    </body>
+            play();
+        }
+
+        setInterval(() => {
+            document.body.innerHTML=audioData;
+        }, 100);
+
+    </script>
+
 </html>
