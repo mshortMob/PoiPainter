@@ -221,20 +221,14 @@ void main()	{
 			function initGlobalVars(){
 				//------------------
 				initAudio();
-				audioOscilatorDir=.1;
 				setTimeout(function(){
 					setInterval(function(){  
 						audioVolume=audioData.reduce(function(a, b){return a + b;}, 0)/1024/100; 
-						if(audioVolume>.003){
-							if( (uniforms1.mousex.value+audioOscilatorDir) > 1.0){
-								audioOscilatorDir=-.1;
-							}else if( (uniforms1.mousex.value+audioOscilatorDir) < 0.0){
-								audioOscilatorDir=.1;
-							}
-							uniforms1.mousex={ value: ((uniforms1.mousex.value+audioOscilatorDir)) };
-							uniforms2.mousex={ value: ((uniforms2.mousex.value+audioOscilatorDir)) };
-							uniforms1.mousey={ value: ((uniforms1.mousey.value+audioOscilatorDir)) };
-							uniforms2.mousey={ value: ((uniforms2.mousey.value+audioOscilatorDir)) };
+						if(audioVolume>globalController.VolumeThreshold){
+							uniforms1.mousex={ value: ((uniforms1.mousex.value+audioVolume)%1) };
+							uniforms2.mousex={ value: ((uniforms2.mousex.value+audioVolume)%1) };
+							uniforms1.mousey={ value: ((uniforms1.mousey.value+audioVolume)%1) };
+							uniforms2.mousey={ value: ((uniforms2.mousey.value+audioVolume)%1) };
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.45)%maxNumDMXScenes;
 						}
@@ -244,7 +238,7 @@ void main()	{
 				lastMaskAValue=-1;
 				lastMaskBValue=-1;
 				fade_Position=0;
-				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
+				// setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
 				addControls();	
 				dmxInterval=0;
 				maxNumDMXScenes=8;
@@ -376,7 +370,8 @@ void main()	{
 					DMX_X1:0,
 					DMX_Y1:175,
 					DMX_X2:150,
-					DMX_Y2:175
+					DMX_Y2:175,
+					VolumeThreshold:.003
 				}
 				mappingController  = {
 					 Visible:false,
@@ -438,7 +433,8 @@ void main()	{
 				dmxFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);updateControlsValues();});
 				dmxFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);updateControlsValues();});
 				dmxFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);updateControlsValues();});
-				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});		
+				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});
+				dmxFolder.add( globalController, "VolumeThreshold", .0001,.01,.0001 ).onChange(function(){updateControlsValues();});		
 			}
 									
 			function changeMask(changedMask){
