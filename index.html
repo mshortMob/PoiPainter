@@ -1215,7 +1215,7 @@ void main()	{
 					}else{
 						globalController.DMX_X1=globalController.DMX_X1+5;
 					}
-					gui.__folders.DMX.__controllers[5].updateDisplay();
+					gui.__folders.DMX.__controllers[4].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="^"){
@@ -1225,7 +1225,7 @@ void main()	{
 					}else{
 						globalController.DMX_X1=3;
 					}
-					gui.__folders.DMX.__controllers[5].updateDisplay();
+					gui.__folders.DMX.__controllers[4].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="7"){
@@ -1235,7 +1235,7 @@ void main()	{
 					}else{
 						globalController.DMX_Y1=globalController.DMX_Y1+5;
 					}
-					gui.__folders.DMX.__controllers[6].updateDisplay();
+					gui.__folders.DMX.__controllers[5].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="&"){
@@ -1245,7 +1245,7 @@ void main()	{
 					}else{
 						globalController.DMX_Y1=3;
 					}
-					gui.__folders.DMX.__controllers[6].updateDisplay();
+					gui.__folders.DMX.__controllers[5].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="8"){
@@ -1255,7 +1255,7 @@ void main()	{
 					}else{
 						globalController.DMX_X2=globalController.DMX_X2+5;
 					}
-					gui.__folders.DMX.__controllers[7].updateDisplay();
+					gui.__folders.DMX.__controllers[6].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="*"){
@@ -1265,7 +1265,7 @@ void main()	{
 					}else{
 						globalController.DMX_X2=3;
 					}
-					gui.__folders.DMX.__controllers[7].updateDisplay();
+					gui.__folders.DMX.__controllers[6].updateDisplay();
 					updateControlsValues();
 				}	
 				if(event.key=="9"){
@@ -1275,7 +1275,7 @@ void main()	{
 					}else{
 						globalController.DMX_Y2=globalController.DMX_Y2+5;
 					}
-					gui.__folders.DMX.__controllers[8].updateDisplay();
+					gui.__folders.DMX.__controllers[7].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="("){
@@ -1285,13 +1285,13 @@ void main()	{
 					}else{
 						globalController.DMX_Y2=3;
 					}
-					gui.__folders.DMX.__controllers[8].updateDisplay();
+					gui.__folders.DMX.__controllers[7].updateDisplay();
 					updateControlsValues();
 				}		
-				keyPressToSlider(event, "l", globalController, "loadShaderA", 1,  function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
-				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
-				keyPressToSlider(event, "t", globalController, "VolumeThreshold", 1,  function(){gui.__folders.DMX.__controllers[9].updateDisplay(); updateControlsValues(); } );
-				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -1, function(){gui.__folders.DMX.__controllers[9].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "l", globalController, "loadShaderA", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[8].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[8].updateDisplay(); updateControlsValues(); } );
 			}
 
 			function toggleDmxSend(){
@@ -1429,10 +1429,10 @@ void main()	{
 				return pixelDataString;
 			}
 		
-			function keyPressToSlider(event, key, controller, slider, delta, callback){
+			function keyPressToSlider(event, key, controller, slider, delta, folder, callback){
 				if(event.key==key){
-					var sliderMax=gui.__folders.Global.__controllers.filter(obj => { return obj.property == slider})[0].__max;
-					var sliderMin=gui.__folders.Global.__controllers.filter(obj => { return obj.property == slider})[0].__min;
+					var sliderMax=folder.__controllers.filter(obj => { return obj.property == slider})[0].__max;
+					var sliderMin=folder.__controllers.filter(obj => { return obj.property == slider})[0].__min;
 					if(controller[slider]+delta<=sliderMax && controller[slider]+delta>=sliderMin){
 						controller[slider]=controller[slider]+delta;
 					}
