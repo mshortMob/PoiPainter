@@ -1290,6 +1290,8 @@ void main()	{
 				}		
 				keyPressToSlider(event, "l", globalController, "loadShaderA", 1,  function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
 				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "t", globalController, "VolumeThreshold", 1,  function(){gui.__folders.DMX.__controllers[9].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -1, function(){gui.__folders.DMX.__controllers[9].updateDisplay(); updateControlsValues(); } );
 			}
 
 			function toggleDmxSend(){
