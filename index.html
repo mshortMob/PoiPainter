@@ -903,28 +903,28 @@ void main()	{
 				}
 				if(event.key=="a"){
 					var listOfCornerVertices=[4,0,20,24];
-					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+4;
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+1;
 					updateControlsView();
 					syncObjectsToJson();
 					displayObjects[globalController.selectedFixture].updateCorners();
 				}
 				if(event.key=="s"){
 					var listOfCornerVertices=[4,0,20,24];
-					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-4;
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-1;
 					updateControlsView();
 					syncObjectsToJson();
 					displayObjects[globalController.selectedFixture].updateCorners();
 				}
 				if(event.key=="d"){
 					var listOfCornerVertices=[4,0,20,24];
-					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-4;
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-1;
 					updateControlsView();
 					syncObjectsToJson();
 					displayObjects[globalController.selectedFixture].updateCorners();
 				}
 				if(event.key=="w"){
 					var listOfCornerVertices=[4,0,20,24];
-					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+4;
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+1;
 					updateControlsView();
 					syncObjectsToJson();
 					displayObjects[globalController.selectedFixture].updateCorners();
