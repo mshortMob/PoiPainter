@@ -1,18 +1,21 @@
 # ShaderMapper
-ShaderMapper is a simple projection mapping, VJ, and lighting design tool based in Three.js
 
-#### Features
-- 
+ShaderMapper is a basic projection mapping, VJ, and lighting design tool based in Three.js and designed primarily to be run as a local web app on the Raspberry Pi.
+
+#### Mapping and VJ Features
+- Multi object quad and grid warping of content written in GLSL fragment shaders. *(video playback not supported at this time due to limitations of the pi)*
+- Simultanenos playback of 2 shaders assigned to up to four objects *(althought he pi could probably handle a good but more than this if desired)*
+- Can dynamically cycle through a bank of pre-defined fragment shaders and select from a bank of still images which can be used for masking or other manipulation within the shaders.
+- Mouse and audio data are available to the fragment shaders as uniform inputs. 
+- Controls are available both onscreen and via keyboard shortcuts *(can be critical in situations where your only monitori is a projector)*
+- All setting can be stored and recalled as presets, allowing for the easy creation and playback of VJ type scenes.
+
+#### DMX/ArtNet/Lighting Features
+- DMX Features are just beyond proof of concept stage.
+- Adding fixture, scene, and patching controls will be required before this is ready for public use.
+- This is basically a custom UI on top of OLA, current code will not attempt to send DMX if OLA isn't setup (and reverse proxied) on your system.
 
 
-
-
-
-
-#### OS Support / System Requirements
-It was designed primarily to run as a local web app on a raspberry pi, but the core features will likely work on most systems capable of running chrome with a simple web server. 
-
-On screen controls are based in Dat.gui. 
 
 
 ## Getting Started
