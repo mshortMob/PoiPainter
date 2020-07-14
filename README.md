@@ -5,7 +5,7 @@ ShaderMapper is a basic projection mapping, VJ, and lighting design tool based i
 #### Mapping and VJ Features
 - Multi object quad and grid warping of content written in GLSL fragment shaders. *(video playback not supported at this time due to limitations of the pi)*
 - Simultanenos playback of 2 shaders which can be dynamically assigned to up to four objects *(althought he pi could probably handle a good but more than this if desired)*
-- Can dynamically cycle through a bank of pre-defined fragment shaders and select from a bank of still images which can be used for masking or other manipulation within the shaders.
+- Can cycle through a bank of pre-defined fragment shaders and select from a bank of still images which can be used for masking or other manipulation within the shaders.
 - Mouse and audio data are available to the fragment shaders as uniform inputs. 
 - Controls are available both onscreen and via keyboard shortcuts *(can be critical in situations where your only monitori is a projector)*
 - All setting can be stored and recalled as presets, allowing for the easy creation and playback of VJ type scenes.
