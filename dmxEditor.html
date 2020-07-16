@@ -6,6 +6,11 @@
 			    margin:0px;
 				background-color:black;
 			}	
+			#guiContainer{
+				position:absolute;
+				width:50%;
+				right:0%;
+			}
 		</style>
 	</head>
 	<body>
@@ -38,8 +43,14 @@
 					G:0,
 					B:0,
 				};
-				gui = new dat.GUI();
-				gui.width=260;
+				//--------	
+				gui = new dat.GUI({ autoPlace: false });
+				guiContainer=document.createElement('div');
+				guiContainer.id="guiContainer";
+				document.body.appendChild(guiContainer);
+				guiContainer.appendChild(gui.domElement);
+				gui.width=guiContainer.offsetWidth;
+				//--------		
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();;});						
