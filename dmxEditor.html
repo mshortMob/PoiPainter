@@ -1,0 +1,1537 @@
+<html>
+	<head>
+		<title>FlowMapper</title>
+		<style>
+			body{
+			    margin:0px;
+				background-color:black;
+			}	
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:10;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+				/* cursor: none; */
+			}
+			textarea{
+				z-index:100;
+				position:fixed;
+				height:42.5%;
+				width:35%;
+				background-color: grey;
+				border-color: #515151;
+				border-width:4;
+				border-top-width:8;
+				border-left-width:8;
+				border-right-width:8;
+				font-size: 14px;
+				wrap: off;
+				white-space: nowrap;
+			}
+			#show_shader_editor{
+				z-index:100;
+				position:fixed;
+				left:0px;
+				top:0px;
+				height:6%;
+				width:100px;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-top-width:0;
+				border-left-width:0;
+				font-size: 14px;
+			}
+			#hide_shader_editor{
+				z-index:100;
+				position:fixed;
+				left:0px;
+				bottom:0px;
+				height:15%;
+				width:10%;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-left-width:8;
+				border-bottom-width:8;
+				font-size: 18px;
+			}
+			#update_shader_button{
+				z-index:100;
+				position:fixed;
+				left:10%;
+				bottom:0px;
+				height:15%;
+				width:25%;
+				background-color: darkgrey;
+				border-color: #515151;
+				border-width:4;
+				border-right-width:8;
+				border-bottom-width:8;
+				font-size: 24px;
+			}
+			#update_shader_button:active{
+				background-color: grey;			
+			}
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+		</style>
+	</head>
+	<body>
+		<textarea wrap="soft" id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
+		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>  
+		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
+		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='none';">Hide Editor</button>
+		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
+		<!-- <canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas> -->
+		<script src="dependancies/three.js"></script>
+		<script src="dependancies/pixel8.js"></script>
+		<script src="dependancies/dat.gui.min.js"></script>
+		<script src="dependancies/Detector.js"></script>
+		<script src="dependancies/NURBSSurface.js"></script>
+		<script src="dependancies/NURBSUtils.js"></script>
+		<script src="dependancies/TrackballControls.js"></script> 
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+precision mediump float;
+precision mediump int;
+
+uniform mat4 modelViewMatrix; // optional
+uniform mat4 projectionMatrix; // optional
+
+attribute vec3 position;
+attribute vec4 color;
+attribute vec2 uv;
+
+varying vec3 vPosition;
+varying vec4 vColor;
+varying vec2 vUv;
+
+void main()	{
+	vUv = uv;
+	vPosition = position;
+	vColor = color;
+
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+}
+		</script>
+
+		<script id="fragmentShader1" type="x-shader/x-fragment">
+			precision mediump float;
+			precision mediump int;
+			
+			uniform float time;
+			varying vec2 vUv;
+			uniform sampler2D colorTexture;
+			uniform sampler2D colorTexture2;
+			
+			void main( void ) {
+			
+				vec2 position = -1.0+2.*vUv;
+					position=position*position*vec2(-1.0, 1.0)+ vec2(2.5, 2.5);
+			
+				float color = 0.0;
+				color += sin( position.x * cos( time / 55.0 ) * 80.0 ) + cos( position.y * cos( time / 15.0 ) * 10.0 );
+				color += sin( position.y * sin( time / 100.0 ) * 40.0 ) + cos( position.x * sin( time / 45.0 ) * 40.0 );
+				color += sin( position.x * sin( time / 25.0 ) * 10.0 ) + sin( position.y * sin( time / 35.0 ) * 30.0 );
+				color *= sin( time / 500.0 ) * 1.5;
+				vec3 mask = texture2D( colorTexture, vUv ).rgb;
+				gl_FragColor = vec4( vec3(  color * 4.2,6.2*(1.-color),color * 12.0 ), mask.r );
+			
+			}			
+		</script>
+		
+		 <script id="fragmentShader2" type="x-shader/x-fragment">
+	precision mediump float;
+	precision mediump int;
+	
+	uniform float time;
+	varying vec2 vUv;
+	uniform sampler2D colorTexture;
+	uniform sampler2D colorTexture2;
+	
+	void main()	{
+		vec2 position = - 3.0 + 6.0 * vUv;
+		float red = abs( sin( position.x * position.y - time / 2.0 ) );
+		float green = abs( sin( position.x * position.y + time / 4.0 ) );
+		float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+		vec3 mask = texture2D( colorTexture, vUv ).rgb;
+		gl_FragColor = vec4( mask.r*red*.7, mask.g*green-.7, mask.b*blue*1.2, mask.r );
+	}
+		</script>
+
+		<script>
+
+					
+			initGlobalVars();
+			
+			function updateShader(){
+				document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent=document.getElementById('frag_shader_text_box').value
+				document.getElementById( 'vertexShader' ).textContent=document.getElementById('vertex_shader_text_box').value
+				materialsList=initShaderMaterial(uniforms1);
+				for(var i=0;i<displayObjects.length;i++){
+					if(statesArray[i].Visible==true){
+						displayObjects[i].material=materialsList[statesArray[i].Shader-1]
+					}
+				}
+				syncObjectsToJson();
+			}
+			
+			function initShaderMaterial(uniforms1){
+
+				matList=[];
+				for(var x=1;x<=2;x++){
+					if(x==1){
+						var material = new THREE.RawShaderMaterial( {
+							uniforms: uniforms1,
+							vertexShader: document.getElementById( 'vertexShader' ).textContent,
+							fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
+						} );	
+					}else{
+						var material = new THREE.RawShaderMaterial( {
+							uniforms: uniforms2,
+							vertexShader: document.getElementById( 'vertexShader' ).textContent,
+							fragmentShader: document.getElementById( 'fragmentShader'+x ).textContent
+						} );	
+					}		
+					material.side=THREE.DoubleSide;
+					// material.transparent=true;
+					matList.push(material)		
+				}
+				return matList;
+			}
+
+			function initGlobalVars(){
+				//------------------
+				initAudio();
+				setTimeout(function(){
+					setInterval(function(){  
+						audioVolume=audioData.reduce(function(a, b){return a + b;}, 0)/1024/100; 
+						if(audioVolume>globalController.VolumeThreshold){
+							uniforms1.mousex={ value: ((uniforms1.mousex.value+.1+audioVolume*400.0)%1.0) };
+							uniforms2.mousex={ value: ((uniforms2.mousex.value+.1+audioVolume*400.0)%1.0) };
+							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1+audioVolume*400.0)%1.0) };
+							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1+audioVolume*400.0)%1.0) };
+							//console.log(audioVolume);
+							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
+						}
+					} ,100);
+				}, 2000);
+				//------------------
+				lastMaskAValue=-1;
+				lastMaskBValue=-1;
+				fade_Position=0;
+				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
+				addControls();	
+				dmxInterval=0;
+				maxNumDMXScenes=8;
+				dmxPresetData=[];
+				retrievePixelPattern();
+				initializeDMX();
+				selectedVertice=0;
+				// width=document.getElementById('video').width;
+				// height=document.getElementById('video').height;	
+				width=32;
+				height=32;
+				materialArray=new Uint8Array(width * height * 4);
+				// previousData=new Uint8Array(width * height * 4);
+				// data=new Uint8Array(width * height * 4);
+				isFirstCycle=true;
+				colorCounter=0.0;
+				// getVideo("init",0)
+				container=null;
+				camera=null;
+				controls=null;
+				scene=null;
+				renderer=null;
+				objects = [];
+				displayObjects=[];
+				plane = new THREE.Plane();
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				offset = new THREE.Vector3();
+				intersection = new THREE.Vector3();
+				INTERSECTED=null;
+				SELECTED=null;
+				initScene();
+				animate();
+				statesArray=[];
+				for(var x=0;x<4;x++){
+					var objectJSON ={}
+					for (var key in mappingController) {
+						objectJSON[key]=mappingController[key]
+					}
+					statesArray.push(objectJSON)
+				}
+				for(var y=0;y<4;y++){
+					addObject();
+				}
+				statesArray[0].Visible=true;
+				//=------
+				globalState={};
+				for (var key in globalController) {
+					globalState[key]=globalController[key]
+				}
+				//=------
+				updateControlsView();
+				syncObjectsToJson();
+				window.addEventListener("keypress", keyHandler);
+			}
+			
+			function initScene() {
+				// prevData=pixel8(video,0,0,width,height)
+				imgTexture = new THREE.TextureLoader().load( 'masks/img1.jpg' );
+				imgTexture2 = new THREE.TextureLoader().load( 'masks/img2.jpg' );
+				dataTexture=[]	
+				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
+				dataTexture.needsUpdate = true;
+				uniforms1 = {
+					"time": { value: 1.0 },
+					"resolution": [width,height],
+					"mousex": { value: 0.0 },
+					"mousey": { value: 0.0 },
+					"colorTexture": { value: imgTexture }
+				};
+				uniforms2 = {
+					"time": { value: 1.0 },
+					"resolution": [width,height],
+					"mousex": { value: 0.0 },
+					"mousey": { value: 0.0 },
+					"colorTexture": { value: imgTexture2 }
+				};
+				// uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
+				materialsList=initShaderMaterial(uniforms1);
+				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader1' ).textContent
+				document.getElementById('vertex_shader_text_box').value=document.getElementById( 'vertexShader' ).textContent
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				frustumSize = 1000;
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10000 );
+				camera.position.z = -1000;
+				controls = new THREE.TrackballControls( camera , container);
+				controls.enabled=false;
+				scene = new THREE.Scene();
+				LIGHTING=new THREE.AmbientLight( 0xffffff ) 
+				scene.add( LIGHTING );
+				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
+				renderer.setClearColor( 0x000000 , 1);
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = false;
+				container.appendChild( renderer.domElement );
+				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+				tempElem=document.body.getElementsByClassName('ac')[0];
+				tempElem.className="";
+				tempElem.style.zIndex='10000000'
+				tempElem.style.position='fixed'
+				tempElem.style.right='0px';
+			}
+				
+			function addControls(){
+				globalController  = {
+					selectedFixture:0,
+					mappingMode:0,
+					shaderToEdit:1,
+					loadShaderA:1,
+					loadShaderB:2,
+					MaskA:1,
+					MaskB:2,
+					PresetName:"GlobalPreset1",
+					SendDMX:true,
+					DMX_Rate: 50,
+					DMX_Fade_Time:.2,
+					Pixel_Level:.5,
+					DMX_Preset:1,
+					DMX_Preset_Rate:.1,
+					DMX_Scene:0.0,
+					DMX_Level:.5,
+					Universe:1,
+					DMX_X1:0,
+					DMX_Y1:175,
+					DMX_X2:150,
+					DMX_Y2:175,
+					VolumeThreshold:.003
+				}
+				mappingController  = {
+					 Visible:false,
+					 ZValue:0,
+					 Shader:1
+				};
+				painterController  = {
+					 KaleidoScope:1,
+					 BrightnessSensitivity:.99,
+					 VelocitySensitivity:0.99,
+					 FadeTime:.6,
+					 ColorMix:.5,
+					 ColorRate:.05,
+					 ColorHop:1,
+					 Resolution:256
+				};
+				var count=0; 
+				for(var y=4; y>=0;y--){
+					for(var x=0; x<5;x++){
+						mappingController["VerticeX"+count]=-200+100*x;
+						mappingController["VerticeY"+count]=-200+100*y;
+						count=count+1;
+					}
+				}
+				gui = new dat.GUI();
+				globalFolder=gui.addFolder( "Global" )
+				globalFolder.open();
+				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
+				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
+				globalFolder.add(globalController, "loadShaderA", 1, 11, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);updateControlsValues();});				
+				globalFolder.add(globalController, "loadShaderB", 1, 11, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);updateControlsValues();});								
+				globalFolder.add(globalController, "MaskA", 1, 3, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA); changeMask(1); updateControlsValues();});				
+				globalFolder.add(globalController, "MaskB", 1, 3, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});				
+				// globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
+				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskAB=parseInt(globalController.MaskAB);});							
+				gui.width=260;
+				controlsFolder=gui.addFolder( "MappingControls" )
+				controlsFolder.open();
+				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
+				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( mappingController, "Shader", 1, 2, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
+				utilsFolder=gui.addFolder( "Utils" )
+				utilsFolder.open();
+				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
+				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
+				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
+				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
+				// utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				dmxFolder=gui.addFolder( "DMX" );
+				dmxFolder.open();
+				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
+				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
+				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
+				// dmxFolder.add(globalController, "DMX_Scene", 0.0,8.0,.1 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){updateControlsValues(); });
+				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
+				// dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
+				dmxFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);updateControlsValues();});
+				dmxFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);updateControlsValues();});
+				dmxFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);updateControlsValues();});
+				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});
+				dmxFolder.add( globalController, "VolumeThreshold", .0001,.01,.0001 ).onChange(function(){updateControlsValues();});		
+			}
+									
+			function changeMask(changedMask){
+				if(changedMask==1){
+					if(parseInt(globalController.MaskA)!=lastMaskAValue){
+						uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'masks/img'+parseInt(globalController.MaskA)+'.jpg' ) };
+						lastMaskAValue=parseInt(globalController.MaskA);
+					}
+				}else{
+					if(parseInt(globalController.MaskB)!=lastMaskBValue){
+						uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'masks/img'+parseInt(globalController.MaskB)+'.jpg' ) };
+						lastMaskBValue=parseInt(globalController.MaskB);
+					}
+				}
+			}
+			
+			function loadShaderPreset(shaderNum){
+				if(shaderNum==1){
+					var shaverVal=parseInt(globalController.loadShaderA);
+				}else{
+					var shaverVal=parseInt(globalController.loadShaderB);
+				}
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "php/read.php?fn=fragmentShaders/shader"+parseInt(shaverVal)+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					// console.log(xmlhttp.response)
+					if(shaderNum==globalController.shaderToEdit){
+						document.getElementById('frag_shader_text_box').value=xmlhttp.response; 
+					}
+					document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent=xmlhttp.response;
+					materialsList=initShaderMaterial(uniforms1);
+					for(var i=0;i<displayObjects.length;i++){
+						if(statesArray[i].Visible==true){
+							displayObjects[i].material=materialsList[statesArray[i].Shader-1]
+						}
+					}
+					// syncObjectsToJson();
+				}
+			}
+			
+			function updateControlsView(){
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				  	mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
+					gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				}
+				for (var i in gui.__folders.Global.__controllers) {
+					if(i!=0){
+						globalController[gui.__folders.Global.__controllers[i].property]=globalState[gui.__folders.Global.__controllers[i].property];
+						gui.__folders.Global.__controllers[i].updateDisplay();
+					}
+				}
+				for (var i in gui.__folders.DMX.__controllers) {
+					globalController[gui.__folders.DMX.__controllers[i].property]=globalState[gui.__folders.DMX.__controllers[i].property];
+					gui.__folders.DMX.__controllers[i].updateDisplay();
+				}
+			}
+			
+			function updateControlsValues(){  
+				for (var i in gui.__folders.MappingControls.__controllers) {
+				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				}
+				for (var i in gui.__folders.Global.__controllers) {
+					globalState[gui.__folders.Global.__controllers[i].property]=globalController[gui.__folders.Global.__controllers[i].property];
+				}
+				for (var i in gui.__folders.DMX.__controllers) {
+					globalState[gui.__folders.DMX.__controllers[i].property]=globalController[gui.__folders.DMX.__controllers[i].property];
+				}
+			}
+			
+			function syncObjectsToJson(includGlobal){
+				for(var x=0;x<displayObjects.length;x++){
+					displayObjects[x].setState(statesArray[x])
+					displayObjects[x].hideChildren();
+				}
+				displayObjects[globalController.selectedFixture].showChildren();
+
+				//--------------------------
+				if(includGlobal){
+					changeMask(1);
+					changeMask(2);
+					loadShaderPreset(1);
+					loadShaderPreset(2);
+					retrievePixelPattern();
+				}
+			}
+			
+			function addObject(){
+			  function createGeometry(u,v){
+					nsControlPoints = [
+						 [
+							 new THREE.Vector4 ( -200, -200, 0, 1 ),
+							 new THREE.Vector4 ( -200, -100, 0, 1 ),
+							 new THREE.Vector4 ( -200, 100, 0, 1 ),
+							 new THREE.Vector4 ( -200, 200, 0, 1 )
+						 ],
+						 [
+							 new THREE.Vector4 ( 0, -200, 0, 1 ),
+							 new THREE.Vector4 ( 0, -100, 0, 1 ),
+							 new THREE.Vector4 ( 0, 100, 0, 1 ),
+							 new THREE.Vector4 ( 0, 200, 0, 1 )
+						 ],
+						 [
+							 new THREE.Vector4 ( 200, -200, 0, 1 ),
+							 new THREE.Vector4 ( 200, -100, 0, 1 ),
+							 new THREE.Vector4 ( 200, 100, 0, 1 ),
+							 new THREE.Vector4 ( 200, 200, 0, 1 )
+						 ]
+					 ];
+					 degree1 = 2;
+					 degree2 = 3;
+					 knots1 = [0, 0, 0, 1, 1, 1];
+					 knots2 = [0, 0, 0, 0, 1, 1, 1, 1];
+					 nurbsSurface = new THREE.NURBSSurface(degree1, degree2, knots1, knots2, nsControlPoints);
+					 return nurbsSurface.getPoint(u, v);		
+			  }
+			  function createObject(){
+				var geometry = new THREE.ParametricGeometry( createGeometry, 4, 4 );			  
+				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
+				var object = new THREE.Mesh( geometry, materialsList[0]);				
+				return object;
+			  }
+			  var object = createObject();
+			  object.showChildren=function(){
+			        if (globalController.mappingMode>.5) {
+						for(var x=0; x<object.children.length ;x++){
+								object.children[x].visible=true;							
+						}
+					}else{
+						for(var x=0; x<object.children.length ;x++){
+							if (object.children[x].isCorner==true) {
+								object.children[x].visible=true;
+								object.updatecorners;
+							}
+						}					
+					}
+			  }
+			  object.hideChildren=function(){
+				for(var x=object.children.length-1;x>=0 ;x--){
+						object.children[x].visible=false;			
+				}
+			  }
+			  object.drawV=function(){
+				for(var x=0; x<object.geometry.vertices.length ; x++ ){
+					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
+					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
+					//var mesh1 = new THREE.Mesh( geo, mat );
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(35, 35, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
+					mesh1.name="vertice"+x;
+					mesh1.isCorner=false;
+					if (x == 0 || x == 4 || x == 24 || x == 20) {
+						mesh1.isCorner=true;
+					}
+					mesh1.vertNum=x;
+					mesh1.position.x=object.geometry.vertices[x].x;
+					mesh1.position.y=object.geometry.vertices[x].y;
+					mesh1.position.z=-5;
+					object.add(mesh1)
+					objects.push(mesh1)
+				}
+			  }
+			  object.setState=function(savedJSON){
+				object.visible=savedJSON.Visible;
+				object.position.z= savedJSON.ZValue
+				object.material=materialsList[parseInt(savedJSON.Shader-1)]
+				for(var x=0;x<object.geometry.vertices.length;x++){
+					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
+					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
+					object.children[x].position.x=savedJSON["VerticeX"+x]
+					object.children[x].position.y=savedJSON["VerticeY"+x]
+				}
+				object.geometry.verticesNeedUpdate = true;
+			  }	  
+			  object.updateCorners=function(){
+					var cornerNum=[];
+					cornerNum[0]=0;
+					cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+					cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+					cornerNum[3]=object.geometry.vertices.length-1
+					var x1 = object.geometry.vertices[cornerNum[0]].x
+					var y1 = object.geometry.vertices[cornerNum[0]].y
+					var x2 = object.geometry.vertices[cornerNum[1]].x
+					var y2 = object.geometry.vertices[cornerNum[1]].y
+					var x3 = object.geometry.vertices[cornerNum[2]].x
+					var y3 = object.geometry.vertices[cornerNum[2]].y
+					var x4 = object.geometry.vertices[cornerNum[3]].x
+					var y4 = object.geometry.vertices[cornerNum[3]].y
+					var xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					var yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x3-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y3-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x4-x3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=object.geometry.vertices.length-1; x>object.geometry.vertices.length-Math.sqrt(object.geometry.vertices.length);x--){
+						 object.geometry.vertices[x].x=object.geometry.vertices[object.geometry.vertices.length-1].x+xDiff1*(x-(object.geometry.vertices.length-1));
+						 object.geometry.vertices[x].y=object.geometry.vertices[object.geometry.vertices.length-1].y+yDiff1*(x-(object.geometry.vertices.length-1));
+					}
+					xDiff1=(x4-x2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].x=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].x+xDiff1*(x);
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].y=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].y+yDiff1*(x);
+					}
+					var sqrt=(Math.sqrt(object.geometry.vertices.length))
+					var numOfMiddleRows=(Math.sqrt(object.geometry.vertices.length)-2)
+					for(var rowNum = 1; rowNum < (Math.sqrt(object.geometry.vertices.length)-1) ; rowNum ++){
+						 var x1 = object.geometry.vertices[rowNum*sqrt].x
+						 var y1 = object.geometry.vertices[rowNum*sqrt].y
+						 var x2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].x
+						 var y2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].y
+						 xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 for(var x=0; x<(Math.sqrt(object.geometry.vertices.length)-1) ; x++ ){
+							  object.geometry.vertices[rowNum*sqrt+x].x= x1+xDiff1*x;
+							  object.geometry.vertices[rowNum*sqrt+x].y= y1+yDiff1*x;
+						 }
+					}
+					
+					object.geometry.verticesNeedUpdate = true;
+					//object.drawV()
+					for(var x=0;x<object.geometry.vertices.length;x++){
+						mappingController["VerticeX"+x]=object.geometry.vertices[x].x;
+						mappingController["VerticeY"+x]=object.geometry.vertices[x].y;
+					}
+					for(var x=0;x<object.children.length;x++){
+						if(object.children[x].name.indexOf("vertice"!=0)){
+							object.children[x].position.x=object.geometry.vertices[x].x;
+							object.children[x].position.y=object.geometry.vertices[x].y;
+							statesArray[globalController.selectedFixture]["VerticeX"+x]=object.geometry.vertices[x].x;
+							statesArray[globalController.selectedFixture]["VerticeY"+x]=object.geometry.vertices[x].y;
+						}		
+					}
+					updateControlsValues();
+					//updateControlsView();
+			  }
+			  object.drawV();
+			  object.visible=false;
+			  scene.add(object);
+			  displayObjects.push(object);
+			}
+									
+			function onWindowResize() {
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.left   = - frustumSize * aspect / 2;
+				camera.right  =   frustumSize * aspect / 2;
+				camera.top    =   frustumSize / 2;
+				camera.bottom = - frustumSize / 2;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			
+			function onDocumentMouseMove( event ) {
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						SELECTED.parent.updateCorners();
+					}
+				}
+				mouse.x = ( event.clientX / window.innerWidth ) * 2.0 - 1.0;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2.0 + 1.0;
+				// uniforms1.mousey={ value: mouse.y };
+				// uniforms2.mousey={ value: mouse.y };
+				// uniforms1.mousex={ value: mouse.x };
+				// uniforms2.mousex={ value: mouse.x };
+				raycaster.setFromCamera( mouse, camera );
+				if ( SELECTED ) {
+					
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
+						    console.log(SELECTED.name)
+							SELECTED.position.copy(intersection.sub( offset ));
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+							SELECTED.parent.geometry.verticesNeedUpdate = true;
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+							statesArray[parseInt(globalController.selectedFixture)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+						}
+					}
+					return;
+				}
+				var intersects = raycaster.intersectObjects( objects);
+				if ( intersects.length > 0 ) {
+					if ( INTERSECTED != intersects[ 0 ].object ) {
+						INTERSECTED = intersects[ 0 ].object;
+						plane.setFromNormalAndCoplanarPoint(
+							camera.getWorldDirection( plane.normal ),
+							INTERSECTED.position );
+					}
+					container.style.cursor = 'pointer';
+				} else {
+					INTERSECTED = null;
+					container.style.cursor = 'auto';
+				}
+			}
+			
+			function onDocumentMouseDown( event ) {
+					raycaster.setFromCamera( mouse, camera );
+					intersects = raycaster.intersectObjects( objects);
+					if ( intersects.length > 0 ) {
+						SELECTED = intersects[ 0 ].object;
+						if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+							offset.copy( intersection ).sub( SELECTED.position );
+						}
+						container.style.cursor = 'move';
+					}
+			}
+			
+			function onDocumentMouseUp( event ) {
+				//event.preventDefault();
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						SELECTED.parent.updateCorners();
+					}
+				}
+				SELECTED = null;
+				container.style.cursor = 'auto';
+			}
+				
+			function animate() {
+			    // if(painterController.ColorMix != 0){
+				// 	colorCounter=colorCounter+painterController.ColorRate
+				// 	if(colorCounter > 1){
+				// 		colorCounter=0;
+				// 		clr.change();
+				// 	}
+			    // }
+				requestAnimationFrame( animate );
+				render();
+			}
+			
+			function render() {
+				uniforms1[ "time" ].value += .01 * 5;
+				uniforms2[ "time" ].value += .01 * 5;
+				computeTraces();
+				for(var x=0;x<displayObjects.length;x++){
+					displayObjects[x].material.transparent=true
+					displayObjects[x].material.needsUpdate=true
+				}
+				renderer.render( scene, camera );
+			}
+			
+			function requestFullScreen() {
+				// Supports most browsers and their versions.
+				var element = document.body; // Make the body go full screen.
+				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+			
+				if (requestMethod) { // Native full screen.
+					requestMethod.call(element);
+				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+					var wscript = new ActiveXObject("WScript.Shell");
+					if (wscript !== null) {
+						wscript.SendKeys("{F11}");
+					}
+				}
+			}
+
+			function computeTraces(){
+				// if(isFirstCycle){
+				// 	isFirstCycle=false;
+				// }else{
+				// 	previousData=data;
+				// }
+				// data=pixel8(video,0,0,width,height)
+				// var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
+				// var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
+				// var delVal=4-parseFloat(painterController.FadeTime)*4;
+				// var mixVal=1-parseFloat(painterController.ColorMix)
+				// for (x=0; x < ((width * height) * 4); x=x+4) {
+				// 		if (Math.abs((data[x]+data[x+1]+data[x+2])-(previousData[x]+previousData[x+1]+previousData[x+2])) > (velVal) && (data[x]+data[x+1]+data[x+2] > briVal)) {
+				// 			materialArray[x]=clr.requestR()*(1-(mixVal))+data[x]*((mixVal));
+				// 			materialArray[x+1]=clr.requestG()*(1-(mixVal))+data[x+1]*((mixVal));
+				// 			materialArray[x+2]=clr.requestB()*(1-(mixVal))+data[x+2]*((mixVal));
+				// 			materialArray[x+3]=255;
+				// 		}
+				// 		if(materialArray[x+0] > 0 ){
+				// 			materialArray[x+0]=materialArray[x+0]-(delVal);
+				// 		}
+				// 		if( materialArray[x+0] < 0 ){
+				// 			materialArray[x+0]=0;
+				// 		}
+				// 		if(materialArray[x+1] > 0 ){
+				// 			materialArray[x+1]=materialArray[x+1]-(delVal);
+				// 		}
+				// 		if( materialArray[x+1] < 0 ){
+				// 			materialArray[x+1]=0;
+				// 		}
+				// 		if(materialArray[x+2] > 0 ){
+				// 			materialArray[x+2]=materialArray[x+2]-(delVal);
+				// 		}
+				// 		if( materialArray[x+2] < 0 ){
+				// 			materialArray[x+2]=0;
+				// 		}
+				// }
+				// dataTexture.needsUpdate = true
+			}
+		
+			function saveState(){
+				var requestBody=JSON.stringify({"storage" : statesArray, "global": globalState})
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "php/write.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+			
+			function recallState(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "php/read.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					statesArray=JSON.parse(xmlhttp.response).storage
+					globalState=JSON.parse(xmlhttp.response).global
+					// presetsArray=JSON.parse(xmlhttp.response).storage2
+					updateControlsView();
+					syncObjectsToJson(true);
+				}
+			}	
+			
+			function keyHandler(event){
+				if(event.key=="<"){
+					if(globalController.selectedFixture>0){
+						globalController.selectedFixture=globalController.selectedFixture-1;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}else{
+						globalController.selectedFixture=3;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key==">"){
+					if(globalController.selectedFixture<3){
+						globalController.selectedFixture=globalController.selectedFixture+1;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}else{
+						globalController.selectedFixture=0;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key=="?"){
+					for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ 
+						displayObjects[globalController.selectedFixture].children[x].visible=false; 
+					};
+				}
+				if(event.key=="C"){
+					gui.close();
+					document.getElementsByClassName("close-button")[0].innerHTML=""; 
+					setTimeout(function(){ 
+						document.getElementsByClassName("close-button")[0].style.width=10; 
+						document.getElementsByClassName("close-button")[0].style.right=0;},1000);
+				}
+				if(event.key=="c"){
+					gui.open();
+				}
+				if(event.key=="a"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="s"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="d"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="w"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="A"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="S"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="D"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="W"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="z"){
+					if(statesArray[globalController.selectedFixture].ZValue>-20){
+						statesArray[globalController.selectedFixture].ZValue=statesArray[globalController.selectedFixture].ZValue-1;
+						updateControlsView();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key=="Z"){
+					if(statesArray[globalController.selectedFixture].ZValue<20){
+						statesArray[globalController.selectedFixture].ZValue=statesArray[globalController.selectedFixture].ZValue+1;
+						updateControlsView();
+						syncObjectsToJson();
+					}
+				}			
+				if(event.key=="X"){
+					if(statesArray[globalController.selectedFixture].Shader+1>2){
+						statesArray[globalController.selectedFixture].Shader=1;
+					}else{
+						statesArray[globalController.selectedFixture].Shader=statesArray[globalController.selectedFixture].Shader+1
+					}
+					updateControlsView();
+					syncObjectsToJson();
+				}
+				if(event.key=="x"){
+					if(statesArray[globalController.selectedFixture].Shader-1<1){
+						statesArray[globalController.selectedFixture].Shader=2;
+					}else{
+						statesArray[globalController.selectedFixture].Shader=statesArray[globalController.selectedFixture].Shader-1
+					}
+					updateControlsView();
+					syncObjectsToJson();
+				}
+				if(event.key=="v" || event.key=="V"){
+					statesArray[globalController.selectedFixture].Visible=!statesArray[globalController.selectedFixture].Visible;
+					updateControlsView();
+					syncObjectsToJson();
+				}
+				if(event.key=="," ){
+					if( (selectedVertice-1)>=0){
+						selectedVertice=selectedVertice-1;
+					}else{
+						selectedVertice=3;
+					}
+				}
+				if(event.key=="." ){
+					selectedVertice=(selectedVertice+1)%4;
+				}
+				// if(event.key=="l"){
+				// 	var controller=globalController;
+				// 	var slider="loadShaderA";
+				// 	var delta=1;
+				// 	var sliderMax=gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].__max;
+				// 	var sliderMin=gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].__min;
+				// 	if(controller[slider]+delta<sliderMax){
+				// 		globalController.loadShaderA=globalController.loadShaderA+1;
+				// 	}
+				// 	gui.__folders.Global.__controllers[1].updateDisplay();
+				// 	loadShaderPreset(1);
+				// 	updateControlsValues();
+				// }
+				// if(event.key=="L"){
+				// 	if(globalController.loadShaderA-1>0){
+				// 		globalController.loadShaderA=globalController.loadShaderA-1;
+						
+				// 	}else{
+				// 		globalController.loadShaderA=8;
+				// 	}
+				// 	gui.__folders.Global.__controllers[1].updateDisplay();
+				// 	loadShaderPreset(1);
+				// 	updateControlsValues();
+				// }
+				if(event.key=="0"){
+					if(globalController.MaskA+1>3){
+						globalController.MaskA=1;
+						
+					}else{
+						globalController.MaskA=globalController.MaskA+1;
+					}
+					gui.__folders.Global.__controllers[3].updateDisplay();
+					changeMask(1);
+					updateControlsValues();
+				}
+				if(event.key==")"){
+					if(globalController.MaskA-1>0){
+						globalController.MaskA=globalController.MaskA-1;
+						
+					}else{
+						globalController.MaskA=3;
+					}
+					gui.__folders.Global.__controllers[3].updateDisplay();
+					changeMask(1); 
+					updateControlsValues();
+				}
+				if(event.key=="p"){
+					if(globalController.MaskB+1>3){
+						globalController.MaskB=1;
+						
+					}else{
+						globalController.MaskB=globalController.MaskB+1;
+					}
+					gui.__folders.Global.__controllers[4].updateDisplay();
+					changeMask(2);
+					updateControlsValues();
+				}
+				if(event.key=="P"){
+					if(globalController.MaskB-1>0){
+						globalController.MaskB=globalController.MaskB-1;
+						
+					}else{
+						globalController.MaskB=3;
+					}
+					gui.__folders.Global.__controllers[4].updateDisplay();
+					changeMask(2); 
+					updateControlsValues();
+				}
+				// if(event.key=="o"){
+				// 	if(globalController.loadShaderB+1>8){
+				// 		globalController.loadShaderB=1;
+						
+				// 	}else{
+				// 		globalController.loadShaderB=globalController.loadShaderB+1;
+				// 	}
+				// 	gui.__folders.Global.__controllers[2].updateDisplay();
+				// 	loadShaderPreset(2);
+				// 	updateControlsValues();
+				// }
+				// if(event.key=="O"){
+				// 	if(globalController.loadShaderB-1>0){
+				// 		globalController.loadShaderB=globalController.loadShaderB-1;
+						
+				// 	}else{
+				// 		globalController.loadShaderB=8;
+				// 	}
+				// 	gui.__folders.Global.__controllers[2].updateDisplay();
+				// 	loadShaderPreset(2);
+				// 	updateControlsValues();
+				// }
+				if(event.key=="k"){
+					if(globalController.DMX_Preset+1>6){
+						globalController.DMX_Preset=1;
+						
+					}else{
+						globalController.DMX_Preset=globalController.DMX_Preset+1;
+					}
+					gui.__folders.DMX.__controllers[0].updateDisplay();
+					updateControlsValues();
+					retrievePixelPattern();
+				}
+				if(event.key=="K"){
+					if(globalController.DMX_Preset-1>0){
+						globalController.DMX_Preset=globalController.DMX_Preset-1;
+					}else{
+						globalController.DMX_Preset=6;
+					}
+					gui.__folders.DMX.__controllers[0].updateDisplay();
+					updateControlsValues();
+					retrievePixelPattern();
+				}
+				if(event.key=="j"){
+					if(globalController.Pixel_Level+.1>1){
+						globalController.Pixel_Level=0;
+						
+					}else{
+						globalController.Pixel_Level=globalController.Pixel_Level+.1;
+					}
+					gui.__folders.DMX.__controllers[1].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="J"){
+					if(globalController.Pixel_Level-.1>0){
+						globalController.Pixel_Level=globalController.Pixel_Level-.1;
+					}else{
+						globalController.Pixel_Level=1.0;
+					}
+					gui.__folders.DMX.__controllers[1].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="i"){
+					if(globalController.DMX_Preset_Rate+.05>.5){
+						globalController.DMX_Preset_Rate=0.0;
+						
+					}else{
+						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate+.05;
+					}
+					gui.__folders.DMX.__controllers[3].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="I"){
+					if(globalController.DMX_Preset_Rate-.05>0){
+						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate-.05;
+					}else{
+						globalController.DMX_Preset_Rate=.5;
+					}
+					gui.__folders.DMX.__controllers[3].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="u"){
+					if(globalController.DMX_Fade_Time+.025>1.0){
+						globalController.DMX_Fade_Time=0.0;
+						
+					}else{
+						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time+.025;
+					}
+					gui.__folders.DMX.__controllers[4].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="U"){
+					if(globalController.DMX_Fade_Time-.025>0){
+						globalController.DMX_Fade_Time=globalController.DMX_Fade_Time-.025;
+					}else{
+						globalController.DMX_Fade_Time=1.0;
+					}
+					gui.__folders.DMX.__controllers[4].updateDisplay();
+					updateControlsValues();
+				}			
+				if(event.key=="!"){
+					globalController.PresetName="GlobalPreset1"
+					saveState();
+				}
+				if(event.key=="1"){
+					globalController.PresetName="GlobalPreset1"
+					recallState();
+				}
+				if(event.key=="@"){
+					globalController.PresetName="GlobalPreset2"
+					saveState();
+				}
+				if(event.key=="2"){
+					globalController.PresetName="GlobalPreset2"
+					recallState();
+				}
+				if(event.key=="#"){
+					globalController.PresetName="GlobalPreset3"
+					saveState();
+				}
+				if(event.key=="3"){
+					globalController.PresetName="GlobalPreset3"
+					recallState();
+				}			
+				if(event.key=="$"){
+					globalController.PresetName="GlobalPreset4"
+					saveState();
+				}
+				if(event.key=="4"){
+					globalController.PresetName="GlobalPreset4"
+					recallState();
+				}				
+				if(event.key=="%"){
+					globalController.PresetName="GlobalPreset5"
+					saveState();
+				}
+				if(event.key=="5"){
+					globalController.PresetName="GlobalPreset5"
+					recallState();
+				}					
+				if(event.key=="m"){
+					globalController.mappingMode=parseInt(globalController.mappingMode+1)%2;
+					if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};
+				}
+				if(event.key=="6"){
+					if(globalController.DMX_X1+5>255){
+						globalController.DMX_X1=0;
+						
+					}else{
+						globalController.DMX_X1=globalController.DMX_X1+5;
+					}
+					gui.__folders.DMX.__controllers[4].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="^"){
+					if(globalController.DMX_X1-5>0){
+						globalController.DMX_X1=globalController.DMX_X1-5;
+						
+					}else{
+						globalController.DMX_X1=3;
+					}
+					gui.__folders.DMX.__controllers[4].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="7"){
+					if(globalController.DMX_Y1+5>255){
+						globalController.DMX_Y1=0;
+						
+					}else{
+						globalController.DMX_Y1=globalController.DMX_Y1+5;
+					}
+					gui.__folders.DMX.__controllers[5].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="&"){
+					if(globalController.DMX_Y1-5>0){
+						globalController.DMX_Y1=globalController.DMX_Y1-5;
+						
+					}else{
+						globalController.DMX_Y1=3;
+					}
+					gui.__folders.DMX.__controllers[5].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="8"){
+					if(globalController.DMX_X2+5>255){
+						globalController.DMX_X2=0;
+						
+					}else{
+						globalController.DMX_X2=globalController.DMX_X2+5;
+					}
+					gui.__folders.DMX.__controllers[6].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="*"){
+					if(globalController.DMX_X2-5>0){
+						globalController.DMX_X2=globalController.DMX_X2-5;
+						
+					}else{
+						globalController.DMX_X2=3;
+					}
+					gui.__folders.DMX.__controllers[6].updateDisplay();
+					updateControlsValues();
+				}	
+				if(event.key=="9"){
+					if(globalController.DMX_Y2+5>255){
+						globalController.DMX_Y2=0;
+						
+					}else{
+						globalController.DMX_Y2=globalController.DMX_Y2+5;
+					}
+					gui.__folders.DMX.__controllers[7].updateDisplay();
+					updateControlsValues();
+				}
+				if(event.key=="("){
+					if(globalController.DMX_Y2-5>0){
+						globalController.DMX_Y2=globalController.DMX_Y2-5;
+						
+					}else{
+						globalController.DMX_Y2=3;
+					}
+					gui.__folders.DMX.__controllers[7].updateDisplay();
+					updateControlsValues();
+				}		
+				keyPressToSlider(event, "l", globalController, "loadShaderA", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "o", globalController, "loadShaderB", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[2].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "O", globalController, "loadShaderB", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[2].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[8].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[8].updateDisplay(); updateControlsValues(); } );
+			}
+
+			function toggleDmxSend(){
+				if(globalController.SendDMX==true){
+					clearInterval(dmxInterval);
+					dmxInterval=setInterval(writeDMX,globalController.DMX_Rate);
+				}else{
+					clearInterval(dmxInterval);
+				}
+			}
+			
+			function retrievePixelPattern(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "php/read.php?fn=dmxPresets/pixelPattern"+globalController.DMX_Preset+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					var response=xmlhttp.response;
+					var presetScenes=response.split('\n')
+					var fullPresetArray=[];
+					for(var s=0;s<presetScenes.length;s++){
+						var stringArray=presetScenes[s].split(',');
+						for(var t=0; t<stringArray.length;t++){
+							stringArray[t]=parseInt(stringArray[t]);
+						}
+					fullPresetArray.push(stringArray);
+					}
+					dmxPresetData=fullPresetArray;
+					//console.log(dmxPresetData);
+				}
+			}	
+
+			function writeDMX() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						console.log("Send DMX: "+this.responseText);
+					}
+				};
+				xhttp.open("POST","proxy/set_dmx", true);
+				xhttp.setRequestHeader("accept", "*/*");
+				xhttp.setRequestHeader("accept-language", "en-US,en;q=0.9,und;q=0.8");
+				xhttp.setRequestHeader("cache-control", "no-cache");
+				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+				xhttp.setRequestHeader("pragma", "no-cache" );
+				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData();
+				// console.log(dmxPayloadString);
+
+				var temp=getMoverData()
+				temp=temp.substring(0,temp.length-1).split(",");
+				moverString=""
+				//m1
+				moverString=moverString+parseInt(globalController.DMX_X1)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(globalController.DMX_Y1)+",";
+				moverString=moverString+"0,0,0,";
+				moverString=moverString+parseInt(255*globalController.Pixel_Level)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[0])+",";
+				moverString=moverString+parseInt(temp[1])+",";
+				moverString=moverString+parseInt(temp[2])+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[3])+",";
+				moverString=moverString+parseInt(temp[4])+",";
+				moverString=moverString+parseInt(temp[5])+",0,0,0,0,0,0,";
+
+				//m2
+				moverString=moverString+parseInt(globalController.DMX_X2)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(globalController.DMX_Y2)+",";
+				moverString=moverString+"0,0,0,";
+				moverString=moverString+parseInt(255*globalController.Pixel_Level)+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[0])+",";
+				moverString=moverString+parseInt(temp[1])+",";
+				moverString=moverString+parseInt(temp[2])+",";
+				moverString=moverString+"0,";
+				moverString=moverString+parseInt(temp[3])+",";
+				moverString=moverString+parseInt(temp[4])+",";
+				moverString=moverString+parseInt(temp[5])+",0,0,0,0,0,0,";
+
+				//pix
+				moverString=moverString+parseInt(temp[6]/10)+",";
+				moverString=moverString+parseInt(temp[7]/10)+",";
+				moverString=moverString+parseInt(temp[8]/10)+",";
+				moverString=moverString+parseInt(temp[9]/10)+",";
+				moverString=moverString+parseInt(temp[10]/10)+",";
+				moverString=moverString+parseInt(temp[11]/10)+",";
+				moverString=moverString+parseInt(temp[6]/10)+",";
+				moverString=moverString+parseInt(temp[7]/10)+",";
+				moverString=moverString+parseInt(temp[8]/10)+",";
+				moverString=moverString+parseInt(temp[9]/10)+",";
+				moverString=moverString+parseInt(temp[10]/10)+",";
+				moverString=moverString+parseInt(temp[11]/10)+",";
+
+				//final
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				// console.log(dmxPayloadString);
+				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				xhttp.send(dmxPayloadString);
+			}	
+
+			function initializeDMX() {
+				xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						console.log("Initialize DMX: "+this.responseText);
+						toggleDmxSend();
+					}else{
+						clearInterval(dmxInterval);
+						console.log("DMX Not Available");
+					}
+				};
+				xhttp.open("GET","proxy/reload", true);
+				xhttp.send();
+			}
+		
+			function getMoverData(){
+				// maxNumDMXScenes=gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Scene"})[0].max;
+				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%maxNumDMXScenes;
+				//gui.__folders.DMX.__controllers[2].updateDisplay();
+				var top=(Math.ceil(globalController.DMX_Scene)%maxNumDMXScenes);
+				var bottom=Math.floor(globalController.DMX_Scene);
+				fade_Position=globalController.DMX_Scene%1.0;
+				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
+					fade_Position=1.0;
+				}else{
+					fade_Position=fade_Position+globalController.DMX_Fade_Time;
+				}
+				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+fade_Position);
+				pixelDataString="";
+				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
+					pixelDataString=pixelDataString+parseInt(parseInt(globalController.Pixel_Level*((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))))+",";
+				}
+				// console.log(pixelDataString);
+				return pixelDataString;
+			}
+		
+			function keyPressToSlider(event, key, controller, slider, delta, folder, callback){
+				if(event.key==key){
+					var sliderMax=folder.__controllers.filter(obj => { return obj.property == slider})[0].__max;
+					var sliderMin=folder.__controllers.filter(obj => { return obj.property == slider})[0].__min;
+					if(controller[slider]+delta<=sliderMax && controller[slider]+delta>=sliderMin){
+						controller[slider]=controller[slider]+delta;
+					}
+					callback();
+				}
+			}
+		
+			function initAudio() {
+				navigator.getUserMedia = navigator.getUserMedia
+                                   || navigator.webkitGetUserMedia
+                                   || navigator.mozGetUserMedia;
+
+            	navigator.getUserMedia({ video : false, audio : true }, getAudioData, console.log);
+
+				function getAudioData(stream) {
+					var ctx = new AudioContext();
+					var mic = ctx.createMediaStreamSource(stream);
+					var analyser = ctx.createAnalyser();
+
+					mic.connect(analyser); 
+					
+
+					audioData = new Uint8Array(analyser.frequencyBinCount);
+
+					function play() {
+						analyser.getByteFrequencyData(audioData);
+						//console.log(audioData);
+						requestAnimationFrame(play);
+					}
+
+					play();
+				}
+			}
+			
+			// function getVideo(action,camNum) {
+			// 	if(action == "init"){
+			// 		numOfCameras=0
+			// 		cameraIds=[]
+			// 		selectedCamera=0;
+			// 		videoElem='video'
+			// 		navigator.mediaDevices.enumerateDevices().then(function(deviceInfos){
+			// 		  for (var i = 0; i !== deviceInfos.length; ++i) {
+			// 			var deviceInfo = deviceInfos[i];
+			// 			if (deviceInfo.kind === 'videoinput') {
+			// 			  numOfCameras=numOfCameras + 1
+			// 			  cameraIds.push(deviceInfo.deviceId);
+			// 			}
+			// 		  }
+			// 		  selectedCamera=camNum;
+			// 		  if (window.stream) {
+			// 			window.stream.getTracks().forEach(function(track) {
+			// 			  track.stop();
+			// 			});
+			// 		  }
+			// 		  console.log(cameraIds[selectedCamera])
+			// 		  var videoSource = cameraIds[selectedCamera];
+			// 		  var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+			// 		  navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+			// 			  window.stream = stream; 
+			// 			  document.getElementById(videoElem).srcObject = stream;
+			// 			  return navigator.mediaDevices.enumerateDevices();
+			// 		  }).catch(function(error){
+			// 			  console.log('navigator.getUserMedia error: ', error);
+			// 		  });
+			// 		  }).catch(function(error){
+			// 			console.log('navigator.getUserMedia error: ', error);
+			// 		  });
+			// 	}
+			// 	if(action == "select"){
+			// 		selectedCamera=camNum;
+			// 		if (window.stream) {
+			// 		  window.stream.getTracks().forEach(function(track) {
+			// 			track.stop();
+			// 		  });
+			// 		}
+			// 		console.log(cameraIds[selectedCamera])
+			// 		var videoSource = cameraIds[selectedCamera];
+			// 		var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
+			// 		navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+			// 			window.stream = stream; 
+			// 			document.getElementById(videoElem).srcObject = stream;
+			// 			return navigator.mediaDevices.enumerateDevices();
+			// 		}).catch(function(error){
+			// 			console.log('navigator.getUserMedia error: ', error);
+			// 		});
+			// 	}
+			// }
+
+		</script>
+	</body>
+</html>
+
