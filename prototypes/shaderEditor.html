@@ -37,6 +37,8 @@
 
             init();
             function init(){
+                numberOfShaders=-1;
+                getNumberOfShaders();
                 addControls();
                 loadSelectedShader();
             }
@@ -66,15 +68,44 @@
                 gui.width=260;
 				gui.add(globalController, "shaderToEdit", 1, 11, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);loadSelectedShader(); });		
                 gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
-				// gui.add({ 'New Preset':function(){ recallState() }},'New Preset');											
+				gui.add({ 'New Preset':function(){ addNewShader() }},'New Preset');											
 			}
 
             function getNumberOfShaders(){
-
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "../php/read.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+                    numberOfShaders=parseInt(xmlhttp.response);
+                    console.log("get number of shaders: "+numberOfShaders)
+				}
             }
 
-            function setNumberOfShaders(){
-                
+            function addNewShader(){
+
+                numberOfShaders=numberOfShaders+1;
+                console.log("set number of shaders: "+numberOfShaders)
+				var requestBody=numberOfShaders.toString();
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "../php/write.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+
+				var xmlhttp2=new XMLHttpRequest();
+                var copyBuffer="";
+				xmlhttp2.open("GET", "../php/read.php?fn=fragmentShaders/shader"+parseInt(globalController.shaderToEdit)+".txt", true);
+				xmlhttp2.send();
+				xmlhttp2.onload = function(e){
+                    console.log("loading copy buffer");
+                    var requestBody3=copyBuffer;
+                    var xmlhttp3=new XMLHttpRequest();
+                    xmlhttp3.open("POST", "../php/write.php?fn=fragmentShaders/shader"+parseInt(numberOfShaders)+".txt", true);
+                    xmlhttp3.send(requestBody3);
+                    xmlhttp3.onload = function(e){
+                        console.log(xmlhttp3.response.status);
+                        console.log("Created new shader file");
+                    }
+				}
             }
 				
 		</script>
