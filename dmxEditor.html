@@ -5,81 +5,83 @@
 			body{
 			    margin:0px;
 				background-color:black;
+				padding-top:3%;
 			}	
 			#guiContainer{
 				position:absolute;
 				width:50%;
 				right:0%;
 			}
+			label{
+				color:white;
+			}
+			label,input{
+				left:5%;
+				position:relative;
+			}
+			.slider {
+				-webkit-appearance: none;
+				width: 30%;
+				height: 25px;
+				background: #d3d3d3;
+				outline: none;
+				opacity: 0.7;
+				-webkit-transition: .2s;
+				transition: opacity .2s;
+				position:relative;
+				display: block;
+				margin-top:2%;
+			}
+			.slider:hover {
+			opacity: 1;
+			}
+			.slider::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 25px;
+			height: 25px;
+			background: #4CAF50;
+			cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
-		<script src="dependancies/dat.gui.min.js"></script>
+		<label for="FixtureName">Fixture Name:</label>
+		<input type="text" id="FixtureName" name="FixtureName"><br><br>
+		<label for="NumberOfChannels">Number Of Channels:</label>
+		<input type="text" id="NumberOfChannels" name="Number Of Channels"><br><br>
+		<input type="submit" value="Add Fixture" onclick="addFixture();"><br><br>
+		<!-- <input type="range" min="1" max="100" value="50" class="slider"> -->
 		
 		<script>
-				
-			initGlobalVars();
 
-			function initGlobalVars(){
-				addControls();
-				statesArray=[];
-				for(var x=0;x<4;x++){
-					var objectJSON ={}
-					for (var key in channelsController) {
-						objectJSON[key]=channelsController[key]
-					}
-					statesArray.push(objectJSON)
+			init();
+			function init(){
+				document.getElementById("NumberOfChannels").value=3;
+				document.getElementById("FixtureName").value="SinglePixel";
+			}
+
+			function addFixture(){
+
+				var numSliders=document.body.getElementsByClassName('slider').length;
+				for (var x =0; x<numSliders;x++){
+						document.body.removeChild(document.getElementById("slider"+x));
+						console.log(x);
 				}
-				updateControlsView();
-				;
-			}
-							
-			function addControls(){
-				globalController  = {
-					selectedFixture:0
-				};
-				channelsController = {
-					R:0,
-					G:0,
-					B:0,
-				};
-				//--------	
-				gui = new dat.GUI({ autoPlace: false });
-				guiContainer=document.createElement('div');
-				guiContainer.id="guiContainer";
-				document.body.appendChild(guiContainer);
-				guiContainer.appendChild(gui.domElement);
-				gui.width=guiContainer.offsetWidth;
-				//--------		
-				globalFolder=gui.addFolder( "Global" )
-				globalFolder.open();
-				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();;});						
-				channelsFolder=gui.addFolder( "Channels" )
-				channelsFolder.open();
-				channelsFolder.add( channelsController, "R", 0, 255, 1).onChange(function(){updateControlsValues();});
-				channelsFolder.add( channelsController, "G",  0, 255, 1).onChange(function(){updateControlsValues();});
-				channelsFolder.add( channelsController, "B",  0, 255, 1).onChange(function(){updateControlsValues();});	
-				utilsFolder=gui.addFolder( "Utils" )
-				utilsFolder.open();
-				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
-				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
-				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
-				// dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
-			}
-									
-			function updateControlsView(){
-				for (var i in gui.__folders.Channels.__controllers) {
-					channelsController[gui.__folders.Channels.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.Channels.__controllers[i].property];
-					gui.__folders.Channels.__controllers[i].updateDisplay();
+
+				var numChannels=parseInt(document.getElementById("NumberOfChannels").value);
+				for(var x=0; x<numChannels; x++){
+					var newSlider=document.createElement('input');
+					newSlider.type="range";
+					newSlider.classList="slider";
+					newSlider.id="slider"+x;
+					newSlider.max=255;
+					newSlider.value=0;
+					document.body.appendChild(newSlider);
 				}
+
 			}
-			
-			function updateControlsValues(){  
-				for (var i in gui.__folders.Channels.__controllers) {
-				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.Channels.__controllers[i].property]=channelsController[gui.__folders.Channels.__controllers[i].property];
-				}
-			}
-																			
+																									
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray})
 				var xmlhttp=new XMLHttpRequest();
@@ -100,20 +102,9 @@
 				}
 			}					
 		
-			function requestFullScreen() {
-				// Supports most browsers and their versions.
-				var element = document.body; // Make the body go full screen.
-				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
-			
-				if (requestMethod) { // Native full screen.
-					requestMethod.call(element);
-				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
-					var wscript = new ActiveXObject("WScript.Shell");
-					if (wscript !== null) {
-						wscript.SendKeys("{F11}");
-					}
-				}
-			}	
+			function temp(){
+
+			}
 		</script>
 	</body>
 </html>
