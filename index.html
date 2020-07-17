@@ -97,7 +97,22 @@
 		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
 		
-			dmxInterval=setInterval(writeDMX,100);
+			// dmxInterval=setInterval(writeDMX,100);
+
+			patternData=[];
+			getPatternData();
+			function getPatternData(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "../php/read.php?fn=datout.txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+                    patternDataString=xmlhttp.response;
+					patternDataStringArray=patternDataString.split('\t');
+				for(var x=0; x<patternDataStringArray.length; x++){
+					patternData[x]=parseInt(patternDataStringArray[x]);
+				}
+				}
+			}
 			
 			function retrievePixelPattern(){
 				var xmlhttp=new XMLHttpRequest();
