@@ -94,12 +94,6 @@
 		</style>
 	</head>
 	<body>
-		<textarea wrap="soft" id="frag_shader_text_box" style="height:85%;resize: none"></textarea>
-		<textarea id="vertex_shader_text_box" style="display:none;height:20%;top:70%;resize: none"></textarea>  
-		<button id="update_shader_button" onclick="updateShader();">Update Shader #1</button>
-		<button id="hide_shader_editor" onclick="document.getElementById('frag_shader_text_box').style.display='none';document.getElementById('update_shader_button').style.display='none';document.getElementById('hide_shader_editor').style.display='none';document.getElementById('show_shader_editor').style.display='none';">Hide Editor</button>
-		<button id="show_shader_editor" style="display:none" onclick="document.getElementById('frag_shader_text_box').style.display='inline';document.getElementById('update_shader_button').style.display='inline';document.getElementById('hide_shader_editor').style.display='inline';document.getElementById('show_shader_editor').style.display='none';">Show Editor</button>
-		<!-- <canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas> -->
 		<script src="dependancies/three.js"></script>
 		<script src="dependancies/pixel8.js"></script>
 		<script src="dependancies/dat.gui.min.js"></script>
@@ -178,8 +172,7 @@ void main()	{
 		</script>
 
 		<script>
-
-					
+		
 			initGlobalVars();
 			
 			function updateShader(){
@@ -238,7 +231,7 @@ void main()	{
 				lastMaskAValue=-1;
 				lastMaskBValue=-1;
 				fade_Position=0;
-				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
+				setTimeout(function(){recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
 				addControls();
 				getNumberOfShaders();
 				dmxInterval=0;
@@ -319,8 +312,6 @@ void main()	{
 				};
 				// uniforms1[ "colorTexture" ].value.wrapS = uniforms1[ "colorTexture" ].value.wrapT = THREE.MirroredRepeatWrapping;
 				materialsList=initShaderMaterial(uniforms1);
-				document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader1' ).textContent
-				document.getElementById('vertex_shader_text_box').value=document.getElementById( 'vertexShader' ).textContent
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 				frustumSize = 1000;
@@ -420,6 +411,7 @@ void main()	{
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
+				utilsFolder.add({ 'Shader Editor':function(){ window.location.replace("http://localhost/prototypes/shaderEditor.html"); }},'Shader Editor');
 				// utilsFolder.add(globalController, 'PresetName').onChange(function(){});
 				dmxFolder=gui.addFolder( "DMX" );
 				dmxFolder.open();
@@ -463,9 +455,6 @@ void main()	{
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					// console.log(xmlhttp.response)
-					if(shaderNum==globalController.shaderToEdit){
-						document.getElementById('frag_shader_text_box').value=xmlhttp.response; 
-					}
 					document.getElementById( 'fragmentShader'+parseInt(shaderNum)).textContent=xmlhttp.response;
 					materialsList=initShaderMaterial(uniforms1);
 					for(var i=0;i<displayObjects.length;i++){

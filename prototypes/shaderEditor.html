@@ -38,9 +38,9 @@
             init();
             function init(){
                 numberOfShaders=-1;
+                addControls();
                 getNumberOfShaders();
                 setTimeout(function(){
-                    addControls();
                     loadSelectedShader();
                 },500);
             }
@@ -68,9 +68,11 @@
 				}
 				gui = new dat.GUI();
                 gui.width=260;
-				gui.add(globalController, "shaderToEdit", 1, numberOfShaders, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);loadSelectedShader(); });		
+				gui.add(globalController, "shaderToEdit", 1, 10, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);loadSelectedShader(); });		
                 gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
-				gui.add({ 'Save As New Preset':function(){ addNewShader() }},'Save As New Preset');											
+				gui.add({ 'Save As New Preset':function(){ addNewShader() }},'Save As New Preset');
+                gui.add({ 'Back to Main':function(){ window.location.replace("http://localhost/index.html"); }},'Back to Main');
+									
 			}
 
             function getNumberOfShaders(){
@@ -80,7 +82,7 @@
 				xmlhttp.onload = function(e){
                     numberOfShaders=parseInt(xmlhttp.response);
                     console.log("get number of shaders: "+numberOfShaders)
-                    gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max=gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max+1;
+                    gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max=numberOfShaders;
                     gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].updateDisplay()
 				}
             }
