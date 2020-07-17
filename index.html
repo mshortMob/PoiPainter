@@ -239,7 +239,8 @@ void main()	{
 				lastMaskBValue=-1;
 				fade_Position=0;
 				setTimeout(function(){document.getElementById('hide_shader_editor').click();recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
-				addControls();	
+				addControls();
+				getNumberOfShaders();
 				dmxInterval=0;
 				maxNumDMXScenes=8;
 				dmxPresetData=[];
@@ -1477,6 +1478,20 @@ void main()	{
 				}
 			}
 			
+            function getNumberOfShaders(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "../php/read.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+                    numberOfShaders=parseInt(xmlhttp.response);
+                    console.log("get number of shaders: "+numberOfShaders)
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].__max=numberOfShaders;
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].updateDisplay()
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderB"})[0].__max=numberOfShaders;
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderB"})[0].updateDisplay()
+				}
+            }
+
 			// function getVideo(action,camNum) {
 			// 	if(action == "init"){
 			// 		numOfCameras=0
