@@ -80,6 +80,8 @@
 				xmlhttp.onload = function(e){
                     numberOfShaders=parseInt(xmlhttp.response);
                     console.log("get number of shaders: "+numberOfShaders)
+                    gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max=gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max+1;
+                    gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].updateDisplay()
 				}
             }
 
