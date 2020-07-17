@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<title>FlowMapper</title>
+		<style>
+			body{
+			    margin:0px;
+				background-color:black;
+			}	
+			textarea{
+				z-index:100;
+				position:absolute;
+				background-color: grey;
+				border-color: #515151;
+				border-width:4;
+				border-top-width:8;
+				border-left-width:8;
+				border-right-width:8;
+				font-size: 14px;
+				wrap: off;
+				white-space: nowrap;
+                width:90%; 
+                height:90%; 
+                top:5%;
+                left:5%;
+                resize: none; 
+                z-index: 0;
+            }
+		</style>
+	</head>
+	<body>
+
+		<textarea wrap="soft" id="textbox1"></textarea>
+
+		<script src="../dependancies/dat.gui.min.js"></script>
+		<script>
+
+            init();
+            function init(){
+                addControls();
+                loadSelectedShader();
+            }
+
+            function  loadSelectedShader(){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "../php/read.php?fn=fragmentShaders/shader"+parseInt(globalController.shaderToEdit)+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+                    document.getElementById('textbox1').value=xmlhttp.response;
+				}
+            }
+
+            function saveState(){
+				var requestBody=document.getElementById('textbox1').value;
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("POST", "php/write.php?fn=globalPresets/"+globalController.PresetName+".txt", true);
+				xmlhttp.send(requestBody);
+				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
+			}
+
+            function addControls(){
+				globalController  = {
+					shaderToEdit:1
+				}
+				gui = new dat.GUI();
+                gui.width=260;
+				gui.add(globalController, "shaderToEdit", 1, 11, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit); });		
+                gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
+				// gui.add({ 'New Preset':function(){ recallState() }},'New Preset');											
+			}
+				
+		</script>
+	</body>
+</html>
+
