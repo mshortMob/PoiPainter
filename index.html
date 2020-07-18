@@ -21,6 +21,8 @@
 				margin-top:2%;
 				transform:rotate(0deg);
 				position:absolute;
+				border-width: 2.5px;
+				border-style: solid;
 			}
 			#speedSlider{
 				top:33%;
@@ -48,7 +50,7 @@
 		<input type="range" min="10" max="400" value="125" class="slider" id="speedSlider" oninput="setSpeed();">
 		<input type="range" min="0" max="1000" value="400" class="slider" id="brightnessSlider" oninput="setSpeed();">
 
-		<script src="dependancies/dat.gui.min.js"></script> 
+		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
 
 			init();
