@@ -10,7 +10,7 @@
 			.slider {
 				-webkit-appearance: none;
 				width: 97%;
-				height: 50%;
+				height: 33%;
 				background: #d3d3d3;
 				outline: none;
 				opacity: 0.7;
@@ -23,7 +23,11 @@
 				position:absolute;
 			}
 			#speedSlider{
-				top:50%;
+				top:33%;
+				transform:scale(-1,1);
+			}
+			#brightnessSlider{
+				top:66%;
 			}
 			.slider:hover {
 			opacity: 1;
@@ -39,8 +43,10 @@
 		</style>
 	</head>
 	<body>
+
 		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider">
-		<input type="range" min="10" max="1000" value="200" class="slider" id="speedSlider" oninput="setSpeed();">
+		<input type="range" min="10" max="400" value="125" class="slider" id="speedSlider" oninput="setSpeed();">
+		<input type="range" min="0" max="1000" value="400" class="slider" id="brightnessSlider" oninput="setSpeed();">
 
 		<script src="dependancies/dat.gui.min.js"></script> 
 		<script>
@@ -99,8 +105,11 @@
 				xhttp.setRequestHeader("cache-control", "no-cache");
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
-
-				dmxPayloadString="u=0&d="+patternsArray[document.getElementById("presetSlider").value-1][masterIndex].toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				var volAdjustedData=patternsArray[document.getElementById("presetSlider").value-1][masterIndex];
+				for(var x=0; x<patternsArray[document.getElementById("presetSlider").value-1][masterIndex].length ; x++){
+					volAdjustedData[x]=parseInt(volAdjustedData[x]*document.getElementById("brightnessSlider").value/1000);
+				}
+				dmxPayloadString="u=0&d="+volAdjustedData.toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				// console.log(dmxPayloadString);
 				xhttp.send(dmxPayloadString);
 			}	
