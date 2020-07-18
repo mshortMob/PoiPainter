@@ -213,6 +213,9 @@ void main()	{
 
 			function initGlobalVars(){
 				//------------------
+				ledStripPatternsArray=[];
+				getLedStripPixelData(1,ledStripPatternsArray);
+				//------------------
 				initAudio();
 				setTimeout(function(){
 					setInterval(function(){  
@@ -288,6 +291,30 @@ void main()	{
 				updateControlsView();
 				syncObjectsToJson();
 				window.addEventListener("keypress", keyHandler);
+			}
+
+			function getLedStripPixelData(patNum,ledStripPatternsArray){
+				var patternData=[];
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "php/read.php?fn=pixelPatterns/datout"+patNum+".txt", true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+                    var patternDataString=xmlhttp.response;
+					var patternDataStringArray=patternDataString.split('\n');
+					for(var x=0; x<patternDataStringArray.length-1; x++){
+						var temp=patternDataStringArray[x].split(',');
+						for(var y=0; y<temp.length; y++){
+							temp[y]=parseInt(temp[y]);
+						}
+						patternData.push(temp);
+					}
+					ledStripPatternsArray.push(patternData);
+					if(patNum<6){
+						getLedStripPixelData(patNum+1,ledStripPatternsArray);
+					}else{
+						console.log("loaded all led strip data");
+					}
+				}
 			}
 			
 			function initScene() {
