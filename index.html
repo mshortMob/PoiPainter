@@ -1428,9 +1428,9 @@ void main()	{
 
 				//final
 				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+volAdjustedLedStripDataString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				console.log(dmxPayloadString);
+				// console.log(dmxPayloadString);
 				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				// xhttp.send(dmxPayloadString);
+				xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
