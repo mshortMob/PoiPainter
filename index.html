@@ -5,95 +5,39 @@
 			body{
 			    margin:0px;
 				background-color:black;
+				padding:0%;
 			}	
-			canvas{
-				opacity: 1;
-				width:100%;
-				height:100%;
-				top:0px;
-				left:0px;
-				z-index:10;
-				transform:scale(1,1);
-				position:fixed;
-				float:left;
-				object-fit:fill;
-				/* cursor: none; */
+			.slider {
+				-webkit-appearance: none;
+				width: 100%;
+				height: 100%;
+				background: #d3d3d3;
+				outline: none;
+				opacity: 0.7;
+				-webkit-transition: .2s;
+				transition: opacity .2s;
+				position:relative;
+				display: block;
+				margin-top:2%;
+				transform:rotate(0deg);
+				position:absolute;
 			}
-			textarea{
-				z-index:100;
-				position:fixed;
-				height:42.5%;
-				width:35%;
-				background-color: grey;
-				border-color: #515151;
-				border-width:4;
-				border-top-width:8;
-				border-left-width:8;
-				border-right-width:8;
-				font-size: 14px;
-				wrap: off;
-				white-space: nowrap;
+			.slider:hover {
+			opacity: 1;
 			}
-			#show_shader_editor{
-				z-index:100;
-				position:fixed;
-				left:0px;
-				top:0px;
-				height:6%;
-				width:100px;
-				background-color: darkgrey;
-				border-color: #515151;
-				border-width:4;
-				border-top-width:0;
-				border-left-width:0;
-				font-size: 14px;
-			}
-			#hide_shader_editor{
-				z-index:100;
-				position:fixed;
-				left:0px;
-				bottom:0px;
-				height:15%;
-				width:10%;
-				background-color: darkgrey;
-				border-color: #515151;
-				border-width:4;
-				border-left-width:8;
-				border-bottom-width:8;
-				font-size: 18px;
-			}
-			#update_shader_button{
-				z-index:100;
-				position:fixed;
-				left:10%;
-				bottom:0px;
-				height:15%;
-				width:25%;
-				background-color: darkgrey;
-				border-color: #515151;
-				border-width:4;
-				border-right-width:8;
-				border-bottom-width:8;
-				font-size: 24px;
-			}
-			#update_shader_button:active{
-				background-color: grey;			
-			}
-			video{
-				opacity: 1;
-				width:100%;
-				height:100%;
-				top:0px;
-				left:0px;
-				z-index:-1;
-				transform:scale(-1,1);
-				position:fixed;
-				float:left;
-				object-fit:fill;
+			.slider::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 50px;
+			height: 100%;
+			background: #354285;
+			cursor: pointer;
 			}
 		</style>
 	</head>
 	<body>
+		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider">
+
 		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
 			initializeDMX();
@@ -101,7 +45,7 @@
 			function getPatternData(){
 				patternData=[];
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=datout.txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=datout"+document.getElementById("presetSlider").value+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
                     patternDataString=xmlhttp.response;
