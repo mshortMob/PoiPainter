@@ -39,7 +39,7 @@
 		</style>
 	</head>
 	<body>
-		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider" oninput="getPatternData();">
+		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider">
 		<input type="range" min="10" max="1000" value="200" class="slider" id="speedSlider" oninput="setSpeed();">
 
 		<script src="dependancies/dat.gui.min.js"></script>
@@ -47,22 +47,21 @@
 
 			init();
 			function init(){
-				initializeDMX();
-				getPatternData();
+				dmxInterval=-1;
+				setTimeout(function(){initializeDMX();},1000);
+				patternsArray=[];
+				getPatternData(1,patternsArray);
 				masterIndex=0;
-				dmxInterval=setInterval(function(){
-					masterIndex=(masterIndex+1)%patternData.length;
-					writeDMX();
-				},100)
 			}
-			function getPatternData(){
-				patternData=[];
+
+			function getPatternData(patNum,patternsArray){
+				var patternData=[];
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/datout"+parseInt(document.getElementById("presetSlider").value)+".txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/datout"+patNum+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
-                    patternDataString=xmlhttp.response;
-					patternDataStringArray=patternDataString.split('\n');
+                    var patternDataString=xmlhttp.response;
+					var patternDataStringArray=patternDataString.split('\n');
 					for(var x=0; x<patternDataStringArray.length-1; x++){
 						var temp=patternDataStringArray[x].split(',');
 						for(var y=0; y<temp.length; y++){
@@ -70,13 +69,19 @@
 						}
 						patternData.push(temp);
 					}
+					patternsArray.push(patternData);
+					if(patNum<6){
+						getPatternData(patNum+1,patternsArray);
+					}else{
+						setSpeed();
+					}
 				}
 			}
 			
 			function setSpeed(){
 				clearInterval(dmxInterval);
 				dmxInterval=setInterval(function(){
-						masterIndex=(masterIndex+1)%patternData.length;
+						masterIndex=(masterIndex+1)%patternsArray[document.getElementById("presetSlider").value-1].length;
 						writeDMX();
 				},parseInt(document.getElementById("speedSlider").value));
 			}
@@ -95,9 +100,9 @@
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
 
-				dmxPayloadString="u=0&d="+patternData[masterIndex].toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				// console.log(dmxPayloadString);
-				xhttp.send(dmxPayloadString);
+				dmxPayloadString="u=0&d="+patternsArray[document.getElementById("presetSlider").value-1][masterIndex].toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				console.log(dmxPayloadString);
+				// xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
