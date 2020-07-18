@@ -101,8 +101,8 @@
 				xhttp.setRequestHeader("pragma", "no-cache" );
 
 				dmxPayloadString="u=0&d="+patternsArray[document.getElementById("presetSlider").value-1][masterIndex].toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				console.log(dmxPayloadString);
-				// xhttp.send(dmxPayloadString);
+				// console.log(dmxPayloadString);
+				xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
