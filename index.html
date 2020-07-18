@@ -36,7 +36,7 @@
 		</style>
 	</head>
 	<body>
-		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider">
+		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider" oninput="getPatternData();">
 
 		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
@@ -45,7 +45,7 @@
 			function getPatternData(){
 				patternData=[];
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=datout"+document.getElementById("presetSlider").value+".txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/datout"+document.getElementById("presetSlider").value+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
                     patternDataString=xmlhttp.response;
@@ -80,8 +80,8 @@
 				xhttp.setRequestHeader("pragma", "no-cache" );
 
 				dmxPayloadString="u=0&d="+patternData[masterIndex].toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				console.log(dmxPayloadString);
-				xhttp.send(dmxPayloadString);
+				// console.log(dmxPayloadString);
+				// xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
