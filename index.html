@@ -1429,7 +1429,7 @@ void main()	{
 
 
 				//final
-				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+volAdjustedLedStripDataString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+volAdjustedLedStripDataString+"0";
 				// console.log(dmxPayloadString);
 				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				xhttp.send(dmxPayloadString);
