@@ -213,6 +213,7 @@ void main()	{
 
 			function initGlobalVars(){
 				//------------------
+				ledStripAnimationmMasterIndex=0;
 				ledStripPatternsArray=[];
 				getLedStripPixelData(1,ledStripPatternsArray);
 				//------------------
@@ -225,6 +226,9 @@ void main()	{
 							uniforms2.mousex={ value: ((uniforms2.mousex.value+.1+audioVolume*400.0)%1.0) };
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1+audioVolume*400.0)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1+audioVolume*400.0)%1.0) };
+
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+1)%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][ledStripAnimationmMasterIndex].length;
+
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
 						}
@@ -1414,11 +1418,19 @@ void main()	{
 				moverString=moverString+parseInt(temp[10]/10)+",";
 				moverString=moverString+parseInt(temp[11]/10)+",";
 
+				//ledStrips
+				var volAdjustedLedStripData=[];
+				for(var x=0; x<ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][ledStripAnimationmMasterIndex].length ; x++){
+					volAdjustedLedStripData.push(parseInt(ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][ledStripAnimationmMasterIndex][x]*globalController.Pixel_Level));
+				}
+				var volAdjustedLedStripDataString=volAdjustedLedStripData.toString();
+
+
 				//final
-				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				// console.log(dmxPayloadString);
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+volAdjustedLedStripDataString+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+				console.log(dmxPayloadString);
 				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-				xhttp.send(dmxPayloadString);
+				// xhttp.send(dmxPayloadString);
 			}	
 
 			function initializeDMX() {
