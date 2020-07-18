@@ -232,7 +232,7 @@ void main()	{
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
 						}else{
-							ledStripAnimationmMasterIndex=ledStripAnimationmMasterIndex+.33%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+.5)%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 						}
 					} ,100);
 				}, 2000);
