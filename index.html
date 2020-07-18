@@ -227,10 +227,12 @@ void main()	{
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1+audioVolume*400.0)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1+audioVolume*400.0)%1.0) };
 
-							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+1)%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][ledStripAnimationmMasterIndex].length;
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+1)%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
+						}else{
+							ledStripAnimationmMasterIndex=ledStripAnimationmMasterIndex+.33%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 						}
 					} ,100);
 				}, 2000);
@@ -1420,8 +1422,8 @@ void main()	{
 
 				//ledStrips
 				var volAdjustedLedStripData=[];
-				for(var x=0; x<ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][ledStripAnimationmMasterIndex].length ; x++){
-					volAdjustedLedStripData.push(parseInt(ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][ledStripAnimationmMasterIndex][x]*globalController.Pixel_Level));
+				for(var x=0; x<ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length ; x++){
+					volAdjustedLedStripData.push(parseInt(ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)][x]*globalController.Pixel_Level));
 				}
 				var volAdjustedLedStripDataString=volAdjustedLedStripData.toString();
 
