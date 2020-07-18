@@ -119,7 +119,7 @@
 					setInterval(function(){
 						masterIndex=(masterIndex+1)%patternData.length;
 						writeDMX();
-					},500)
+					},100)
 				}
 			}
 			
@@ -139,7 +139,7 @@
 
 				dmxPayloadString="u=0&d="+patternData[masterIndex].toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				console.log(dmxPayloadString);
-				// xhttp.send(dmxPayloadString);
+				xhttp.send(dmxPayloadString);
 			}	
 		</script>
 	</body>
