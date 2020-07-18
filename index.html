@@ -52,7 +52,6 @@
 
 		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
-
 			init();
 			function init(){
 				dmxInterval=-1;
@@ -107,9 +106,9 @@
 				xhttp.setRequestHeader("cache-control", "no-cache");
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
-				var volAdjustedData=patternsArray[document.getElementById("presetSlider").value-1][masterIndex];
+				var volAdjustedData=[]
 				for(var x=0; x<patternsArray[document.getElementById("presetSlider").value-1][masterIndex].length ; x++){
-					volAdjustedData[x]=parseInt(volAdjustedData[x]*document.getElementById("brightnessSlider").value/1000);
+					volAdjustedData.push(parseInt(patternsArray[document.getElementById("presetSlider").value-1][masterIndex][x]*document.getElementById("brightnessSlider").value/1000));
 				}
 				dmxPayloadString="u=0&d="+volAdjustedData.toString()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				// console.log(dmxPayloadString);
