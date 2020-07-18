@@ -96,9 +96,7 @@
 	<body>
 		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
-		
-			// dmxInterval=setInterval(writeDMX,100);
-
+			initializeDMX();
 			getPatternData();
 			function getPatternData(){
 				patternData=[];
@@ -141,6 +139,22 @@
 				console.log(dmxPayloadString);
 				xhttp.send(dmxPayloadString);
 			}	
+
+			function initializeDMX() {
+				xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						console.log("Initialize DMX: "+this.responseText);
+						toggleDmxSend();
+					}else{
+						clearInterval(dmxInterval);
+						console.log("DMX Not Available");
+					}
+				};
+				xhttp.open("GET","proxy/reload", true);
+				xhttp.send();
+			}
+		
 		</script>
 	</body>
 </html>
