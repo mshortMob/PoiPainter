@@ -10,7 +10,7 @@
 			.slider {
 				-webkit-appearance: none;
 				width: 97%;
-				height: 100%;
+				height: 50%;
 				background: #d3d3d3;
 				outline: none;
 				opacity: 0.7;
@@ -21,6 +21,9 @@
 				margin-top:2%;
 				transform:rotate(0deg);
 				position:absolute;
+			}
+			#speedSlider{
+				top:50%;
 			}
 			.slider:hover {
 			opacity: 1;
@@ -37,34 +40,47 @@
 	</head>
 	<body>
 		<input type="range" min="1" max="6" value="1" class="slider" id="presetSlider" oninput="getPatternData();">
+		<input type="range" min="10" max="1000" value="200" class="slider" id="speedSlider" oninput="setSpeed();">
 
 		<script src="dependancies/dat.gui.min.js"></script>
 		<script>
-			initializeDMX();
-			getPatternData();
+
+			init();
+			function init(){
+				initializeDMX();
+				getPatternData();
+				masterIndex=0;
+				dmxInterval=setInterval(function(){
+					masterIndex=(masterIndex+1)%patternData.length;
+					writeDMX();
+				},100)
+			}
 			function getPatternData(){
 				patternData=[];
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/datout"+document.getElementById("presetSlider").value+".txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/datout"+parseInt(document.getElementById("presetSlider").value)+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
                     patternDataString=xmlhttp.response;
 					patternDataStringArray=patternDataString.split('\n');
-					for(var x=0; x<patternDataStringArray.length; x++){
+					for(var x=0; x<patternDataStringArray.length-1; x++){
 						var temp=patternDataStringArray[x].split(',');
 						for(var y=0; y<temp.length; y++){
 							temp[y]=parseInt(temp[y]);
 						}
 						patternData.push(temp);
 					}
-					masterIndex=0;
-					setInterval(function(){
-						masterIndex=(masterIndex+1)%patternData.length;
-						writeDMX();
-					},100)
 				}
 			}
 			
+			function setSpeed(){
+				clearInterval(dmxInterval);
+				dmxInterval=setInterval(function(){
+						masterIndex=(masterIndex+1)%patternData.length;
+						writeDMX();
+				},parseInt(document.getElementById("speedSlider").value));
+			}
+
 			function writeDMX() {
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
