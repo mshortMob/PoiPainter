@@ -172,7 +172,6 @@ void main()	{
 		</script>
 
 		<script>
-		
 			initGlobalVars();
 			 
 			function updateShader(){
@@ -212,6 +211,7 @@ void main()	{
 			}
 
 			function initGlobalVars(){
+				getNumberOfShadersAndPresets();
 				//------------------
 				ledStripAnimationmMasterIndex=0;
 				ledStripPatternsArray=[];
@@ -243,7 +243,6 @@ void main()	{
 				setTimeout(function(){recallState();loadShaderPreset(1);loadShaderPreset(2);},10);
 				addControls();
 				// gui.close();
-				getNumberOfShaders();
 				dmxInterval=0;
 				maxNumDMXScenes=8;
 				dmxPresetData=[];
@@ -302,7 +301,7 @@ void main()	{
 			function getLedStripPixelData(patNum,ledStripPatternsArray){
 				var patternData=[];
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "php/read.php?fn=pixelPatterns/datout"+patNum+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn=pixelPatterns/pattern"+patNum+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
                     var patternDataString=xmlhttp.response;
@@ -1502,7 +1501,7 @@ void main()	{
 				}
 			}
 			
-            function getNumberOfShaders(){
+            function getNumberOfShadersAndPresets(){
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("GET", "../php/read.php?fn=fragmentShaders/numberOfShaders.txt", true);
 				xmlhttp.send();
@@ -1513,63 +1512,19 @@ void main()	{
                     gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].updateDisplay()
                     gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderB"})[0].__max=numberOfShaders;
                     gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderB"})[0].updateDisplay()
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].__max=numberOfShaders;
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
+				}
+				var xmlhttp2=new XMLHttpRequest();
+				xmlhttp2.open("GET", "../php/read.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp2.send();
+				xmlhttp2.onload = function(e){
+                    numberOfDMXPatterns=parseInt(xmlhttp2.response);
+                    console.log("get number of dmx patterns: "+numberOfShaders)
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].__max=numberOfDMXPatterns;
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
 				}
             }
-
-			// function getVideo(action,camNum) {
-			// 	if(action == "init"){
-			// 		numOfCameras=0
-			// 		cameraIds=[]
-			// 		selectedCamera=0;
-			// 		videoElem='video'
-			// 		navigator.mediaDevices.enumerateDevices().then(function(deviceInfos){
-			// 		  for (var i = 0; i !== deviceInfos.length; ++i) {
-			// 			var deviceInfo = deviceInfos[i];
-			// 			if (deviceInfo.kind === 'videoinput') {
-			// 			  numOfCameras=numOfCameras + 1
-			// 			  cameraIds.push(deviceInfo.deviceId);
-			// 			}
-			// 		  }
-			// 		  selectedCamera=camNum;
-			// 		  if (window.stream) {
-			// 			window.stream.getTracks().forEach(function(track) {
-			// 			  track.stop();
-			// 			});
-			// 		  }
-			// 		  console.log(cameraIds[selectedCamera])
-			// 		  var videoSource = cameraIds[selectedCamera];
-			// 		  var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
-			// 		  navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
-			// 			  window.stream = stream; 
-			// 			  document.getElementById(videoElem).srcObject = stream;
-			// 			  return navigator.mediaDevices.enumerateDevices();
-			// 		  }).catch(function(error){
-			// 			  console.log('navigator.getUserMedia error: ', error);
-			// 		  });
-			// 		  }).catch(function(error){
-			// 			console.log('navigator.getUserMedia error: ', error);
-			// 		  });
-			// 	}
-			// 	if(action == "select"){
-			// 		selectedCamera=camNum;
-			// 		if (window.stream) {
-			// 		  window.stream.getTracks().forEach(function(track) {
-			// 			track.stop();
-			// 		  });
-			// 		}
-			// 		console.log(cameraIds[selectedCamera])
-			// 		var videoSource = cameraIds[selectedCamera];
-			// 		var constraints = {video: {deviceId: videoSource ? {exact: videoSource} : undefined}};
-			// 		navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
-			// 			window.stream = stream; 
-			// 			document.getElementById(videoElem).srcObject = stream;
-			// 			return navigator.mediaDevices.enumerateDevices();
-			// 		}).catch(function(error){
-			// 			console.log('navigator.getUserMedia error: ', error);
-			// 		});
-			// 	}
-			// }
-
 		</script>
 	</body>
 </html>
