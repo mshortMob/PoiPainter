@@ -68,7 +68,7 @@
 				}
 				gui = new dat.GUI();
                 gui.width=260;
-				gui.add(globalController, "patternToEdit", 1, 10, 1 ).onChange(function(){globalController.patternToEdit=parseInt(globalController.patternToEdit);loadSelectedPattern(); });		
+				gui.add(globalController, "patternToEdit", 0, 10, 1 ).onChange(function(){globalController.patternToEdit=parseInt(globalController.patternToEdit);loadSelectedPattern(); });		
                 gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				gui.add({ 'Save As New Preset':function(){ addNewPattern() }},'Save As New Preset');
                 gui.add({ 'Back to Main':function(){ window.location.replace("http://localhost/index.html"); }},'Back to Main');
