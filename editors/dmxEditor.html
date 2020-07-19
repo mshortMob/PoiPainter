@@ -37,17 +37,17 @@
 
             init();
             function init(){
-                numberOfShaders=-1;
+                numberOfPatterns=-1;
                 addControls();
-                getNumberOfShaders();
+                getNumberOfPatterns();
                 setTimeout(function(){
-                    loadSelectedShader();
+                    loadSelectedPattern();
                 },500);
             }
 
-            function  loadSelectedShader(){
+            function  loadSelectedPattern(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=fragmentShaders/shader"+parseInt(globalController.shaderToEdit)+".txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/pattern"+parseInt(globalController.patternToEdit)+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
                     document.getElementById('textbox1').value=xmlhttp.response;
@@ -57,61 +57,61 @@
             function saveState(){
 				var requestBody=document.getElementById('textbox1').value;
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "../php/write.php?fn=fragmentShaders/shader"+parseInt(globalController.shaderToEdit)+".txt", true);
+				xmlhttp.open("POST", "../php/write.php?fn=fragmentPatterns/pattern"+parseInt(globalController.patternToEdit)+".txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 
             function addControls(){
 				globalController  = {
-					shaderToEdit:1
+					patternToEdit:1
 				}
 				gui = new dat.GUI();
                 gui.width=260;
-				gui.add(globalController, "shaderToEdit", 1, 10, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);loadSelectedShader(); });		
+				gui.add(globalController, "patternToEdit", 1, 10, 1 ).onChange(function(){globalController.patternToEdit=parseInt(globalController.patternToEdit);loadSelectedPattern(); });		
                 gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
-				gui.add({ 'Save As New Preset':function(){ addNewShader() }},'Save As New Preset');
+				gui.add({ 'Save As New Preset':function(){ addNewPattern() }},'Save As New Preset');
                 gui.add({ 'Back to Main':function(){ window.location.replace("http://localhost/index.html"); }},'Back to Main');
 									
 			}
 
-            function getNumberOfShaders(){
+            function getNumberOfPatterns(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=fragmentPatterns/numberOfPatterns.txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
-                    numberOfShaders=parseInt(xmlhttp.response);
-                    console.log("get number of shaders: "+numberOfShaders)
-                    gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max=numberOfShaders;
-                    gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].updateDisplay()
+                    numberOfPatterns=parseInt(xmlhttp.response);
+                    console.log("get number of patterns: "+numberOfPatterns)
+                    gui.__controllers.filter(obj => { return obj.property == "patternToEdit"})[0].__max=numberOfPatterns;
+                    gui.__controllers.filter(obj => { return obj.property == "patternToEdit"})[0].updateDisplay()
 				}
             }
 
-            function addNewShader(){
+            function addNewPattern(){
 
-                numberOfShaders=numberOfShaders+1;
-                console.log("set number of shaders: "+numberOfShaders)
-				var requestBody=numberOfShaders.toString();
+                numberOfPatterns=numberOfPatterns+1;
+                console.log("set number of patterns: "+numberOfPatterns)
+				var requestBody=numberOfPatterns.toString();
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "../php/write.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp.open("POST", "../php/write.php?fn=fragmentPatterns/numberOfPatterns.txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 
 				var xmlhttp2=new XMLHttpRequest();
-				xmlhttp2.open("GET", "../php/read.php?fn=fragmentShaders/shader"+parseInt(globalController.shaderToEdit)+".txt", true);
+				xmlhttp2.open("GET", "../php/read.php?fn=fragmentPatterns/pattern"+parseInt(globalController.patternToEdit)+".txt", true);
 				xmlhttp2.send();
 				xmlhttp2.onload = function(e){
                     console.log("loading copy buffer");
                     var requestBody3=xmlhttp2.response;
                     var xmlhttp3=new XMLHttpRequest();
-                    xmlhttp3.open("POST", "../php/write.php?fn=fragmentShaders/shader"+parseInt(numberOfShaders)+".txt", true);
+                    xmlhttp3.open("POST", "../php/write.php?fn=fragmentPatterns/pattern"+parseInt(numberOfPatterns)+".txt", true);
                     xmlhttp3.send(requestBody3);
                     xmlhttp3.onload = function(e){
                         console.log(xmlhttp3.response.status);
-                        console.log("Created new shader file number: "+numberOfShaders);
-                        gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max=gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].__max+1;
-                        globalController.shaderToEdit=numberOfShaders;
-                        gui.__controllers.filter(obj => { return obj.property == "shaderToEdit"})[0].updateDisplay()
+                        console.log("Created new pattern file number: "+numberOfPatterns);
+                        gui.__controllers.filter(obj => { return obj.property == "patternToEdit"})[0].__max=gui.__controllers.filter(obj => { return obj.property == "patternToEdit"})[0].__max+1;
+                        globalController.patternToEdit=numberOfPatterns;
+                        gui.__controllers.filter(obj => { return obj.property == "patternToEdit"})[0].updateDisplay()
                     }
 				}
             }
