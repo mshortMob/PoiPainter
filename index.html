@@ -227,12 +227,12 @@ void main()	{
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1+audioVolume*400.0)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1+audioVolume*400.0)%1.0) };
 
-							// ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+5)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+5)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
 						}else{
-							// ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+.5)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+globalController.DMX_Pattern_Rate)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 						}
 					} ,100);
 				}, 2000);
@@ -308,9 +308,9 @@ void main()	{
 					var patternDataStringArray=patternDataString.split('\n');
 					for(var x=0; x<patternDataStringArray.length-1; x++){
 						var temp=patternDataStringArray[x].split(',');
-						for(var y=0; y<temp.length; y++){
-							temp[y]=parseInt(temp[y]);
-						}
+						// for(var y=0; y<temp.length; y++){
+						// 	temp[y]=parseInt(temp[y]);
+						// }
 						patternData.push(temp);
 					}
 					ledStripPatternsArray.push(patternData);
@@ -1054,86 +1054,14 @@ void main()	{
 					globalController.mappingMode=parseInt(globalController.mappingMode+1)%2;
 					if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};
 				}
-				if(event.key=="6"){
-					if(globalController.DMX_X1+5>255){
-						globalController.DMX_X1=0;
-						
-					}else{
-						globalController.DMX_X1=globalController.DMX_X1+5;
-					}
-					gui.__folders.DMX.__controllers[4].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="^"){
-					if(globalController.DMX_X1-5>0){
-						globalController.DMX_X1=globalController.DMX_X1-5;
-						
-					}else{
-						globalController.DMX_X1=3;
-					}
-					gui.__folders.DMX.__controllers[4].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="7"){
-					if(globalController.DMX_Y1+5>255){
-						globalController.DMX_Y1=0;
-						
-					}else{
-						globalController.DMX_Y1=globalController.DMX_Y1+5;
-					}
-					gui.__folders.DMX.__controllers[5].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="&"){
-					if(globalController.DMX_Y1-5>0){
-						globalController.DMX_Y1=globalController.DMX_Y1-5;
-						
-					}else{
-						globalController.DMX_Y1=3;
-					}
-					gui.__folders.DMX.__controllers[5].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="8"){
-					if(globalController.DMX_X2+5>255){
-						globalController.DMX_X2=0;
-						
-					}else{
-						globalController.DMX_X2=globalController.DMX_X2+5;
-					}
-					gui.__folders.DMX.__controllers[6].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="*"){
-					if(globalController.DMX_X2-5>0){
-						globalController.DMX_X2=globalController.DMX_X2-5;
-						
-					}else{
-						globalController.DMX_X2=3;
-					}
-					gui.__folders.DMX.__controllers[6].updateDisplay();
-					updateControlsValues();
-				}	
-				if(event.key=="9"){
-					if(globalController.DMX_Y2+5>255){
-						globalController.DMX_Y2=0;
-						
-					}else{
-						globalController.DMX_Y2=globalController.DMX_Y2+5;
-					}
-					gui.__folders.DMX.__controllers[7].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="("){
-					if(globalController.DMX_Y2-5>0){
-						globalController.DMX_Y2=globalController.DMX_Y2-5;
-						
-					}else{
-						globalController.DMX_Y2=3;
-					}
-					gui.__folders.DMX.__controllers[7].updateDisplay();
-					updateControlsValues();
-				}		
+				keyPressToSlider(event, "6", globalController, "DMX_X1", 1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "^", globalController, "DMX_X1", -1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "7", globalController, "DMX_Y1", 1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "&", globalController, "DMX_Y1", -1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "8", globalController, "DMX_X2", 1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "*", globalController, "DMX_X2", -1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "9", globalController, "DMX_Y2", 1, gui.__folders.DMX, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "(", globalController, "DMX_Y2", -1, gui.__folders.DMX, function(){ updateControlsValues(); } );
 				keyPressToSlider(event, "l", globalController, "loadShaderA", 1, gui.__folders.Global, function(){loadShaderPreset(1); updateControlsValues(); } );
 				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){loadShaderPreset(1); updateControlsValues(); } );
 				keyPressToSlider(event, "o", globalController, "loadShaderB", 1, gui.__folders.Global, function(){loadShaderPreset(2); updateControlsValues(); } );
@@ -1172,6 +1100,7 @@ void main()	{
 			}	
 
 			function writeDMX() {
+				listOfGuardedChannels=[1,3,22,24];
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
@@ -1185,13 +1114,36 @@ void main()	{
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
 
-				var volAdjustedLedStripData=[];
+				var brightnessAdjustedDMXData=[];
 				for(var x=0; x<ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length ; x++){
-					volAdjustedLedStripData.push(parseInt(ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)][x]*globalController.Brightness));
+					var oneValue=ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)][x];
+					var isGuardedChannel=false;
+					for(var y=0; y<listOfGuardedChannels.length; y++){
+						if(x  == (listOfGuardedChannels[y]-1) ){
+							isGuardedChannel=true;
+						}
+					}
+					if(isGuardedChannel){
+						if(x==(listOfGuardedChannels[0]-1)){
+							brightnessAdjustedDMXData.push(parseInt(globalController.DMX_X1));
+						}
+						if(x==(listOfGuardedChannels[1]-1)){
+							brightnessAdjustedDMXData.push(parseInt(globalController.DMX_Y1));
+						}
+						if(x==(listOfGuardedChannels[2]-1)){
+							brightnessAdjustedDMXData.push(parseInt(globalController.DMX_X2));
+						}
+						if(x==(listOfGuardedChannels[3]-1)){
+							brightnessAdjustedDMXData.push(parseInt(globalController.DMX_Y2));
+						}
+						
+					}else{
+						brightnessAdjustedDMXData.push(parseInt(parseInt(oneValue)*globalController.Brightness));
+					}
 				}
-				var volAdjustedLedStripDataString=volAdjustedLedStripData.toString();
+				var brightnessAdjustedDMXDataString=brightnessAdjustedDMXData.toString();
 
-				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+volAdjustedLedStripDataString+"0";
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+brightnessAdjustedDMXDataString+"0";
 				// console.log(dmxPayloadString);
 				xhttp.send(dmxPayloadString);
 			}	
