@@ -227,12 +227,12 @@ void main()	{
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1+audioVolume*400.0)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1+audioVolume*400.0)%1.0) };
 
-							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+5)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+5)%(ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(0)].length-1);
 
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
 						}else{
-							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+globalController.DMX_Pattern_Rate)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+globalController.DMX_Pattern_Rate)%(ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(0)].length-1);
 						}
 					} ,100);
 				}, 2000);
