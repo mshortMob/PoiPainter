@@ -35,13 +35,13 @@
 	<body>
 		<video id="video" autoplay width='600' height='300' style="display:none;"></video>
 		<canvas id="canvasp8" autoplay width='600' height='300' style=""></canvas>
-		<script src="three.js"></script>
-		<script src="pixel8.js"></script>
-		<script src='dat.gui.min.js'></script>
-		<script src="Detector.js"></script>
-		<script src="NURBSSurface.js"></script>
-		<script src="NURBSUtils.js"></script>
-		<script src="TrackballControls.js"></script>
+		<script src="dependancies/three.js"></script>
+		<script src="dependancies/pixel8.js"></script>
+		<script src='dependancies/dat.gui.min.js'></script>
+		<script src="dependancies/Detector.js"></script>
+		<script src="dependancies/NURBSSurface.js"></script>
+		<script src="dependancies/NURBSUtils.js"></script>
+		<script src="dependancies/TrackballControls.js"></script>
 		<script>
 			var colorObject = function() {
 				this.currentColHex="ff00ff";
@@ -682,14 +682,14 @@
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray, "storage2": presetsArray})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "write.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.open("POST", "php/write.php?fn="+globalController.PresetName+".txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "read.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn="+globalController.PresetName+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response).storage
