@@ -215,7 +215,7 @@ void main()	{
 				//------------------
 				ledStripAnimationmMasterIndex=0;
 				ledStripPatternsArray=[];
-				getLedStripPixelData(1,ledStripPatternsArray);
+				getDMXPatternData(1,ledStripPatternsArray);
 				//------------------
 				initAudio();
 				setTimeout(function(){
@@ -227,12 +227,12 @@ void main()	{
 							uniforms1.mousey={ value: ((uniforms1.mousey.value+.1+audioVolume*400.0)%1.0) };
 							uniforms2.mousey={ value: ((uniforms2.mousey.value+.1+audioVolume*400.0)%1.0) };
 
-							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+5)%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							// ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+5)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 
 							//console.log(audioVolume);
 							globalController.DMX_Scene=(globalController.DMX_Scene+.3)%maxNumDMXScenes;
 						}else{
-							ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+.5)%ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length;
+							// ledStripAnimationmMasterIndex=(ledStripAnimationmMasterIndex+.5)%ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length;
 						}
 					} ,100);
 				}, 2000);
@@ -278,8 +278,8 @@ void main()	{
 				statesArray=[];
 				for(var x=0;x<4;x++){
 					var objectJSON ={}
-					for (var key in mappingController) {
-						objectJSON[key]=mappingController[key]
+					for (var key in objectController) {
+						objectJSON[key]=objectController[key]
 					}
 					statesArray.push(objectJSON)
 				}
@@ -298,7 +298,7 @@ void main()	{
 				window.addEventListener("keypress", keyHandler);
 			}
 
-			function getLedStripPixelData(patNum,ledStripPatternsArray){
+			function getDMXPatternData(patNum,ledStripPatternsArray){
 				var patternData=[];
 				var xmlhttp=new XMLHttpRequest();
 				xmlhttp.open("GET", "php/read.php?fn=pixelPatterns/pattern"+patNum+".txt", true);
@@ -315,7 +315,7 @@ void main()	{
 					}
 					ledStripPatternsArray.push(patternData);
 					if(patNum<6){
-						getLedStripPixelData(patNum+1,ledStripPatternsArray);
+						getDMXPatternData(patNum+1,ledStripPatternsArray);
 					}else{
 						console.log("loaded all led strip data");
 					}
@@ -377,7 +377,6 @@ void main()	{
 				globalController  = {
 					selectedFixture:0,
 					mappingMode:0,
-					shaderToEdit:1,
 					loadShaderA:1,
 					loadShaderB:2,
 					MaskA:1,
@@ -385,12 +384,9 @@ void main()	{
 					PresetName:"GlobalPreset1",
 					SendDMX:true,
 					DMX_Rate: 50,
-					DMX_Fade_Time:.2,
-					Pixel_Level:.5,
-					DMX_Preset:1,
-					DMX_Preset_Rate:.1,
-					DMX_Scene:0.0,
-					DMX_Level:.5,
+					Brightness:.5,
+					DMX_Pattern:1,
+					DMX_Pattern_Rate:.1,
 					Universe:1,
 					DMX_X1:0,
 					DMX_Y1:175,
@@ -398,26 +394,16 @@ void main()	{
 					DMX_Y2:175,
 					VolumeThreshold:.003
 				}
-				mappingController  = {
+				objectController  = {
 					 Visible:false,
 					 ZValue:0,
 					 Shader:1
 				};
-				painterController  = {
-					 KaleidoScope:1,
-					 BrightnessSensitivity:.99,
-					 VelocitySensitivity:0.99,
-					 FadeTime:.6,
-					 ColorMix:.5,
-					 ColorRate:.05,
-					 ColorHop:1,
-					 Resolution:256
-				};
 				var count=0; 
 				for(var y=4; y>=0;y--){
 					for(var x=0; x<5;x++){
-						mappingController["VerticeX"+count]=-200+100*x;
-						mappingController["VerticeY"+count]=-200+100*y;
+						objectController["VerticeX"+count]=-200+100*x;
+						objectController["VerticeY"+count]=-200+100*y;
 						count=count+1;
 					}
 				}
@@ -431,11 +417,20 @@ void main()	{
 				globalFolder.add(globalController, "MaskA", 1, 3, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA); changeMask(1); updateControlsValues();});				
 				globalFolder.add(globalController, "MaskB", 1, 3, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});
 				globalFolder.add( globalController, "VolumeThreshold", .0001,.01,.0001 ).onChange(function(){updateControlsValues();});				
-				controlsFolder=gui.addFolder( "MappingControls" )
+				controlsFolder=gui.addFolder( "ObjectControls" )
 				controlsFolder.open();
-				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
-				controlsFolder.add( mappingController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
-				controlsFolder.add( mappingController, "Shader", 1, 2, 1 ).onChange(function(){mappingController.Shader=parseInt(mappingController.Shader);updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( objectController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
+				controlsFolder.add( objectController, "ZValue", -20, 20, 1 ).onChange(function(){updateControlsValues();syncObjectsToJson()});
+				controlsFolder.add( objectController, "Shader", 1, 2, 1 ).onChange(function(){objectController.Shader=parseInt(objectController.Shader);updateControlsValues();syncObjectsToJson()});
+				dmxFolder=gui.addFolder( "DMX" );
+				dmxFolder.open();
+				dmxFolder.add(globalController, "DMX_Pattern", 1,6,1 ).onChange(function(){globalController.DMX_Pattern=parseInt(globalController.DMX_Pattern);  updateControlsValues(); retrievePixelPattern();});
+				dmxFolder.add(globalController, "Brightness", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add(globalController, "DMX_Pattern_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
+				dmxFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);updateControlsValues();});
+				dmxFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);updateControlsValues();});
+				dmxFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);updateControlsValues();});
+				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});
 				utilsFolder=gui.addFolder( "Utils" )
 				utilsFolder.open();
 				utilsFolder.add({ 'Full Screen':function(){ requestFullScreen() }},'Full Screen');
@@ -443,17 +438,7 @@ void main()	{
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
 				utilsFolder.add({ 'Shader Editor':function(){ window.location.replace("http://localhost/editors/shaderEditor.html"); }},'Shader Editor');
-				utilsFolder.add({ 'DMX Editor':function(){ window.location.replace("http://localhost/editors/dmxEditor.html"); }},'DMX Editor');
-				dmxFolder=gui.addFolder( "DMX" );
-				dmxFolder.open();
-				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
-				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
-				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
-				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){updateControlsValues(); });
-				dmxFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);updateControlsValues();});
-				dmxFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);updateControlsValues();});
-				dmxFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);updateControlsValues();});
-				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});	
+				utilsFolder.add({ 'DMX Editor':function(){ window.location.replace("http://localhost/editors/dmxEditor.html"); }},'DMX Editor');	
 			}
 									
 			function changeMask(changedMask){
@@ -493,9 +478,9 @@ void main()	{
 			}
 			
 			function updateControlsView(){
-				for (var i in gui.__folders.MappingControls.__controllers) {
-				  	mappingController[gui.__folders.MappingControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property];
-					gui.__folders.MappingControls.__controllers[i].updateDisplay();
+				for (var i in gui.__folders.ObjectControls.__controllers) {
+				  	objectController[gui.__folders.ObjectControls.__controllers[i].property]=statesArray[parseInt(globalController.selectedFixture)][gui.__folders.ObjectControls.__controllers[i].property];
+					gui.__folders.ObjectControls.__controllers[i].updateDisplay();
 				}
 				for (var i in gui.__folders.Global.__controllers) {
 					if(i!=0){
@@ -510,8 +495,8 @@ void main()	{
 			}
 			
 			function updateControlsValues(){  
-				for (var i in gui.__folders.MappingControls.__controllers) {
-				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.MappingControls.__controllers[i].property]=mappingController[gui.__folders.MappingControls.__controllers[i].property];
+				for (var i in gui.__folders.ObjectControls.__controllers) {
+				  statesArray[parseInt(globalController.selectedFixture)][gui.__folders.ObjectControls.__controllers[i].property]=objectController[gui.__folders.ObjectControls.__controllers[i].property];
 				}
 				for (var i in gui.__folders.Global.__controllers) {
 					globalState[gui.__folders.Global.__controllers[i].property]=globalController[gui.__folders.Global.__controllers[i].property];
@@ -680,8 +665,8 @@ void main()	{
 					object.geometry.verticesNeedUpdate = true;
 					//object.drawV()
 					for(var x=0;x<object.geometry.vertices.length;x++){
-						mappingController["VerticeX"+x]=object.geometry.vertices[x].x;
-						mappingController["VerticeY"+x]=object.geometry.vertices[x].y;
+						objectController["VerticeX"+x]=object.geometry.vertices[x].x;
+						objectController["VerticeY"+x]=object.geometry.vertices[x].y;
 					}
 					for(var x=0;x<object.children.length;x++){
 						if(object.children[x].name.indexOf("vertice"!=0)){
@@ -791,7 +776,6 @@ void main()	{
 			function render() {
 				uniforms1[ "time" ].value += .01 * 5;
 				uniforms2[ "time" ].value += .01 * 5;
-				computeTraces();
 				for(var x=0;x<displayObjects.length;x++){
 					displayObjects[x].material.transparent=true
 					displayObjects[x].material.needsUpdate=true
@@ -812,46 +796,6 @@ void main()	{
 						wscript.SendKeys("{F11}");
 					}
 				}
-			}
-
-			function computeTraces(){
-				// if(isFirstCycle){
-				// 	isFirstCycle=false;
-				// }else{
-				// 	previousData=data;
-				// }
-				// data=pixel8(video,0,0,width,height)
-				// var velVal=765-parseFloat(painterController.VelocitySensitivity)*765;
-				// var briVal=765-parseFloat(painterController.BrightnessSensitivity)*765;
-				// var delVal=4-parseFloat(painterController.FadeTime)*4;
-				// var mixVal=1-parseFloat(painterController.ColorMix)
-				// for (x=0; x < ((width * height) * 4); x=x+4) {
-				// 		if (Math.abs((data[x]+data[x+1]+data[x+2])-(previousData[x]+previousData[x+1]+previousData[x+2])) > (velVal) && (data[x]+data[x+1]+data[x+2] > briVal)) {
-				// 			materialArray[x]=clr.requestR()*(1-(mixVal))+data[x]*((mixVal));
-				// 			materialArray[x+1]=clr.requestG()*(1-(mixVal))+data[x+1]*((mixVal));
-				// 			materialArray[x+2]=clr.requestB()*(1-(mixVal))+data[x+2]*((mixVal));
-				// 			materialArray[x+3]=255;
-				// 		}
-				// 		if(materialArray[x+0] > 0 ){
-				// 			materialArray[x+0]=materialArray[x+0]-(delVal);
-				// 		}
-				// 		if( materialArray[x+0] < 0 ){
-				// 			materialArray[x+0]=0;
-				// 		}
-				// 		if(materialArray[x+1] > 0 ){
-				// 			materialArray[x+1]=materialArray[x+1]-(delVal);
-				// 		}
-				// 		if( materialArray[x+1] < 0 ){
-				// 			materialArray[x+1]=0;
-				// 		}
-				// 		if(materialArray[x+2] > 0 ){
-				// 			materialArray[x+2]=materialArray[x+2]-(delVal);
-				// 		}
-				// 		if( materialArray[x+2] < 0 ){
-				// 			materialArray[x+2]=0;
-				// 		}
-				// }
-				// dataTexture.needsUpdate = true
 			}
 		
 			function saveState(){
@@ -1020,50 +964,33 @@ void main()	{
 				if(event.key=="." ){
 					selectedVertice=(selectedVertice+1)%4;
 				}
-				keyPressToSlider(event, "0", globalController, "MaskA", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[3].updateDisplay(); changeMask(1); updateControlsValues(); } );
-				keyPressToSlider(event, ")", globalController, "MaskA", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[3].updateDisplay(); changeMask(1); updateControlsValues(); } );
-				keyPressToSlider(event, "p", globalController, "MaskB", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[4].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
-				keyPressToSlider(event, "P", globalController, "MaskB", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[4].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
-				keyPressToSlider(event, "k", globalController, "DMX_Preset", 1, gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[0].updateDisplay(); updateControlsValues(); retrievePixelPattern();  } );
-				keyPressToSlider(event, "K", globalController, "DMX_Preset", -1, gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[0].updateDisplay(); updateControlsValues(); retrievePixelPattern(); } );
+				keyPressToSlider(event, "0", globalController, "MaskA", 1, gui.__folders.Global, function(){ changeMask(1); updateControlsValues(); } );
+				keyPressToSlider(event, ")", globalController, "MaskA", -1, gui.__folders.Global, function(){ changeMask(1); updateControlsValues(); } );
+				keyPressToSlider(event, "p", globalController, "MaskB", 1, gui.__folders.Global, function(){loadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "P", globalController, "MaskB", -1, gui.__folders.Global, function(){gloadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "k", globalController, "DMX_Pattern", 1, gui.__folders.DMX, function(){updateControlsValues(); retrievePixelPattern();  } );
+				keyPressToSlider(event, "K", globalController, "DMX_Pattern", -1, gui.__folders.DMX, function(){updateControlsValues(); retrievePixelPattern(); } );
 				if(event.key=="j"){
-					if(globalController.Pixel_Level+.1>1){
-						globalController.Pixel_Level=0;
+					if(globalController.Brightness+.1>1){
+						globalController.Brightness=0;
 						
 					}else{
-						globalController.Pixel_Level=globalController.Pixel_Level+.1;
+						globalController.Brightness=globalController.Brightness+.1;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
 					updateControlsValues();
 				}
 				if(event.key=="J"){
-					if(globalController.Pixel_Level-.1>0){
-						globalController.Pixel_Level=globalController.Pixel_Level-.1;
+					if(globalController.Brightness-.1>0){
+						globalController.Brightness=globalController.Brightness-.1;
 					}else{
-						globalController.Pixel_Level=1.0;
+						globalController.Brightness=1.0;
 					}
 					gui.__folders.DMX.__controllers[1].updateDisplay();
 					updateControlsValues();
 				}
-				if(event.key=="i"){
-					if(globalController.DMX_Preset_Rate+.05>.5){
-						globalController.DMX_Preset_Rate=0.0;
-						
-					}else{
-						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate+.05;
-					}
-					gui.__folders.DMX.__controllers[3].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="I"){
-					if(globalController.DMX_Preset_Rate-.05>0){
-						globalController.DMX_Preset_Rate=globalController.DMX_Preset_Rate-.05;
-					}else{
-						globalController.DMX_Preset_Rate=.5;
-					}
-					gui.__folders.DMX.__controllers[3].updateDisplay();
-					updateControlsValues();
-				}
+				keyPressToSlider(event, "i", globalController, "DMX_Pattern_Rate", .05, gui.__folders.DMX, function(){ updateControlsValues();  } );
+				keyPressToSlider(event, "I", globalController, "DMX_Pattern_Rate", -.05, gui.__folders.DMX, function(){ updateControlsValues();  } );
 				if(event.key=="u"){
 					if(globalController.DMX_Fade_Time+.025>1.0){
 						globalController.DMX_Fade_Time=0.0;
@@ -1207,12 +1134,12 @@ void main()	{
 					gui.__folders.DMX.__controllers[7].updateDisplay();
 					updateControlsValues();
 				}		
-				keyPressToSlider(event, "l", globalController, "loadShaderA", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
-				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
-				keyPressToSlider(event, "o", globalController, "loadShaderB", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[2].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
-				keyPressToSlider(event, "O", globalController, "loadShaderB", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[2].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
-				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.Global, function(){gui.__folders.Global.__controllers[5].updateDisplay(); updateControlsValues(); } );
-				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.Global, function(){gui.__folders.Global.__controllers[5].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "l", globalController, "loadShaderA", 1, gui.__folders.Global, function(){loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){loadShaderPreset(1); updateControlsValues(); } );
+				keyPressToSlider(event, "o", globalController, "loadShaderB", 1, gui.__folders.Global, function(){loadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "O", globalController, "loadShaderB", -1, gui.__folders.Global, function(){oadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.Global, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.Global, function(){updateControlsValues(); } );
 			}
 
 			function toggleDmxSend(){
@@ -1226,7 +1153,7 @@ void main()	{
 			
 			function retrievePixelPattern(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "php/read.php?fn=dmxPresets/pixelPattern"+globalController.DMX_Preset+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn=dmxPresets/pixelPattern"+globalController.DMX_Pattern+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					var response=xmlhttp.response;
@@ -1257,68 +1184,15 @@ void main()	{
 				xhttp.setRequestHeader("cache-control", "no-cache");
 				xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
 				xhttp.setRequestHeader("pragma", "no-cache" );
-				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData();
-				// console.log(dmxPayloadString);
 
-				var temp=getMoverData()
-				temp=temp.substring(0,temp.length-1).split(",");
-				moverString=""
-				//m1
-				moverString=moverString+parseInt(globalController.DMX_X1)+",";
-				moverString=moverString+"0,";
-				moverString=moverString+parseInt(globalController.DMX_Y1)+",";
-				moverString=moverString+"0,0,0,";
-				moverString=moverString+parseInt(255*globalController.Pixel_Level)+",";
-				moverString=moverString+"0,";
-				moverString=moverString+parseInt(temp[0])+",";
-				moverString=moverString+parseInt(temp[1])+",";
-				moverString=moverString+parseInt(temp[2])+",";
-				moverString=moverString+"0,";
-				moverString=moverString+parseInt(temp[3])+",";
-				moverString=moverString+parseInt(temp[4])+",";
-				moverString=moverString+parseInt(temp[5])+",0,0,0,0,0,0,";
-
-				//m2
-				moverString=moverString+parseInt(globalController.DMX_X2)+",";
-				moverString=moverString+"0,";
-				moverString=moverString+parseInt(globalController.DMX_Y2)+",";
-				moverString=moverString+"0,0,0,";
-				moverString=moverString+parseInt(255*globalController.Pixel_Level)+",";
-				moverString=moverString+"0,";
-				moverString=moverString+parseInt(temp[0])+",";
-				moverString=moverString+parseInt(temp[1])+",";
-				moverString=moverString+parseInt(temp[2])+",";
-				moverString=moverString+"0,";
-				moverString=moverString+parseInt(temp[3])+",";
-				moverString=moverString+parseInt(temp[4])+",";
-				moverString=moverString+parseInt(temp[5])+",0,0,0,0,0,0,";
-
-				//pix
-				moverString=moverString+parseInt(temp[6]/10)+",";
-				moverString=moverString+parseInt(temp[7]/10)+",";
-				moverString=moverString+parseInt(temp[8]/10)+",";
-				moverString=moverString+parseInt(temp[9]/10)+",";
-				moverString=moverString+parseInt(temp[10]/10)+",";
-				moverString=moverString+parseInt(temp[11]/10)+",";
-				moverString=moverString+parseInt(temp[6]/10)+",";
-				moverString=moverString+parseInt(temp[7]/10)+",";
-				moverString=moverString+parseInt(temp[8]/10)+",";
-				moverString=moverString+parseInt(temp[9]/10)+",";
-				moverString=moverString+parseInt(temp[10]/10)+",";
-				moverString=moverString+parseInt(temp[11]/10)+",";
-
-				//ledStrips
 				var volAdjustedLedStripData=[];
-				for(var x=0; x<ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)].length ; x++){
-					volAdjustedLedStripData.push(parseInt(ledStripPatternsArray[parseInt(globalController.DMX_Preset)-1][parseInt(ledStripAnimationmMasterIndex)][x]*globalController.Pixel_Level));
+				for(var x=0; x<ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)].length ; x++){
+					volAdjustedLedStripData.push(parseInt(ledStripPatternsArray[parseInt(globalController.DMX_Pattern)-1][parseInt(ledStripAnimationmMasterIndex)][x]*globalController.Brightness));
 				}
 				var volAdjustedLedStripDataString=volAdjustedLedStripData.toString();
 
-
-				//final
-				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+moverString+volAdjustedLedStripDataString+"0";
+				dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+volAdjustedLedStripDataString+"0";
 				// console.log(dmxPayloadString);
-				// dmxPayloadString="u="+parseInt(globalController.Universe)+"&d="+getPixelData()+"0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
 				xhttp.send(dmxPayloadString);
 			}	
 
@@ -1336,28 +1210,7 @@ void main()	{
 				xhttp.open("GET","proxy/reload", true);
 				xhttp.send();
 			}
-		
-			function getMoverData(){
-				// maxNumDMXScenes=gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Scene"})[0].max;
-				globalController.DMX_Scene=(globalController.DMX_Scene+globalController.DMX_Preset_Rate)%maxNumDMXScenes;
-				//gui.__folders.DMX.__controllers[2].updateDisplay();
-				var top=(Math.ceil(globalController.DMX_Scene)%maxNumDMXScenes);
-				var bottom=Math.floor(globalController.DMX_Scene);
-				fade_Position=globalController.DMX_Scene%1.0;
-				if( (fade_Position+globalController.DMX_Fade_Time) > 1.0){
-					fade_Position=1.0;
-				}else{
-					fade_Position=fade_Position+globalController.DMX_Fade_Time;
-				}
-				// console.log("top:"+top+"  botoom:"+bottom+"  position:"+fade_Position);
-				pixelDataString="";
-				for(i=0;i<dmxPresetData[Math.floor(globalController.DMX_Scene)].length;i++){
-					pixelDataString=pixelDataString+parseInt(parseInt(globalController.Pixel_Level*((dmxPresetData[top][i]*fade_Position) + (dmxPresetData[bottom][i]*(1-fade_Position)))))+",";
-				}
-				// console.log(pixelDataString);
-				return pixelDataString;
-			}
-		
+				
 			function keyPressToSlider(event, key, controller, slider, delta, folder, callback){
 				if(event.key==key){
 					var sliderMax=folder.__controllers.filter(obj => { return obj.property == slider})[0].__max;
@@ -1365,6 +1218,7 @@ void main()	{
 					if(controller[slider]+delta<=sliderMax && controller[slider]+delta>=sliderMin){
 						controller[slider]=controller[slider]+delta;
 					}
+					folder.__controllers.filter(obj => { return obj.property == slider})[0].updateDisplay();
 					callback();
 				}
 			}
@@ -1407,8 +1261,8 @@ void main()	{
                     gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].updateDisplay()
                     gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderB"})[0].__max=numberOfShaders;
                     gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderB"})[0].updateDisplay()
-                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].__max=numberOfShaders;
-                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Pattern"})[0].__max=numberOfShaders;
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Pattern"})[0].updateDisplay()					
 				}
 				var xmlhttp2=new XMLHttpRequest();
 				xmlhttp2.open("GET", "../php/read.php?fn=pixelPatterns/numberOfPatterns.txt", true);
@@ -1416,8 +1270,8 @@ void main()	{
 				xmlhttp2.onload = function(e){
                     numberOfDMXPatterns=parseInt(xmlhttp2.response);
                     console.log("get number of dmx patterns: "+numberOfDMXPatterns)
-                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].__max=numberOfDMXPatterns;
-                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Pattern"})[0].__max=numberOfDMXPatterns;
+                    gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Pattern"})[0].updateDisplay()					
 				}
 				var xmlhttp3=new XMLHttpRequest();
 				xmlhttp3.open("GET", "../php/read.php?fn=masks/numberOfMasks.txt", true);
