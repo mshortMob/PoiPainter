@@ -324,8 +324,8 @@ void main()	{
 			
 			function initScene() {
 				// prevData=pixel8(video,0,0,width,height)
-				imgTexture = new THREE.TextureLoader().load( 'masks/img1.jpg' );
-				imgTexture2 = new THREE.TextureLoader().load( 'masks/img2.jpg' );
+				imgTexture = new THREE.TextureLoader().load( 'masks/mask1.jpg' );
+				imgTexture2 = new THREE.TextureLoader().load( 'masks/mask2.jpg' );
 				dataTexture=[]	
 				dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 				dataTexture.needsUpdate = true;
@@ -459,12 +459,12 @@ void main()	{
 			function changeMask(changedMask){
 				if(changedMask==1){
 					if(parseInt(globalController.MaskA)!=lastMaskAValue){
-						uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'masks/img'+parseInt(globalController.MaskA)+'.jpg' ) };
+						uniforms1.colorTexture={ value: new THREE.TextureLoader().load( 'masks/mask'+parseInt(globalController.MaskA)+'.jpg' ) };
 						lastMaskAValue=parseInt(globalController.MaskA);
 					}
 				}else{
 					if(parseInt(globalController.MaskB)!=lastMaskBValue){
-						uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'masks/img'+parseInt(globalController.MaskB)+'.jpg' ) };
+						uniforms2.colorTexture={ value: new THREE.TextureLoader().load( 'masks/mask'+parseInt(globalController.MaskB)+'.jpg' ) };
 						lastMaskBValue=parseInt(globalController.MaskB);
 					}
 				}
