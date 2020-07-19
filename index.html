@@ -1478,6 +1478,17 @@ void main()	{
                     gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].__max=numberOfDMXPatterns;
                     gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
 				}
+				var xmlhttp3=new XMLHttpRequest();
+				xmlhttp3.open("GET", "../php/read.php?fn=masks/numberOfMasks.txt", true);
+				xmlhttp3.send();
+				xmlhttp3.onload = function(e){
+                    numberOfMasks=parseInt(xmlhttp3.response);
+                    console.log("get number of masks: "+numberOfMasks)
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "MaskA"})[0].__max=numberOfMasks;
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "MaskA"})[0].updateDisplay()			
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "MaskB"})[0].__max=numberOfMasks;
+                    gui.__folders.Global.__controllers.filter(obj => { return obj.property == "MaskB"})[0].updateDisplay()					
+				}
             }
 		</script>
 	</body>
