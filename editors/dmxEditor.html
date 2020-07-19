@@ -57,7 +57,7 @@
             function saveState(){
 				var requestBody=document.getElementById('textbox1').value;
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "../php/write.php?fn=fragmentPatterns/pattern"+parseInt(globalController.patternToEdit)+".txt", true);
+				xmlhttp.open("POST", "../php/write.php?fn=pixelPatterns/pattern"+parseInt(globalController.patternToEdit)+".txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
@@ -77,7 +77,7 @@
 
             function getNumberOfPatterns(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "../php/read.php?fn=fragmentPatterns/numberOfPatterns.txt", true);
+				xmlhttp.open("GET", "../php/read.php?fn=pixelPatterns/numberOfPatterns.txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
                     numberOfPatterns=parseInt(xmlhttp.response);
