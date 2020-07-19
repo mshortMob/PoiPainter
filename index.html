@@ -429,7 +429,8 @@ void main()	{
 				globalFolder.add(globalController, "loadShaderA", 1, 11, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);updateControlsValues();});				
 				globalFolder.add(globalController, "loadShaderB", 1, 11, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);updateControlsValues();});								
 				globalFolder.add(globalController, "MaskA", 1, 3, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA); changeMask(1); updateControlsValues();});				
-				globalFolder.add(globalController, "MaskB", 1, 3, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});				
+				globalFolder.add(globalController, "MaskB", 1, 3, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});
+				globalFolder.add( globalController, "VolumeThreshold", .0001,.01,.0001 ).onChange(function(){updateControlsValues();});				
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
@@ -452,8 +453,7 @@ void main()	{
 				dmxFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);updateControlsValues();});
 				dmxFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);updateControlsValues();});
 				dmxFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);updateControlsValues();});
-				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});
-				dmxFolder.add( globalController, "VolumeThreshold", .0001,.01,.0001 ).onChange(function(){updateControlsValues();});		
+				dmxFolder.add( globalController, "DMX_Y2", 1,255,1 ).onChange(function(){globalController.DMX_Y2=parseInt(globalController.DMX_Y2);updateControlsValues();});	
 			}
 									
 			function changeMask(changedMask){
@@ -1020,30 +1020,6 @@ void main()	{
 				if(event.key=="." ){
 					selectedVertice=(selectedVertice+1)%4;
 				}
-				// if(event.key=="l"){
-				// 	var controller=globalController;
-				// 	var slider="loadShaderA";
-				// 	var delta=1;
-				// 	var sliderMax=gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].__max;
-				// 	var sliderMin=gui.__folders.Global.__controllers.filter(obj => { return obj.property == "loadShaderA"})[0].__min;
-				// 	if(controller[slider]+delta<sliderMax){
-				// 		globalController.loadShaderA=globalController.loadShaderA+1;
-				// 	}
-				// 	gui.__folders.Global.__controllers[1].updateDisplay();
-				// 	loadShaderPreset(1);
-				// 	updateControlsValues();
-				// }
-				// if(event.key=="L"){
-				// 	if(globalController.loadShaderA-1>0){
-				// 		globalController.loadShaderA=globalController.loadShaderA-1;
-						
-				// 	}else{
-				// 		globalController.loadShaderA=8;
-				// 	}
-				// 	gui.__folders.Global.__controllers[1].updateDisplay();
-				// 	loadShaderPreset(1);
-				// 	updateControlsValues();
-				// }
 				if(event.key=="0"){
 					if(globalController.MaskA+1>3){
 						globalController.MaskA=1;
@@ -1088,28 +1064,6 @@ void main()	{
 					changeMask(2); 
 					updateControlsValues();
 				}
-				// if(event.key=="o"){
-				// 	if(globalController.loadShaderB+1>8){
-				// 		globalController.loadShaderB=1;
-						
-				// 	}else{
-				// 		globalController.loadShaderB=globalController.loadShaderB+1;
-				// 	}
-				// 	gui.__folders.Global.__controllers[2].updateDisplay();
-				// 	loadShaderPreset(2);
-				// 	updateControlsValues();
-				// }
-				// if(event.key=="O"){
-				// 	if(globalController.loadShaderB-1>0){
-				// 		globalController.loadShaderB=globalController.loadShaderB-1;
-						
-				// 	}else{
-				// 		globalController.loadShaderB=8;
-				// 	}
-				// 	gui.__folders.Global.__controllers[2].updateDisplay();
-				// 	loadShaderPreset(2);
-				// 	updateControlsValues();
-				// }
 				if(event.key=="k"){
 					if(globalController.DMX_Preset+1>6){
 						globalController.DMX_Preset=1;
@@ -1316,8 +1270,8 @@ void main()	{
 				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[1].updateDisplay(); loadShaderPreset(1); updateControlsValues(); } );
 				keyPressToSlider(event, "o", globalController, "loadShaderB", 1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[2].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
 				keyPressToSlider(event, "O", globalController, "loadShaderB", -1, gui.__folders.Global, function(){gui.__folders.Global.__controllers[2].updateDisplay(); loadShaderPreset(2); updateControlsValues(); } );
-				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[8].updateDisplay(); updateControlsValues(); } );
-				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.DMX, function(){gui.__folders.DMX.__controllers[8].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.Global, function(){gui.__folders.Global.__controllers[5].updateDisplay(); updateControlsValues(); } );
+				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.Global, function(){gui.__folders.Global.__controllers[5].updateDisplay(); updateControlsValues(); } );
 			}
 
 			function toggleDmxSend(){
@@ -1516,11 +1470,11 @@ void main()	{
                     gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
 				}
 				var xmlhttp2=new XMLHttpRequest();
-				xmlhttp2.open("GET", "../php/read.php?fn=fragmentShaders/numberOfShaders.txt", true);
+				xmlhttp2.open("GET", "../php/read.php?fn=pixelPatterns/numberOfPatterns.txt", true);
 				xmlhttp2.send();
 				xmlhttp2.onload = function(e){
                     numberOfDMXPatterns=parseInt(xmlhttp2.response);
-                    console.log("get number of dmx patterns: "+numberOfShaders)
+                    console.log("get number of dmx patterns: "+numberOfDMXPatterns)
                     gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].__max=numberOfDMXPatterns;
                     gui.__folders.DMX.__controllers.filter(obj => { return obj.property == "DMX_Preset"})[0].updateDisplay()					
 				}
