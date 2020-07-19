@@ -146,6 +146,7 @@
 			}
 			
 			function initGlobalVars(){
+				selectedVertice=0;
 				clr=new colorObject();
 			    width=document.getElementById('video').width;
 				height=document.getElementById('video').height;
@@ -195,6 +196,7 @@
 				for(var y=0;y<4;y++){
 					addPlane();
 				}
+				window.addEventListener("keypress", keyHandler);
 			}
 			
 			function initScene() {
@@ -297,6 +299,153 @@
 
 			}
 									
+			function keyHandler(event){
+				if(event.key=="<"){
+					if(globalController.selectedFixture>0){
+						globalController.selectedFixture=globalController.selectedFixture-1;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}else{
+						globalController.selectedFixture=3;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key==">"){
+					if(globalController.selectedFixture<3){
+						globalController.selectedFixture=globalController.selectedFixture+1;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}else{
+						globalController.selectedFixture=0;
+						updateControlsView();
+						gui.__folders.Global.__controllers[0].updateDisplay();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key=="?"){
+					for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ 
+						displayObjects[globalController.selectedFixture].children[x].visible=false; 
+					};
+				}
+				if(event.key=="C"){
+					gui.close();
+				}
+				if(event.key=="c"){
+					gui.open();
+				}
+				if(event.key=="a"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="s"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="d"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="w"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+1;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="A"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]+40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="S"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]-40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="D"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeX"+listOfCornerVertices[selectedVertice]]-40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="W"){
+					var listOfCornerVertices=[4,0,20,24];
+					statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]=statesArray[globalController.selectedFixture]["VerticeY"+listOfCornerVertices[selectedVertice]]+40;
+					updateControlsView();
+					syncObjectsToJson();
+					displayObjects[globalController.selectedFixture].updateCorners();
+				}
+				if(event.key=="z"){
+					if(statesArray[globalController.selectedFixture].ZValue>-20){
+						statesArray[globalController.selectedFixture].ZValue=statesArray[globalController.selectedFixture].ZValue-1;
+						updateControlsView();
+						syncObjectsToJson();
+					}
+				}
+				if(event.key=="Z"){
+					if(statesArray[globalController.selectedFixture].ZValue<20){
+						statesArray[globalController.selectedFixture].ZValue=statesArray[globalController.selectedFixture].ZValue+1;
+						updateControlsView();
+						syncObjectsToJson();
+					}
+				}			
+				if(event.key=="v" || event.key=="V"){
+					statesArray[globalController.selectedFixture].Visible=!statesArray[globalController.selectedFixture].Visible;
+					updateControlsView();
+					syncObjectsToJson();
+				}
+				if(event.key=="," ){
+					if( (selectedVertice-1)>=0){
+						selectedVertice=selectedVertice-1;
+					}else{
+						selectedVertice=3;
+					}
+				}
+				if(event.key=="." ){
+					selectedVertice=(selectedVertice+1)%4;
+				}
+				keyPressToSlider(event, "b", painterController, "BrightnessSensitivity", .01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "B", painterController, "BrightnessSensitivity", -.01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "m", painterController, "VelocitySensitivity", .01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "M", painterController, "VelocitySensitivity", -.01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "f", painterController, "FadeTime", .01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "F", painterController, "FadeTime", -.01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "n", painterController, "ColorMix", .01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "N", painterController, "ColorMix", -.01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "r", painterController, "ColorRate", .01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "R", painterController, "ColorRate", -.01, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "k", painterController, "KaleidoScope",  1, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "K", painterController, "KaleidoScope",  -.1, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "j", painterController, "ColorHop", .1, gui.__folders.PainterControls, function(){ updateControlsValues(); } );
+				keyPressToSlider(event, "J", painterController, "ColorHop", -.1, gui.__folders.PainterControls, function(){ updateControlsValues(); } );	
+				if(event.key=="!"){
+					globalController.PresetName="Preset_1"
+					saveState();
+				}
+				if(event.key=="1"){
+					globalController.PresetName="Preset_1"
+					recallState();
+				}
+			}
+			
 			function updateControlsView(){
 				for (var i in gui.__folders.MappingControls.__controllers) {
 					//mappingController[i]=statesArray[globalController.selectedScene].objects[globalController.selectedFixture]
@@ -716,6 +865,25 @@
 					dataTexture = new THREE.DataTexture( materialArray, width, height, THREE.RGBAFormat );
 					dataTexture.needsUpdate = true;
 					material.map=dataTexture;
+				}
+			}
+		
+			function keyPressToSlider(event, key, controller, slider, delta, folder, callback){
+				if(event.key==key){
+					var sliderMax=folder.__controllers.filter(obj => { return obj.property == slider})[0].__max;
+					var sliderMin=folder.__controllers.filter(obj => { return obj.property == slider})[0].__min;
+					if(controller[slider]+delta<=sliderMax && controller[slider]+delta>=sliderMin){
+						controller[slider]=controller[slider]+delta;
+					}else{
+						if(controller[slider]+delta>sliderMax){
+							controller[slider]=sliderMax;
+						}
+						if(controller[slider]+delta<sliderMin){
+							controller[slider]=sliderMin;
+						}
+					}
+					folder.__controllers.filter(obj => { return obj.property == slider})[0].updateDisplay();
+					callback();
 				}
 			}
 		</script>
