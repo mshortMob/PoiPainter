@@ -687,14 +687,14 @@
 			function saveState(){
 				var requestBody=JSON.stringify({"storage" : statesArray, "storage2": presetsArray})
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("POST", "php/write.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.open("POST", "php/write.php?fn=presets/"+globalController.PresetName+".txt", true);
 				xmlhttp.send(requestBody);
 				xmlhttp.onload = function(e){console.log(xmlhttp.response.status)}
 			}
 			
 			function recallState(){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "php/read.php?fn="+globalController.PresetName+".txt", true);
+				xmlhttp.open("GET", "php/read.php?fn=presets/"+globalController.PresetName+".txt", true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					statesArray=JSON.parse(xmlhttp.response).storage
