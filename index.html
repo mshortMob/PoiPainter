@@ -967,25 +967,8 @@ void main()	{
 				keyPressToSlider(event, "P", globalController, "MaskB", -1, gui.__folders.Global, function(){gloadShaderPreset(2); updateControlsValues(); } );
 				keyPressToSlider(event, "k", globalController, "DMX_Pattern", 1, gui.__folders.DMX, function(){updateControlsValues(); retrievePixelPattern();  } );
 				keyPressToSlider(event, "K", globalController, "DMX_Pattern", -1, gui.__folders.DMX, function(){updateControlsValues(); retrievePixelPattern(); } );
-				if(event.key=="j"){
-					if(globalController.Brightness+.1>1){
-						globalController.Brightness=0;
-						
-					}else{
-						globalController.Brightness=globalController.Brightness+.1;
-					}
-					gui.__folders.DMX.__controllers[1].updateDisplay();
-					updateControlsValues();
-				}
-				if(event.key=="J"){
-					if(globalController.Brightness-.1>0){
-						globalController.Brightness=globalController.Brightness-.1;
-					}else{
-						globalController.Brightness=1.0;
-					}
-					gui.__folders.DMX.__controllers[1].updateDisplay();
-					updateControlsValues();
-				}
+				keyPressToSlider(event, "j", globalController, "Brightness", .05, gui.__folders.DMX, function(){ updateControlsValues();  } );
+				keyPressToSlider(event, "J", globalController, "Brightness", -.05, gui.__folders.DMX, function(){ updateControlsValues();  } );
 				keyPressToSlider(event, "i", globalController, "DMX_Pattern_Rate", .05, gui.__folders.DMX, function(){ updateControlsValues();  } );
 				keyPressToSlider(event, "I", globalController, "DMX_Pattern_Rate", -.05, gui.__folders.DMX, function(){ updateControlsValues();  } );
 				if(event.key=="u"){
@@ -1062,7 +1045,7 @@ void main()	{
 				keyPressToSlider(event, "l", globalController, "loadShaderA", 1, gui.__folders.Global, function(){loadShaderPreset(1); updateControlsValues(); } );
 				keyPressToSlider(event, "L", globalController, "loadShaderA", -1, gui.__folders.Global, function(){loadShaderPreset(1); updateControlsValues(); } );
 				keyPressToSlider(event, "o", globalController, "loadShaderB", 1, gui.__folders.Global, function(){loadShaderPreset(2); updateControlsValues(); } );
-				keyPressToSlider(event, "O", globalController, "loadShaderB", -1, gui.__folders.Global, function(){oadShaderPreset(2); updateControlsValues(); } );
+				keyPressToSlider(event, "O", globalController, "loadShaderB", -1, gui.__folders.Global, function(){loadShaderPreset(2); updateControlsValues(); } );
 				keyPressToSlider(event, "t", globalController, "VolumeThreshold", .00025,  gui.__folders.Global, function(){ updateControlsValues(); } );
 				keyPressToSlider(event, "T", globalController, "VolumeThreshold", -.00025, gui.__folders.Global, function(){updateControlsValues(); } );
 			}
