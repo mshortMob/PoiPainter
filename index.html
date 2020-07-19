@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>FlowMapper</title>
+		<title>ShaderMapper</title>
 		<style>
 			body{
 			    margin:0px;
@@ -423,17 +423,14 @@ void main()	{
 					}
 				}
 				gui = new dat.GUI();
+				gui.width=260;
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedFixture", 0, 3, 1 ).onChange(function(){globalController.selectedFixture=parseInt(globalController.selectedFixture);updateControlsView();syncObjectsToJson();});
-				// globalFolder.add(globalController, "shaderToEdit", 1, 2, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);document.getElementById('frag_shader_text_box').value=document.getElementById( 'fragmentShader'+parseInt(globalController.shaderToEdit)).textContent; document.getElementById('update_shader_button').innerHTML="Update Shader #"+parseInt(globalController.shaderToEdit)});				
 				globalFolder.add(globalController, "loadShaderA", 1, 11, 1 ).onChange(function(){globalController.loadShaderA=parseInt(globalController.loadShaderA);loadShaderPreset(1);updateControlsValues();});				
 				globalFolder.add(globalController, "loadShaderB", 1, 11, 1 ).onChange(function(){globalController.loadShaderB=parseInt(globalController.loadShaderB);loadShaderPreset(2);updateControlsValues();});								
 				globalFolder.add(globalController, "MaskA", 1, 3, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA); changeMask(1); updateControlsValues();});				
 				globalFolder.add(globalController, "MaskB", 1, 3, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});				
-				// globalFolder.add(globalController, "mappingMode", 0, 1, .1 ).onChange(function(){if(statesArray[globalController.selectedFixture]["Visible"]==true){displayObjects[globalController.selectedFixture].hideChildren();displayObjects[globalController.selectedFixture].showChildren();};});
-				// globalFolder.add(globalController, "MaskB", 0, 2, 1 ).onChange(function(){globalController.MaskAB=parseInt(globalController.MaskAB);});							
-				gui.width=260;
 				controlsFolder=gui.addFolder( "MappingControls" )
 				controlsFolder.open();
 				controlsFolder.add( mappingController, "Visible", true ).onChange(function(){updateControlsValues();syncObjectsToJson();});	
@@ -445,18 +442,14 @@ void main()	{
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
-				utilsFolder.add({ 'Shader Editor':function(){ window.location.replace("http://localhost/prototypes/shaderEditor.html"); }},'Shader Editor');
-				// utilsFolder.add(globalController, 'PresetName').onChange(function(){});
+				utilsFolder.add({ 'Shader Editor':function(){ window.location.replace("http://localhost/editors/shaderEditor.html"); }},'Shader Editor');
+				utilsFolder.add({ 'DMX Editor':function(){ window.location.replace("http://localhost/editors/dmxEditor.html"); }},'DMX Editor');
 				dmxFolder=gui.addFolder( "DMX" );
 				dmxFolder.open();
-				// dmxFolder.add(globalController, "SendDMX", true ).onChange(function(){ toggleDmxSend(); });	
 				dmxFolder.add(globalController, "DMX_Preset", 1,6,1 ).onChange(function(){globalController.DMX_Preset=parseInt(globalController.DMX_Preset);  updateControlsValues(); retrievePixelPattern();});
 				dmxFolder.add(globalController, "Pixel_Level", 0.0, 1.0, .01 ).onChange(function(){updateControlsValues(); });
-				// dmxFolder.add(globalController, "DMX_Scene", 0.0,8.0,.1 ).onChange(function(){updateControlsValues(); });
 				dmxFolder.add(globalController, "DMX_Preset_Rate", 0.00,.5,.01 ).onChange(function(){updateControlsValues(); });
 				dmxFolder.add(globalController, "DMX_Fade_Time", 0.00,1.0,.01 ).onChange(function(){updateControlsValues(); });
-				// dmxFolder.add(globalController, "DMX_Rate", 25, 250, 1 ).onChange(function(){globalController.DMX_Rate=parseInt(globalController.DMX_Rate);toggleDmxSend();});
-				// dmxFolder.add(globalController, "Universe", 0,3,1 ).onChange(function(){globalController.Universe=parseInt(globalController.Universe);});
 				dmxFolder.add( globalController, "DMX_X1", 1,255,1 ).onChange(function(){globalController.DMX_X1=parseInt(globalController.DMX_X1);updateControlsValues();});
 				dmxFolder.add( globalController, "DMX_Y1", 1,255,1 ).onChange(function(){globalController.DMX_Y1=parseInt(globalController.DMX_Y1);updateControlsValues();});
 				dmxFolder.add( globalController, "DMX_X2", 1,255,1 ).onChange(function(){globalController.DMX_X2=parseInt(globalController.DMX_X2);updateControlsValues();});
