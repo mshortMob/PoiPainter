@@ -311,7 +311,7 @@ void main()	{
 						patternData.push(temp);
 					}
 					ledStripPatternsArray.push(patternData);
-					if(patNum<6){
+					if(patNum<numberOfDMXPatterns){
 						getDMXPatternData(patNum+1,ledStripPatternsArray);
 					}else{
 						console.log("loaded all led strip data");
