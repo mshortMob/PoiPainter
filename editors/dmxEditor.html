@@ -66,7 +66,7 @@
             function addControls(){
 				globalController  = {
 					patternToEdit:1,
-					Universe:1,
+					Universe:2,
 				}
 				gui = new dat.GUI();
                 gui.width=260;
@@ -126,14 +126,14 @@
 				xmlhttp.onload = function(e){
 					dmxRecordingString=dmxRecordingString+JSON.parse(xmlhttp.response).dmx.toString()+"\n";
 					setTimeout(function(){
-						if(sceneNum<60){
+						if(sceneNum<(30*4)){
 							recordDMX(sceneNum+1);
 						}else{
 							console.log("done recording:");
 							console.log(dmxRecordingString);
 							document.getElementById("textbox1").value=dmxRecordingString;
 						}
-					},100);
+					},30);
 				}
 			}
 		
