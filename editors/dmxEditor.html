@@ -37,6 +37,7 @@
 
             init();
             function init(){
+				dmxRecordingString="";
                 numberOfPatterns=-1;
                 addControls();
                 getNumberOfPatterns();
@@ -70,7 +71,8 @@
 				gui = new dat.GUI();
                 gui.width=260;
 				gui.add(globalController, "patternToEdit", 0, 10, 1 ).onChange(function(){globalController.patternToEdit=parseInt(globalController.patternToEdit);loadSelectedPattern(); });		
-                gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
+                gui.add({ 'Record Input':function(){ recordDMX(0); }},'Record Input');
+				gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				gui.add({ 'Save As New Preset':function(){ addNewPattern() }},'Save As New Preset');
                 gui.add({ 'Back to Main':function(){ window.location.replace("http://localhost/index.html"); }},'Back to Main');
 									
@@ -117,6 +119,24 @@
 				}
             }
 				
+			function recordDMX(sceneNum){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "../proxy/get_dmx?u="+parseInt(globalController.Universe), true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					dmxRecordingString=dmxRecordingString+JSON.parse(xmlhttp.response).dmx.toString()+"\n";
+					setTimeout(function(){
+						if(sceneNum<60){
+							recordDMX(sceneNum+1);
+						}else{
+							console.log("done recording:");
+							console.log(dmxRecordingString);
+							document.getElementById("textbox1").value=dmxRecordingString;
+						}
+					},100);
+				}
+			}
+		
 		</script>
 	</body>
 </html>
