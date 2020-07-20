@@ -71,7 +71,7 @@
 				gui.add(globalController, "shaderToEdit", 1, 10, 1 ).onChange(function(){globalController.shaderToEdit=parseInt(globalController.shaderToEdit);loadSelectedShader(); });		
                 gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				gui.add({ 'Save As New Preset':function(){ addNewShader() }},'Save As New Preset');
-                gui.add({ 'Back to Main':function(){ window.location.replace("http://localhost/index.html"); }},'Back to Main');
+                gui.add({ 'Back to Main':function(){ window.location.replace("http://"+location.hostname+"/index.html"); }},'Back to Main');
 									
 			}
 

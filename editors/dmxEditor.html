@@ -74,7 +74,7 @@
                 gui.add({ 'Record Input':function(){ recordDMX(0); }},'Record Input');
 				gui.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				gui.add({ 'Save As New Preset':function(){ addNewPattern() }},'Save As New Preset');
-                gui.add({ 'Back to Main':function(){ window.location.replace("http://localhost/index.html"); }},'Back to Main');
+                gui.add({ 'Back to Main':function(){ window.location.replace("http://"+location.hostname+"/index.html"); }},'Back to Main');
 									
 			}
 

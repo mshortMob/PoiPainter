@@ -434,8 +434,8 @@ void main()	{
 				utilsFolder.add({ 'PresentationMode':function(){ for(var x=0;x<displayObjects[globalController.selectedFixture].children.length;x++){ displayObjects[globalController.selectedFixture].children[x].visible=false; } ; requestFullScreen(); gui.close();document.getElementsByClassName("close-button")[0].innerHTML=""; setTimeout(function(){ document.getElementsByClassName("close-button")[0].style.width=10; document.getElementsByClassName("close-button")[0].style.right=0;},1000);}},'PresentationMode');	
 				utilsFolder.add({ 'Save Preset':function(){ saveState() }},'Save Preset');
 				utilsFolder.add({ 'Recall Preset':function(){ recallState() }},'Recall Preset');
-				utilsFolder.add({ 'Shader Editor':function(){ window.location.replace("http://localhost/editors/shaderEditor.html"); }},'Shader Editor');
-				utilsFolder.add({ 'DMX Editor':function(){ window.location.replace("http://localhost/editors/dmxEditor.html"); }},'DMX Editor');	
+				utilsFolder.add({ 'Shader Editor':function(){ window.location.replace("http://"+location.hostname+"/editors/shaderEditor.html"); }},'Shader Editor');
+				utilsFolder.add({ 'DMX Editor':function(){ window.location.replace("http://"+location.hostname+"/editors/dmxEditor.html"); }},'DMX Editor');	
 			}
 									
 			function changeMask(changedMask){
